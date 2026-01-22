@@ -14,7 +14,363 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          read_at: string | null
+          resolved_at: string | null
+          severity: string
+          source_type: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          read_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_type?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          read_at?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source_type?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload_json: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload_json?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload_json?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      broker_sites: {
+        Row: {
+          created_at: string
+          date_submitted: string | null
+          id: string
+          notes: string | null
+          site_name: string
+          status: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_submitted?: string | null
+          id?: string
+          notes?: string | null
+          site_name: string
+          status?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_submitted?: string | null
+          id?: string
+          notes?: string | null
+          site_name?: string
+          status?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_accounts: {
+        Row: {
+          account_name: string
+          category: string
+          created_at: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          account_name: string
+          category?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          account_name?: string
+          category?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_domains: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_primary: boolean
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_primary?: boolean
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_phones: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          phone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          phone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory_usernames: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          platform: string | null
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          platform?: string | null
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      notification_settings: {
+        Row: {
+          created_at: string
+          digest_frequency: string
+          email_enabled: boolean
+          id: string
+          sms_enabled: boolean
+          sms_high_only: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          digest_frequency?: string
+          email_enabled?: boolean
+          id?: string
+          sms_enabled?: boolean
+          sms_high_only?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          digest_frequency?: string
+          email_enabled?: boolean
+          id?: string
+          sms_enabled?: boolean
+          sms_high_only?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          consent_accepted_at: string | null
+          created_at: string
+          id: string
+          onboarding_completed: boolean
+          tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          consent_accepted_at?: string | null
+          created_at?: string
+          id?: string
+          onboarding_completed?: boolean
+          tier?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          consent_accepted_at?: string | null
+          created_at?: string
+          id?: string
+          onboarding_completed?: boolean
+          tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      signals_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          frequency: string
+          id: string
+          last_check_at: string | null
+          next_check_at: string | null
+          signal_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_check_at?: string | null
+          next_check_at?: string | null
+          signal_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          last_check_at?: string | null
+          next_check_at?: string | null
+          signal_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: number
+          status: string
+          steps_json: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: number
+          status?: string
+          steps_json?: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: number
+          status?: string
+          steps_json?: Json | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

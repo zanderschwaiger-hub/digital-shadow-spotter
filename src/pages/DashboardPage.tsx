@@ -1,0 +1,181 @@
+import { useEffect, useState } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { ExposureCard } from '@/components/dashboard/ExposureCard';
+import { TaskCard } from '@/components/dashboard/TaskCard';
+import { AlertsCard } from '@/components/dashboard/AlertsCard';
+import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
+import { InventoryCompletenessCard } from '@/components/dashboard/InventoryCompletenessCard';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useAuditLog } from '@/hooks/useAuditLog';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Task, 
+  Alert, 
+  InventoryCounts, 
+  getExposureLevel, 
+  calculateInventoryCompleteness 
+} from '@/lib/types';
+
+export default function DashboardPage() {
+  const { user } = useAuth();
+  const { logEvent } = useAuditLog();
+  const { toast } = useToast();
+  
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [inventoryCounts, setInventoryCounts] = useState<InventoryCounts>({
+    emails: 0,
+    usernames: 0,
+    accounts: 0,
+    domains: 0,
+    phones: 0
+  });
+  const [primaryEmail, setPrimaryEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
+  const loadDashboardData = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Fetch all data in parallel
+      const [
+        tasksRes,
+        alertsRes,
+        emailsRes,
+        usernamesRes,
+        accountsRes,
+        domainsRes,
+        phonesRes
+      ] = await Promise.all([
+        supabase.from('tasks').select('*').eq('user_id', user.id).order('priority', { ascending: false }),
+        supabase.from('alerts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('inventory_emails').select('*').eq('user_id', user.id),
+        supabase.from('inventory_usernames').select('*').eq('user_id', user.id),
+        supabase.from('inventory_accounts').select('*').eq('user_id', user.id),
+        supabase.from('inventory_domains').select('*').eq('user_id', user.id),
+        supabase.from('inventory_phones').select('*').eq('user_id', user.id)
+      ]);
+
+      if (tasksRes.data) setTasks(tasksRes.data as Task[]);
+      if (alertsRes.data) setAlerts(alertsRes.data as Alert[]);
+      
+      const emails = emailsRes.data || [];
+      const primary = emails.find(e => e.is_primary);
+      if (primary) setPrimaryEmail(primary.email);
+
+      setInventoryCounts({
+        emails: emails.length,
+        usernames: usernamesRes.data?.length || 0,
+        accounts: accountsRes.data?.length || 0,
+        domains: domainsRes.data?.length || 0,
+        phones: phonesRes.data?.length || 0
+      });
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTaskComplete = async (taskId: string) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .eq('id', taskId);
+
+    if (!error) {
+      await logEvent('task_completed', { task_id: taskId });
+      setTasks(prev => prev.map(t => 
+        t.id === taskId ? { ...t, status: 'completed' as const } : t
+      ));
+      toast({ title: 'Task completed!', description: 'Great job on maintaining your footprint.' });
+    }
+  };
+
+  const handleTaskSkip = async (taskId: string) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ status: 'skipped' })
+      .eq('id', taskId);
+
+    if (!error) {
+      await logEvent('task_skipped', { task_id: taskId });
+      setTasks(prev => prev.map(t => 
+        t.id === taskId ? { ...t, status: 'skipped' as const } : t
+      ));
+    }
+  };
+
+  const handleTaskRemind = async (taskId: string) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ status: 'reminded' })
+      .eq('id', taskId);
+
+    if (!error) {
+      await logEvent('task_reminded', { task_id: taskId });
+      toast({ title: 'Reminder set', description: 'We\'ll remind you about this task later.' });
+    }
+  };
+
+  const completeness = calculateInventoryCompleteness(inventoryCounts);
+  const highSeverityCount = alerts.filter(a => a.severity === 'high' && !a.resolved_at).length;
+  const unresolvedCount = alerts.filter(a => !a.resolved_at).length;
+  const exposure = getExposureLevel(unresolvedCount, highSeverityCount, completeness);
+
+  // Mock checklist for Master Key - in reality this would be tracked
+  const masterKeyChecklist = [
+    { label: 'Two-factor authentication enabled', completed: false },
+    { label: 'Strong unique password', completed: false },
+    { label: 'Recovery options reviewed', completed: false },
+    { label: 'App passwords audited', completed: false }
+  ];
+
+  if (loading) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <AppLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">Your digital footprint at a glance</p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <ExposureCard level={exposure.level} reason={exposure.reason} />
+          <InventoryCompletenessCard counts={inventoryCounts} />
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <TaskCard 
+            tasks={tasks}
+            onComplete={handleTaskComplete}
+            onSkip={handleTaskSkip}
+            onRemind={handleTaskRemind}
+          />
+          <AlertsCard alerts={alerts} />
+          <MasterKeyCard 
+            primaryEmail={primaryEmail}
+            checklistItems={masterKeyChecklist}
+          />
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
