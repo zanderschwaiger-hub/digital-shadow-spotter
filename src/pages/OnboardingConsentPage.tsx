@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { supabase } from '@/integrations/supabase/client';
+import { createStarterTasks } from '@/lib/starterTasks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -68,12 +69,23 @@ export default function OnboardingConsentPage() {
 
       if (error) throw error;
 
-      await logEvent('consent_accepted', { version: '1.0' });
+      // Create starter tasks for the new user
+      const { success: tasksCreated, error: tasksError } = await createStarterTasks(user.id);
+      if (tasksError) {
+        console.warn('Failed to create starter tasks:', tasksError);
+      }
+
+      await logEvent('consent_accepted', { 
+        version: '1.0',
+        starter_tasks_created: tasksCreated 
+      });
       await refreshProfile();
       
       toast({
         title: 'Welcome to Freedom Engine',
-        description: 'Your governance-first journey begins now.'
+        description: tasksCreated 
+          ? 'Your starter tasks are ready. Let\'s secure your digital footprint!'
+          : 'Your governance-first journey begins now.'
       });
       
       navigate('/dashboard');
