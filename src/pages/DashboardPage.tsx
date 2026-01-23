@@ -5,6 +5,7 @@ import { TaskCard } from '@/components/dashboard/TaskCard';
 import { AlertsCard } from '@/components/dashboard/AlertsCard';
 import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
 import { InventoryCompletenessCard } from '@/components/dashboard/InventoryCompletenessCard';
+import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -16,6 +17,8 @@ import {
   getExposureLevel, 
   calculateInventoryCompleteness 
 } from '@/lib/types';
+
+const WELCOME_SEEN_KEY = 'freedom-engine-welcome-seen';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -33,12 +36,27 @@ export default function DashboardPage() {
   });
   const [primaryEmail, setPrimaryEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     if (user) {
       loadDashboardData();
+      
+      // Check if this is first visit
+      const hasSeenWelcome = localStorage.getItem(`${WELCOME_SEEN_KEY}-${user.id}`);
+      if (!hasSeenWelcome) {
+        setShowWelcome(true);
+      }
     }
   }, [user]);
+
+  const handleWelcomeClose = () => {
+    if (user) {
+      localStorage.setItem(`${WELCOME_SEEN_KEY}-${user.id}`, 'true');
+      logEvent('welcome_tour_completed', {});
+    }
+    setShowWelcome(false);
+  };
 
   const loadDashboardData = async () => {
     if (!user) return;
@@ -151,6 +169,8 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
+      <WelcomeModal open={showWelcome} onClose={handleWelcomeClose} />
+      
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Dashboard</h1>
