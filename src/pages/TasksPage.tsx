@@ -56,7 +56,7 @@ export default function TasksPage() {
   };
 
   const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
-    const updates: Partial<Task> = { status };
+    const updates: { status: string; completed_at?: string } = { status };
     if (status === 'completed') {
       updates.completed_at = new Date().toISOString();
     }
