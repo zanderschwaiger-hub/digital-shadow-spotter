@@ -1,10 +1,49 @@
+import { useState, useEffect } from 'react';
 import { Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { EmbedPasswordGate } from '@/components/embed/EmbedPasswordGate';
 import { EmbedLoginForm } from '@/components/embed/EmbedLoginForm';
 import { EmbedStatusWidget } from '@/components/embed/EmbedStatusWidget';
 
 export default function EmbedPage() {
   const { user, loading } = useAuth();
+  const [accessGranted, setAccessGranted] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('embed-access-granted');
+    if (stored === 'true') {
+      setAccessGranted(true);
+    }
+  }, []);
+
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
+      );
+    }
+
+    // Step 1: Password gate
+    if (!accessGranted) {
+      return <EmbedPasswordGate onSuccess={() => setAccessGranted(true)} />;
+    }
+
+    // Step 2: Login form or status widget
+    if (user) {
+      return <EmbedStatusWidget />;
+    }
+
+    return (
+      <>
+        <p className="text-sm text-muted-foreground mb-4 text-center">
+          Sign in to view your security status
+        </p>
+        <EmbedLoginForm onSuccess={() => {}} />
+      </>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -22,20 +61,7 @@ export default function EmbedPage() {
 
         {/* Content */}
         <div className="rounded-lg border bg-card p-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-pulse text-muted-foreground">Loading...</div>
-            </div>
-          ) : user ? (
-            <EmbedStatusWidget />
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground mb-4 text-center">
-                Sign in to view your security status
-              </p>
-              <EmbedLoginForm onSuccess={() => {}} />
-            </>
-          )}
+          {renderContent()}
         </div>
 
         {/* Footer */}
