@@ -74,6 +74,36 @@ export type Database = {
         }
         Relationships: []
       }
+      baseline_artifacts: {
+        Row: {
+          artifact_type: string
+          content_json: Json
+          created_at: string
+          exported_at: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artifact_type: string
+          content_json?: Json
+          created_at?: string
+          exported_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artifact_type?: string
+          content_json?: Json
+          created_at?: string
+          exported_at?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       broker_sites: {
         Row: {
           created_at: string
@@ -104,6 +134,42 @@ export type Database = {
           status?: string
           url?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      governance_pillars: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          minimum_tier: number
+          name: string
+          pillar_order: number
+          questions_json: Json
+          steps_json: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id: string
+          minimum_tier?: number
+          name: string
+          pillar_order: number
+          questions_json?: Json
+          steps_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          minimum_tier?: number
+          name?: string
+          pillar_order?: number
+          questions_json?: Json
+          steps_json?: Json
+          updated_at?: string
         }
         Relationships: []
       }
@@ -273,6 +339,7 @@ export type Database = {
           id: string
           onboarding_completed: boolean
           tier: string
+          tier_level: number
           updated_at: string
           user_id: string
         }
@@ -282,6 +349,7 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean
           tier?: string
+          tier_level?: number
           updated_at?: string
           user_id: string
         }
@@ -291,6 +359,7 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean
           tier?: string
+          tier_level?: number
           updated_at?: string
           user_id?: string
         }
@@ -371,9 +440,76 @@ export type Database = {
         }
         Relationships: []
       }
+      user_pillar_progress: {
+        Row: {
+          answers_json: Json | null
+          completed_at: string | null
+          created_at: string
+          decision_log: Json | null
+          id: string
+          pillar_id: string
+          score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers_json?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          decision_log?: Json | null
+          id?: string
+          pillar_id: string
+          score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers_json?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          decision_log?: Json | null
+          id?: string
+          pillar_id?: string
+          score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_pillar_progress_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "governance_pillars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      user_entitlements: {
+        Row: {
+          baseline_access: boolean | null
+          governance_agent_access: boolean | null
+          guided_cleanup_access: boolean | null
+          tier_level: number | null
+          user_id: string | null
+        }
+        Insert: {
+          baseline_access?: never
+          governance_agent_access?: never
+          guided_cleanup_access?: never
+          tier_level?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          baseline_access?: never
+          governance_agent_access?: never
+          guided_cleanup_access?: never
+          tier_level?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
