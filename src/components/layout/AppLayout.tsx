@@ -26,6 +26,7 @@ import {
   Settings,
   LogOut,
   Shield,
+  BookOpen,
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -34,6 +35,7 @@ interface AppLayoutProps {
 
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Governance', url: '/governance', icon: BookOpen },
   { title: 'Identity Inventory', url: '/inventory', icon: User },
   { title: 'Signals', url: '/signals', icon: Radio },
   { title: 'Tasks', url: '/tasks', icon: CheckSquare },

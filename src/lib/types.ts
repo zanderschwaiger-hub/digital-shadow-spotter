@@ -16,6 +16,7 @@ export interface Profile {
   id: string;
   user_id: string;
   tier: string;
+  tier_level: number;
   onboarding_completed: boolean;
   consent_accepted_at: string | null;
   created_at: string;

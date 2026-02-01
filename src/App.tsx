@@ -14,6 +14,7 @@ import TasksPage from "./pages/TasksPage";
 import BrokersPage from "./pages/BrokersPage";
 import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
+import GovernancePage from "./pages/GovernancePage";
 import EmbedPage from "./pages/EmbedPage";
 import NotFound from "./pages/NotFound";
 
@@ -53,6 +54,9 @@ const App = () => (
             } />
             <Route path="/settings" element={
               <ProtectedRoute><SettingsPage /></ProtectedRoute>
+            } />
+            <Route path="/governance" element={
+              <ProtectedRoute><GovernancePage /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
