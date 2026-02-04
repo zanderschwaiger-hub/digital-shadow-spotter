@@ -9,7 +9,13 @@ export interface GovernancePillar {
   pillar_order: number;
   minimum_tier: number;
   questions_json: unknown[];
-  steps_json: unknown[];
+  steps_json: PillarStep[];
+}
+
+export interface PillarStep {
+  id: string;
+  title: string;
+  description?: string;
 }
 
 export interface UserPillarProgress {
@@ -65,7 +71,7 @@ export function useGovernance() {
       const pillarsWithProgress: PillarWithProgress[] = (pillarsData || []).map(pillar => ({
         ...pillar,
         questions_json: pillar.questions_json as unknown[],
-        steps_json: pillar.steps_json as unknown[],
+        steps_json: (pillar.steps_json as unknown[] || []) as PillarStep[],
         progress: progressMap.get(pillar.id) as UserPillarProgress | null ?? null,
         isAccessible: tierLevel >= pillar.minimum_tier,
       }));
@@ -107,8 +113,26 @@ export function useGovernance() {
     };
   }, [pillars]);
 
+  const generateTasksForPillar = async (pillarId: string, steps: PillarStep[]) => {
+    if (!user || steps.length === 0) return;
+
+    const tasks = steps.map((step, index) => ({
+      user_id: user.id,
+      type: `pillar:${pillarId}`,
+      title: step.title,
+      description: step.description || null,
+      priority: index + 1,
+      status: 'pending',
+    }));
+
+    await supabase.from('tasks').insert(tasks);
+  };
+
   const startPillar = async (pillarId: string) => {
     if (!user) return { error: 'Not authenticated' };
+
+    const pillar = pillars.find(p => p.id === pillarId);
+    if (!pillar) return { error: 'Pillar not found' };
 
     const { error } = await supabase
       .from('user_pillar_progress')
@@ -121,6 +145,8 @@ export function useGovernance() {
       });
 
     if (!error) {
+      // Generate tasks from pillar steps
+      await generateTasksForPillar(pillarId, pillar.steps_json);
       await loadGovernanceData();
     }
 
