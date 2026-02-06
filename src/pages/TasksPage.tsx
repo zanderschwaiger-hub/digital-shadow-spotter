@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useToast } from '@/hooks/use-toast';
+import { updatePillarScoreFromTasks, getPillarIdFromTaskType } from '@/hooks/usePillarTaskSync';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,6 +57,9 @@ export default function TasksPage() {
   };
 
   const updateTaskStatus = async (taskId: string, status: TaskStatus) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !user) return;
+
     const updates: { status: string; completed_at?: string } = { status };
     if (status === 'completed') {
       updates.completed_at = new Date().toISOString();
@@ -72,7 +76,22 @@ export default function TasksPage() {
         t.id === taskId ? { ...t, ...updates } as Task : t
       ));
       
-      if (status === 'completed') {
+      // Update pillar score if this is a pillar task
+      const pillarId = getPillarIdFromTaskType(task.type);
+      if (pillarId) {
+        const result = await updatePillarScoreFromTasks(user.id, pillarId);
+        if (result?.isComplete) {
+          toast({ 
+            title: 'Pillar Completed! 🎉', 
+            description: `You've completed all tasks for this governance pillar.` 
+          });
+        } else if (status === 'completed') {
+          toast({ 
+            title: 'Task completed!', 
+            description: result ? `Pillar progress: ${result.score}%` : 'Great job maintaining your footprint.' 
+          });
+        }
+      } else if (status === 'completed') {
         toast({ title: 'Task completed!', description: 'Great job maintaining your footprint.' });
       }
     }
