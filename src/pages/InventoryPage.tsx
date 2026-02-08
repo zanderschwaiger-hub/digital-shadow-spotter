@@ -227,7 +227,7 @@ export default function InventoryPage() {
           <CardHeader>
             <CardTitle className="text-lg">Inventory Completeness</CardTitle>
             <CardDescription>
-              Add more data to improve monitoring accuracy
+              Add more data to improve review accuracy
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -283,7 +283,7 @@ export default function InventoryPage() {
                       <DialogHeader>
                         <DialogTitle>Add Email Address</DialogTitle>
                         <DialogDescription>
-                          Add an email address to monitor for breaches
+                          Add an email address to check for breaches
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
@@ -319,7 +319,7 @@ export default function InventoryPage() {
               <CardContent>
                 {emails.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">
-                    No emails added yet. Add your first email to start monitoring.
+                    No emails added yet. Add your first email to begin tracking.
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -573,7 +573,7 @@ export default function InventoryPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Phone Numbers</CardTitle>
-                    <CardDescription>Optional: for comprehensive monitoring</CardDescription>
+                    <CardDescription>Optional: for comprehensive review coverage</CardDescription>
                   </div>
                   <Dialog>
                     <DialogTrigger asChild>

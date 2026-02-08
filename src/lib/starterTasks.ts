@@ -18,7 +18,7 @@ export const STARTER_TASKS: StarterTaskTemplate[] = [
   {
     type: 'inventory',
     title: 'Complete your identity inventory',
-    description: 'Add your emails, usernames, and accounts so we can monitor for exposures.',
+    description: 'Add your emails, usernames, and accounts so we can check for exposures.',
     priority: 1,
     steps_json: [
       {
