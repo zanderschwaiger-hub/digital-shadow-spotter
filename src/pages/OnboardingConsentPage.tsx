@@ -15,9 +15,9 @@ const CONSENT_ITEMS = [
   {
     category: 'What We Collect',
     items: [
-      'Email addresses you provide for monitoring',
+      'Email addresses you provide for breach checks',
       'Usernames and handles you add to your inventory',
-      'Phone numbers (optional) for comprehensive monitoring',
+      'Phone numbers (optional) for comprehensive review coverage',
       'Account names and categories for organization',
       'Domain names (optional) for business owners'
     ]

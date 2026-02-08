@@ -32,7 +32,7 @@ const SIGNAL_CONFIG: Record<SignalType, {
   breach_alerts: {
     icon: ShieldAlert,
     title: 'Breach Alerts',
-    description: 'Monitor your emails against known data breach databases',
+    description: 'Check your emails against known data breach databases',
     note: 'Uses lawful breach notification APIs. Manual check available if API is not configured.'
   },
   password_exposure: {
@@ -50,7 +50,7 @@ const SIGNAL_CONFIG: Record<SignalType, {
   domain_spoofing: {
     icon: Globe,
     title: 'Domain Spoofing & Impersonation',
-    description: 'Monitor for lookalike domains that could be used for phishing',
+    description: 'Check for lookalike domains that could be used for phishing',
     note: 'Only for users who have added domains to their inventory.'
   },
   social_takeover: {
@@ -162,9 +162,9 @@ export default function SignalsPage() {
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Signals Monitoring</h1>
+          <h1 className="text-2xl font-bold">Signals Overview</h1>
           <p className="text-muted-foreground">
-            Configure which signals to monitor for your digital footprint
+            Configure which signals to review for your digital footprint
           </p>
         </div>
 
@@ -224,7 +224,7 @@ export default function SignalsPage() {
           <CardContent>
             {alerts.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                No alerts yet. Enable signals and add items to your inventory to start monitoring.
+                No alerts yet. Enable signals and add items to your inventory to begin tracking.
               </p>
             ) : (
               <div className="space-y-3">

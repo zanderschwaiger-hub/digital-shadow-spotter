@@ -184,7 +184,7 @@ export function getExposureLevel(
     return { 
       level: 'medium', 
       reason: inventoryCompleteness < 50 
-        ? 'Your identity inventory is incomplete - add more data to improve monitoring'
+        ? 'Your identity inventory is incomplete - add more data to improve review coverage'
         : `${alertsCount} alerts pending review`
     };
   }

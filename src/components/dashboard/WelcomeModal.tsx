@@ -23,7 +23,7 @@ const WELCOME_STEPS = [
   {
     icon: ListChecks,
     title: 'Complete Your Inventory',
-    description: 'Add your emails, usernames, and accounts so we can monitor for exposures.',
+    description: 'Add your emails, usernames, and accounts so we can check for exposures.',
     action: '/inventory',
     actionLabel: 'Go to Inventory'
   },
