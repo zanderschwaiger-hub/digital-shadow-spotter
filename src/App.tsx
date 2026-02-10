@@ -16,6 +16,7 @@ import ReportsPage from "./pages/ReportsPage";
 import SettingsPage from "./pages/SettingsPage";
 import GovernancePage from "./pages/GovernancePage";
 import EmbedPage from "./pages/EmbedPage";
+import GovernanceFilePage from "./pages/GovernanceFilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,9 @@ const App = () => (
             } />
             <Route path="/governance" element={
               <ProtectedRoute><GovernancePage /></ProtectedRoute>
+            } />
+            <Route path="/governance-file" element={
+              <ProtectedRoute><GovernanceFilePage /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
