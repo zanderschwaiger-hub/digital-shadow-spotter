@@ -28,6 +28,8 @@ import {
   Shield,
   BookOpen,
   ClipboardList,
+  Target,
+  GitBranch,
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -38,6 +40,8 @@ const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Governance', url: '/governance', icon: BookOpen },
   { title: 'Governance File', url: '/governance-file', icon: ClipboardList },
+  { title: 'Exposures', url: '/exposures', icon: Target },
+  { title: 'Decisions', url: '/decisions', icon: GitBranch },
   { title: 'Identity Inventory', url: '/inventory', icon: User },
   { title: 'Signals', url: '/signals', icon: Radio },
   { title: 'Tasks', url: '/tasks', icon: CheckSquare },

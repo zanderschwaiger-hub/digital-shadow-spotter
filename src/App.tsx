@@ -17,6 +17,9 @@ import SettingsPage from "./pages/SettingsPage";
 import GovernancePage from "./pages/GovernancePage";
 import EmbedPage from "./pages/EmbedPage";
 import GovernanceFilePage from "./pages/GovernanceFilePage";
+import AssessmentPage from "./pages/AssessmentPage";
+import ExposuresPage from "./pages/ExposuresPage";
+import DecisionsPage from "./pages/DecisionsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +64,15 @@ const App = () => (
             } />
             <Route path="/governance-file" element={
               <ProtectedRoute><GovernanceFilePage /></ProtectedRoute>
+            } />
+            <Route path="/assessment" element={
+              <ProtectedRoute><AssessmentPage /></ProtectedRoute>
+            } />
+            <Route path="/exposures" element={
+              <ProtectedRoute><ExposuresPage /></ProtectedRoute>
+            } />
+            <Route path="/decisions" element={
+              <ProtectedRoute><DecisionsPage /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
