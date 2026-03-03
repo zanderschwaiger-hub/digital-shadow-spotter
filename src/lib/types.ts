@@ -101,6 +101,20 @@ export interface Task {
   due_date: string | null;
   completed_at: string | null;
   created_at: string;
+  source_type?: string | null;
+  source_id?: string | null;
+  sequence_order?: number | null;
+}
+
+export interface TaskCatalogItem {
+  id: string;
+  pillar_id: string;
+  title: string;
+  description: string;
+  course_order: number;
+  effort_minutes: number | null;
+  blast_radius: string | null;
+  dependency_task_ids: string[];
 }
 
 export interface TaskStep {
