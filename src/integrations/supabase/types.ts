@@ -398,6 +398,47 @@ export type Database = {
         }
         Relationships: []
       }
+      task_catalog: {
+        Row: {
+          blast_radius: string | null
+          course_order: number
+          dependency_task_ids: string[] | null
+          description: string
+          effort_minutes: number | null
+          id: string
+          pillar_id: string | null
+          title: string
+        }
+        Insert: {
+          blast_radius?: string | null
+          course_order: number
+          dependency_task_ids?: string[] | null
+          description: string
+          effort_minutes?: number | null
+          id: string
+          pillar_id?: string | null
+          title: string
+        }
+        Update: {
+          blast_radius?: string | null
+          course_order?: number
+          dependency_task_ids?: string[] | null
+          description?: string
+          effort_minutes?: number | null
+          id?: string
+          pillar_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_catalog_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "governance_pillars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           completed_at: string | null
@@ -406,6 +447,9 @@ export type Database = {
           due_date: string | null
           id: string
           priority: number
+          sequence_order: number | null
+          source_id: string | null
+          source_type: string | null
           status: string
           steps_json: Json | null
           title: string
@@ -419,6 +463,9 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: number
+          sequence_order?: number | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           steps_json?: Json | null
           title: string
@@ -432,6 +479,9 @@ export type Database = {
           due_date?: string | null
           id?: string
           priority?: number
+          sequence_order?: number | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           steps_json?: Json | null
           title?: string
@@ -512,7 +562,7 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      generate_course_tasks: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
