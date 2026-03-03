@@ -94,9 +94,9 @@ export default function LoginPage() {
             <Shield className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-bold">Freedom Engine</h1>
-          <p className="text-muted-foreground mt-1">Footprint Maintenance Agent</p>
+          <p className="text-muted-foreground mt-1">Digital Governance & Hygiene Agent</p>
           <p className="text-sm text-muted-foreground mt-2 italic">
-            "Emotional safety through technical discipline."
+            "Digital safety through technical discipline."
           </p>
         </div>
 
