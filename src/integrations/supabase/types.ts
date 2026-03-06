@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          proposed_payload: Json
+          reason: string | null
+          resolved_at: string | null
+          status: string
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          proposed_payload?: Json
+          reason?: string | null
+          resolved_at?: string | null
+          status?: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          proposed_payload?: Json
+          reason?: string | null
+          resolved_at?: string | null
+          status?: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       alerts: {
         Row: {
           created_at: string
