@@ -1,22 +1,22 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useAgentEngine } from '@/hooks/useAgentEngine';
+import { useAuditLog } from '@/hooks/useAuditLog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  CheckCircle2,
-  Clock,
-  Loader2,
-  ListTodo,
-  CheckCheck,
-  Lock,
-  PlayCircle,
-  Zap,
-  Timer,
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  CheckCircle2, Clock, Loader2, ListTodo, CheckCheck,
+  Lock, PlayCircle, Zap, Timer, ShieldAlert, Info,
 } from 'lucide-react';
 import { Task, TaskCatalogItem } from '@/lib/types';
 
@@ -28,7 +28,6 @@ const STATUS_CONFIG: Record<CourseStatus, { label: string; icon: typeof CheckCir
   done: { label: 'Done', icon: CheckCircle2, variant: 'default' },
 };
 
-// Pillar display names keyed by pillar_id
 const PILLAR_NAMES: Record<string, string> = {
   'master-key-control': 'Pillar 1 — Master Key Control',
   'credential-system': 'Pillar 2 — Credential System',
@@ -44,22 +43,31 @@ const PILLAR_NAMES: Record<string, string> = {
   'governance-cadence': 'Pillar 12 — Governance Cadence & Containment',
 };
 
-// Ordered pillar IDs
 const PILLAR_ORDER = [
   'master-key-control', 'credential-system', 'mfa-standard', 'account-inventory',
   'account-closure', 'breach-reality', 'session-device-control', 'connected-apps',
   'inbox-cloud-hygiene', 'personal-content', 'public-footprint', 'governance-cadence',
 ];
 
+interface PendingAction {
+  actionId: string;
+  taskId: string;
+  taskTitle: string;
+  newStatus: CourseStatus;
+}
+
 export default function TasksPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { logEvent } = useAuditLog();
+  const { proposeAction, confirmAction, rejectAction, getNextRecommendation } = useAgentEngine();
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [catalog, setCatalog] = useState<TaskCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('open');
+  const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
 
   useEffect(() => {
     if (user) loadData();
@@ -68,79 +76,148 @@ export default function TasksPage() {
   const loadData = async () => {
     if (!user) return;
     setLoading(true);
-
     const [tasksRes, catalogRes] = await Promise.all([
-      supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('source_type', 'course')
-        .order('sequence_order', { ascending: true }),
-      supabase
-        .from('task_catalog')
-        .select('*')
-        .order('course_order', { ascending: true }),
+      supabase.from('tasks').select('*').eq('user_id', user.id).eq('source_type', 'course').order('sequence_order', { ascending: true }),
+      supabase.from('task_catalog').select('*').order('course_order', { ascending: true }),
     ]);
-
     if (tasksRes.data) setTasks(tasksRes.data as Task[]);
     if (catalogRes.data) setCatalog(catalogRes.data as TaskCatalogItem[]);
     setLoading(false);
   };
 
-  const generatePlan = async () => {
-    setGenerating(true);
-    const { error } = await supabase.rpc('generate_course_tasks');
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: 'Guided Plan generated!', description: '72 tasks created across 12 pillars.' });
-      await loadData();
-    }
-    setGenerating(false);
-  };
-
-  const updateTaskStatus = async (taskId: string, status: CourseStatus) => {
-    const updates: Record<string, unknown> = { status };
-    if (status === 'done') updates.completed_at = new Date().toISOString();
-
-    const { error } = await supabase
-      .from('tasks')
-      .update(updates)
-      .eq('id', taskId);
-
-    if (!error) {
-      setTasks(prev => prev.map(t =>
-        t.id === taskId ? { ...t, status, ...(status === 'done' ? { completed_at: new Date().toISOString() } : {}) } : t
-      ));
-    }
-  };
-
-  // Build a set of completed source_ids for dependency checking
+  // Derived state
   const completedSourceIds = useMemo(() => {
     const set = new Set<string>();
-    tasks.forEach(t => {
-      if (t.status === 'done' && t.source_id) set.add(t.source_id);
-    });
+    tasks.forEach(t => { if (t.status === 'done' && t.source_id) set.add(t.source_id); });
     return set;
   }, [tasks]);
 
-  // Build catalog lookup
   const catalogMap = useMemo(() => {
     const map = new Map<string, TaskCatalogItem>();
     catalog.forEach(c => map.set(c.id, c));
     return map;
   }, [catalog]);
 
-  // Check if a task's dependencies are met
+  const catalogDeps = useMemo(() => {
+    const map = new Map<string, string[]>();
+    catalog.forEach(c => map.set(c.id, c.dependency_task_ids || []));
+    return map;
+  }, [catalog]);
+
   const isDependencyMet = (task: Task): boolean => {
     if (!task.source_id) return true;
-    const catItem = catalogMap.get(task.source_id);
-    if (!catItem || !catItem.dependency_task_ids || catItem.dependency_task_ids.length === 0) return true;
-    return catItem.dependency_task_ids.every(depId => completedSourceIds.has(depId));
+    const deps = catalogDeps.get(task.source_id);
+    if (!deps || deps.length === 0) return true;
+    return deps.every(depId => completedSourceIds.has(depId));
   };
 
-  // Group tasks by pillar
   const courseTasks = tasks.filter(t => t.source_type === 'course');
+
+  // Agent recommendation
+  const recommendation = useMemo(
+    () => getNextRecommendation(
+      courseTasks.map(t => ({ title: t.title, status: t.status, source_id: t.source_id, sequence_order: t.sequence_order })),
+      completedSourceIds,
+      catalogDeps,
+    ),
+    [courseTasks, completedSourceIds, catalogDeps, getNextRecommendation],
+  );
+
+  // Generate plan — goes through agent
+  const generatePlan = async () => {
+    setGenerating(true);
+    const result = await proposeAction(
+      { action_type: 'generate_plan', target_type: 'plan', proposed_payload: { task_count: 72 } },
+      { completedSourceIds, catalogDeps },
+    );
+
+    if (!result.approved) {
+      toast({ title: 'Blocked', description: result.reason, variant: 'destructive' });
+      setGenerating(false);
+      return;
+    }
+
+    // Execute
+    const { error } = await supabase.rpc('generate_course_tasks');
+    if (error) {
+      if (result.action_id) await rejectAction(result.action_id, error.message);
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      if (result.action_id) await confirmAction(result.action_id);
+      await logEvent('plan_generated', { task_count: 72 });
+      toast({ title: 'Guided Plan generated', description: '72 tasks created across 12 pillars.' });
+      await loadData();
+    }
+    setGenerating(false);
+  };
+
+  // Request a status change — propose through agent, then show approval dialog
+  const requestStatusChange = useCallback(async (task: Task, newStatus: CourseStatus) => {
+    const result = await proposeAction(
+      {
+        action_type: 'task_status_change',
+        target_type: 'task',
+        target_id: task.id,
+        proposed_payload: {
+          source_id: task.source_id || '',
+          current_status: task.status,
+          new_status: newStatus,
+          title: task.title,
+        },
+      },
+      { completedSourceIds, catalogDeps },
+    );
+
+    if (!result.approved) {
+      toast({ title: 'Action blocked', description: result.reason, variant: 'destructive' });
+      return;
+    }
+
+    // Show approval dialog
+    setPendingAction({
+      actionId: result.action_id!,
+      taskId: task.id,
+      taskTitle: task.title,
+      newStatus,
+    });
+  }, [proposeAction, completedSourceIds, catalogDeps, toast]);
+
+  // User confirms the pending action
+  const handleApprove = async () => {
+    if (!pendingAction) return;
+
+    const updates: Record<string, unknown> = { status: pendingAction.newStatus };
+    if (pendingAction.newStatus === 'done') updates.completed_at = new Date().toISOString();
+    if (pendingAction.newStatus === 'open') updates.completed_at = null;
+
+    const { error } = await supabase.from('tasks').update(updates).eq('id', pendingAction.taskId);
+
+    if (!error) {
+      await confirmAction(pendingAction.actionId);
+      await logEvent('task_status_changed', {
+        task_id: pendingAction.taskId,
+        new_status: pendingAction.newStatus,
+      });
+      setTasks(prev => prev.map(t =>
+        t.id === pendingAction.taskId
+          ? { ...t, status: pendingAction.newStatus, ...(pendingAction.newStatus === 'done' ? { completed_at: new Date().toISOString() } : { completed_at: null }) }
+          : t
+      ));
+    } else {
+      await rejectAction(pendingAction.actionId, error.message);
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+    setPendingAction(null);
+  };
+
+  // User rejects the pending action
+  const handleReject = async () => {
+    if (!pendingAction) return;
+    await rejectAction(pendingAction.actionId, 'User declined');
+    setPendingAction(null);
+  };
+
+  // Grouping and filtering
   const groupedByPillar = useMemo(() => {
     const groups: Record<string, Task[]> = {};
     PILLAR_ORDER.forEach(pid => { groups[pid] = []; });
@@ -153,14 +230,10 @@ export default function TasksPage() {
     return groups;
   }, [courseTasks, catalogMap]);
 
-  // Filter by status tab
   const filteredGroups = useMemo(() => {
     const result: Record<string, Task[]> = {};
     for (const [pillarId, pillarTasks] of Object.entries(groupedByPillar)) {
-      const filtered = pillarTasks.filter(t => {
-        if (activeTab === 'all') return true;
-        return t.status === activeTab;
-      });
+      const filtered = pillarTasks.filter(t => activeTab === 'all' || t.status === activeTab);
       if (filtered.length > 0) result[pillarId] = filtered;
     }
     return result;
@@ -183,16 +256,13 @@ export default function TasksPage() {
     );
   }
 
-  // No course tasks yet — show generate button
   if (courseTasks.length === 0) {
     return (
       <AppLayout>
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold">Guided Plan</h1>
-            <p className="text-muted-foreground">
-              72 tasks across 12 pillars to secure your digital footprint.
-            </p>
+            <p className="text-muted-foreground">72 tasks across 12 pillars — your governance course.</p>
           </div>
           <Card className="border-dashed">
             <CardContent className="py-16 text-center space-y-4">
@@ -214,17 +284,58 @@ export default function TasksPage() {
 
   return (
     <AppLayout>
+      {/* Approval Dialog */}
+      <AlertDialog open={!!pendingAction} onOpenChange={(open) => { if (!open) handleReject(); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-primary" />
+              Confirm Action
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingAction && (
+                <>
+                  Change <strong>"{pendingAction.taskTitle}"</strong> to{' '}
+                  <Badge variant="outline">{pendingAction.newStatus}</Badge>?
+                  <br /><br />
+                  <span className="text-xs text-muted-foreground">
+                    Every action is logged. You can review your action history in Settings.
+                  </span>
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleReject}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleApprove}>Approve</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">Guided Plan</h1>
-            <p className="text-muted-foreground">
-              {counts.done}/{counts.total} tasks completed
-            </p>
+            <p className="text-muted-foreground">{counts.done}/{counts.total} tasks completed</p>
           </div>
         </div>
 
-        {/* Summary cards */}
+        {/* Agent recommendation */}
+        {recommendation && (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardHeader className="py-3 px-4">
+              <div className="flex items-center gap-3">
+                <Info className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <CardTitle className="text-sm font-medium">Recommended next</CardTitle>
+                  <CardDescription className="text-xs">{recommendation.title} — {recommendation.reason}</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+        )}
+
+        {/* Summary */}
         <div className="grid gap-4 md:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
@@ -252,7 +363,7 @@ export default function TasksPage() {
           </Card>
         </div>
 
-        {/* Tabs */}
+        {/* Task list */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="all">All ({counts.total})</TabsTrigger>
@@ -265,7 +376,6 @@ export default function TasksPage() {
             {PILLAR_ORDER.map(pillarId => {
               const pillarTasks = filteredGroups[pillarId];
               if (!pillarTasks || pillarTasks.length === 0) return null;
-
               const allPillarTasks = groupedByPillar[pillarId] || [];
               const pillarDone = allPillarTasks.filter(t => t.status === 'done').length;
 
@@ -285,7 +395,7 @@ export default function TasksPage() {
                           task={task}
                           catItem={catItem || null}
                           locked={locked}
-                          onStatusChange={updateTaskStatus}
+                          onStatusChange={requestStatusChange}
                         />
                       );
                     })}
@@ -304,7 +414,7 @@ interface CourseTaskItemProps {
   task: Task;
   catItem: TaskCatalogItem | null;
   locked: boolean;
-  onStatusChange: (id: string, status: CourseStatus) => void;
+  onStatusChange: (task: Task, status: CourseStatus) => void;
 }
 
 function CourseTaskItem({ task, catItem, locked, onStatusChange }: CourseTaskItemProps) {
@@ -352,17 +462,17 @@ function CourseTaskItem({ task, catItem, locked, onStatusChange }: CourseTaskIte
           {!locked && (
             <div className="flex gap-2 shrink-0">
               {status === 'open' && (
-                <Button size="sm" variant="outline" onClick={() => onStatusChange(task.id, 'in_progress')}>
+                <Button size="sm" variant="outline" onClick={() => onStatusChange(task, 'in_progress')}>
                   Start
                 </Button>
               )}
               {status === 'in_progress' && (
-                <Button size="sm" onClick={() => onStatusChange(task.id, 'done')}>
+                <Button size="sm" onClick={() => onStatusChange(task, 'done')}>
                   <CheckCircle2 className="mr-1 h-3 w-3" /> Done
                 </Button>
               )}
               {status === 'done' && (
-                <Button size="sm" variant="ghost" onClick={() => onStatusChange(task.id, 'open')}>
+                <Button size="sm" variant="ghost" onClick={() => onStatusChange(task, 'open')}>
                   Reopen
                 </Button>
               )}
