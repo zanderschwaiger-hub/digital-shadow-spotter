@@ -77,6 +77,7 @@ export function useAgentEngine() {
       for (const rule of rules) {
         const result = rule(request, ctx);
         if (!result.allowed) {
+          const blockedReason = (result as { allowed: false; reason: string }).reason;
           // Log blocked action
           await supabase.from('agent_actions').insert([{
             user_id: user.id,
@@ -85,17 +86,17 @@ export function useAgentEngine() {
             target_id: request.target_id || null,
             proposed_payload: JSON.parse(JSON.stringify(request.proposed_payload)),
             status: 'blocked',
-            reason: result.reason,
+            reason: blockedReason,
             resolved_at: new Date().toISOString(),
           }]);
 
           await logEvent('agent_action_blocked', {
             action_type: request.action_type,
             target_id: request.target_id || '',
-            reason: result.reason,
+            reason: blockedReason,
           });
 
-          return { approved: false, reason: result.reason };
+          return { approved: false, reason: blockedReason };
         }
       }
 
