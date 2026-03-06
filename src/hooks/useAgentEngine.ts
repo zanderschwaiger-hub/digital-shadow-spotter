@@ -97,39 +97,40 @@ export function useAgentEngine() {
       for (const rule of RULES) {
         const result = rule(request, ctx);
         if (!result.allowed) {
+          const blockReason = result.reason;
           // Log blocked action
-          await supabase.from('agent_actions').insert({
+          await supabase.from('agent_actions').insert([{
             user_id: user.id,
             action_type: request.action_type,
             target_type: request.target_type,
             target_id: request.target_id || null,
-            proposed_payload: request.proposed_payload,
+            proposed_payload: request.proposed_payload as unknown as Record<string, unknown>,
             status: 'blocked',
-            reason: result.reason,
+            reason: blockReason,
             resolved_at: new Date().toISOString(),
-          });
+          }]);
 
           await logEvent('agent_action_blocked', {
             action_type: request.action_type,
             target_id: request.target_id,
-            reason: result.reason,
+            reason: blockReason,
           });
 
-          return { approved: false, reason: result.reason };
+          return { approved: false, reason: blockReason };
         }
       }
 
       // All rules passed — record as pending (needs user confirmation)
       const { data } = await supabase
         .from('agent_actions')
-        .insert({
+        .insert([{
           user_id: user.id,
           action_type: request.action_type,
           target_type: request.target_type,
           target_id: request.target_id || null,
-          proposed_payload: request.proposed_payload,
+          proposed_payload: request.proposed_payload as unknown as Record<string, unknown>,
           status: 'pending',
-        })
+        }])
         .select('id')
         .single();
 
