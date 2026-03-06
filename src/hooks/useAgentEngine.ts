@@ -2,8 +2,6 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
-import type { Json } from '@/integrations/supabase/types';
-import { useAuditLog } from '@/hooks/useAuditLog';
 
 export type AgentActionType =
   | 'generate_plan'
@@ -16,7 +14,7 @@ export interface AgentActionRequest {
   action_type: AgentActionType;
   target_type: 'task' | 'pillar' | 'plan';
   target_id?: string;
-  proposed_payload: Record<string, unknown>;
+  proposed_payload: Record<string, string | number | boolean | null>;
 }
 
 export interface AgentActionResult {
@@ -25,23 +23,15 @@ export interface AgentActionResult {
   action_id?: string;
 }
 
-/**
- * Validation rules the agent checks before approving an action.
- * Returns { allowed: true } or { allowed: false, reason: string }.
- */
-type ValidationRule = (
-  request: AgentActionRequest,
-  context: ValidationContext,
-) => { allowed: true } | { allowed: false; reason: string };
-
 interface ValidationContext {
   userId: string;
   completedSourceIds: Set<string>;
-  catalogDeps: Map<string, string[]>; // source_id -> dependency_task_ids
+  catalogDeps: Map<string, string[]>;
 }
 
-// Rule: dependency tasks must be done before starting/completing a task
-const dependencyRule: ValidationRule = (request, ctx) => {
+type RuleResult = { allowed: true } | { allowed: false; reason: string };
+
+function checkDependency(request: AgentActionRequest, ctx: ValidationContext): RuleResult {
   if (request.action_type !== 'task_status_change') return { allowed: true };
   const newStatus = request.proposed_payload.new_status as string;
   if (newStatus !== 'in_progress' && newStatus !== 'done') return { allowed: true };
@@ -54,38 +44,25 @@ const dependencyRule: ValidationRule = (request, ctx) => {
 
   const unmet = deps.filter(d => !ctx.completedSourceIds.has(d));
   if (unmet.length > 0) {
-    return {
-      allowed: false,
-      reason: `Blocked: prerequisite tasks not completed (${unmet.join(', ')})`,
-    };
+    return { allowed: false, reason: `Blocked: prerequisite tasks not completed (${unmet.join(', ')})` };
   }
   return { allowed: true };
-};
+}
 
-// Rule: cannot skip a task that hasn't been started
-const skipRule: ValidationRule = (request) => {
+function checkSkip(request: AgentActionRequest): RuleResult {
   if (request.action_type !== 'task_status_change') return { allowed: true };
   const newStatus = request.proposed_payload.new_status as string;
   const currentStatus = request.proposed_payload.current_status as string;
   if (newStatus === 'done' && currentStatus === 'open') {
-    return {
-      allowed: false,
-      reason: 'Blocked: task must be started before marking done',
-    };
+    return { allowed: false, reason: 'Blocked: task must be started before marking done' };
   }
   return { allowed: true };
-};
-
-const RULES: ValidationRule[] = [dependencyRule, skipRule];
+}
 
 export function useAgentEngine() {
   const { user } = useAuth();
   const { logEvent } = useAuditLog();
 
-  /**
-   * Propose an action. The agent validates it, logs the proposal,
-   * and returns whether it was approved or blocked.
-   */
   const proposeAction = useCallback(
     async (
       request: AgentActionRequest,
@@ -95,34 +72,34 @@ export function useAgentEngine() {
 
       const ctx: ValidationContext = { ...context, userId: user.id };
 
-      // Run all validation rules
-      for (const rule of RULES) {
+      // Run validation rules
+      const rules = [checkDependency, checkSkip];
+      for (const rule of rules) {
         const result = rule(request, ctx);
         if (!result.allowed) {
-          const blockReason = result.reason;
           // Log blocked action
           await supabase.from('agent_actions').insert([{
             user_id: user.id,
             action_type: request.action_type,
             target_type: request.target_type,
             target_id: request.target_id || null,
-            proposed_payload: request.proposed_payload as unknown as Record<string, unknown>,
+            proposed_payload: JSON.parse(JSON.stringify(request.proposed_payload)),
             status: 'blocked',
-            reason: blockReason,
+            reason: result.reason,
             resolved_at: new Date().toISOString(),
           }]);
 
           await logEvent('agent_action_blocked', {
             action_type: request.action_type,
-            target_id: request.target_id,
-            reason: blockReason,
+            target_id: request.target_id || '',
+            reason: result.reason,
           });
 
-          return { approved: false, reason: blockReason };
+          return { approved: false, reason: result.reason };
         }
       }
 
-      // All rules passed — record as pending (needs user confirmation)
+      // All rules passed — record as pending
       const { data } = await supabase
         .from('agent_actions')
         .insert([{
@@ -130,7 +107,7 @@ export function useAgentEngine() {
           action_type: request.action_type,
           target_type: request.target_type,
           target_id: request.target_id || null,
-          proposed_payload: request.proposed_payload as unknown as Record<string, unknown>,
+          proposed_payload: JSON.parse(JSON.stringify(request.proposed_payload)),
           status: 'pending',
         }])
         .select('id')
@@ -145,19 +122,13 @@ export function useAgentEngine() {
     [user, logEvent],
   );
 
-  /**
-   * Confirm an approved action — execute it and log completion.
-   */
   const confirmAction = useCallback(
     async (actionId: string) => {
       if (!user) return;
 
       await supabase
         .from('agent_actions')
-        .update({
-          status: 'approved',
-          resolved_at: new Date().toISOString(),
-        })
+        .update({ status: 'approved', resolved_at: new Date().toISOString() })
         .eq('id', actionId);
 
       await logEvent('agent_action_approved', { action_id: actionId });
@@ -165,40 +136,26 @@ export function useAgentEngine() {
     [user, logEvent],
   );
 
-  /**
-   * Reject a pending action.
-   */
   const rejectAction = useCallback(
     async (actionId: string, reason: string) => {
       if (!user) return;
 
       await supabase
         .from('agent_actions')
-        .update({
-          status: 'rejected',
-          reason,
-          resolved_at: new Date().toISOString(),
-        })
+        .update({ status: 'rejected', reason, resolved_at: new Date().toISOString() })
         .eq('id', actionId);
 
-      await logEvent('agent_action_rejected', {
-        action_id: actionId,
-        reason,
-      });
+      await logEvent('agent_action_rejected', { action_id: actionId, reason });
     },
     [user, logEvent],
   );
 
-  /**
-   * Get the next recommended action based on user state.
-   */
   const getNextRecommendation = useCallback(
     (
-      tasks: Array<{ status: string; source_id?: string | null; sequence_order?: number | null }>,
+      tasks: Array<{ title: string; status: string; source_id?: string | null; sequence_order?: number | null }>,
       completedSourceIds: Set<string>,
       catalogDeps: Map<string, string[]>,
     ): { title: string; source_id: string; reason: string } | null => {
-      // Find the first open task whose dependencies are met
       const sorted = [...tasks]
         .filter(t => t.status === 'open' && t.source_id)
         .sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0));
@@ -207,7 +164,7 @@ export function useAgentEngine() {
         const deps = catalogDeps.get(task.source_id!);
         if (!deps || deps.length === 0 || deps.every(d => completedSourceIds.has(d))) {
           return {
-            title: (task as { title?: string }).title || 'Next task',
+            title: task.title,
             source_id: task.source_id!,
             reason: 'This is the next unlocked task in your guided plan.',
           };
@@ -218,10 +175,5 @@ export function useAgentEngine() {
     [],
   );
 
-  return {
-    proposeAction,
-    confirmAction,
-    rejectAction,
-    getNextRecommendation,
-  };
+  return { proposeAction, confirmAction, rejectAction, getNextRecommendation };
 }
