@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import type { Json } from '@/integrations/supabase/types';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 export type AgentActionType =
   | 'generate_plan'
