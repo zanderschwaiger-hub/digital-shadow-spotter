@@ -5,6 +5,7 @@ import { TaskCard } from '@/components/dashboard/TaskCard';
 import { AlertsCard } from '@/components/dashboard/AlertsCard';
 import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
 import { InventoryCompletenessCard } from '@/components/dashboard/InventoryCompletenessCard';
+import { RecommendedActionCard } from '@/components/dashboard/RecommendedActionCard';
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
