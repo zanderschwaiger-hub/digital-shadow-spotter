@@ -184,6 +184,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <RecommendedActionCard />
           <TaskCard 
             tasks={tasks}
             onComplete={handleTaskComplete}

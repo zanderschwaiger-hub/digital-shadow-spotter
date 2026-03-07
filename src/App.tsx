@@ -75,6 +75,9 @@ const App = () => (
             <Route path="/decisions" element={
               <ProtectedRoute><DecisionsPage /></ProtectedRoute>
             } />
+            <Route path="/agent-log" element={
+              <ProtectedRoute><AgentLogPage /></ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

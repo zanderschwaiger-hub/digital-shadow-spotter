@@ -47,6 +47,7 @@ const navItems = [
   { title: 'Signals', url: '/signals', icon: Radio },
   { title: 'Tasks', url: '/tasks', icon: CheckSquare },
   { title: 'Broker Opt-outs', url: '/brokers', icon: Building2 },
+  { title: 'Agent Log', url: '/agent-log', icon: ScrollText },
   { title: 'Reports', url: '/reports', icon: FileText },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
