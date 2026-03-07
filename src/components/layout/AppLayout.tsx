@@ -30,6 +30,7 @@ import {
   ClipboardList,
   Target,
   GitBranch,
+  ScrollText,
 } from 'lucide-react';
 
 interface AppLayoutProps {
