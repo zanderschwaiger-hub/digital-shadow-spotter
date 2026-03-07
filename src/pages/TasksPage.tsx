@@ -1,5 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { TaskBriefPanel } from '@/components/tasks/TaskBriefPanel';
+import { generateTaskBrief, generateLockedBrief } from '@/lib/task-briefs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
