@@ -18,8 +18,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   CheckCircle2, Clock, Loader2, ListTodo, CheckCheck,
-  Lock, PlayCircle, Zap, Timer, ShieldAlert, Info,
+  Lock, PlayCircle, Zap, Timer, ShieldAlert, Info, ChevronDown, ChevronRight, FileText,
 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Task, TaskCatalogItem } from '@/lib/types';
 
 type CourseStatus = 'open' | 'in_progress' | 'done';
