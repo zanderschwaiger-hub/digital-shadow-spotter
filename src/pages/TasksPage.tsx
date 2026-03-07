@@ -399,6 +399,8 @@ export default function TasksPage() {
                           catItem={catItem || null}
                           locked={locked}
                           onStatusChange={requestStatusChange}
+                          catalogMap={catalogMap}
+                          completedSourceIds={completedSourceIds}
                         />
                       );
                     })}
