@@ -151,7 +151,7 @@ export default function AgentLogPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
             </CardHeader>
-            <CardContent><p className="text-2xl font-bold text-amber-600">{counts.pending}</p></CardContent>
+            <CardContent><p className="text-2xl font-bold text-accent-foreground">{counts.pending}</p></CardContent>
           </Card>
         </div>
 
