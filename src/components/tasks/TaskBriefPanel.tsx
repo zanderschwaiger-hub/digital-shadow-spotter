@@ -22,9 +22,9 @@ type Props = TaskBriefPanelProps | LockedBriefPanelProps;
 
 export function TaskBriefPanel(props: Props) {
   if (props.locked) {
-    return <LockedPanel brief={props.brief} taskTitle={props.taskTitle} />;
+    return <LockedPanel brief={props.brief as LockedBrief} taskTitle={props.taskTitle} />;
   }
-  return <UnlockedPanel brief={props.brief} />;
+  return <UnlockedPanel brief={props.brief as TaskBrief} />;
 }
 
 function LockedPanel({ brief, taskTitle }: { brief: LockedBrief; taskTitle: string }) {
