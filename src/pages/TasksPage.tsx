@@ -420,71 +420,106 @@ interface CourseTaskItemProps {
   catItem: TaskCatalogItem | null;
   locked: boolean;
   onStatusChange: (task: Task, status: CourseStatus) => void;
+  catalogMap: Map<string, TaskCatalogItem>;
+  completedSourceIds: Set<string>;
 }
 
-function CourseTaskItem({ task, catItem, locked, onStatusChange }: CourseTaskItemProps) {
+function CourseTaskItem({ task, catItem, locked, onStatusChange, catalogMap, completedSourceIds }: CourseTaskItemProps) {
+  const [expanded, setExpanded] = useState(false);
   const status = task.status as CourseStatus;
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.open;
   const StatusIcon = config.icon;
 
   return (
-    <Card className={locked ? 'opacity-50' : ''}>
-      <CardHeader className="py-3 px-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
-              {task.sequence_order || '—'}
-            </span>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
-                <Badge variant={config.variant} className="text-xs">
-                  <StatusIcon className="h-3 w-3 mr-1" />
-                  {config.label}
-                </Badge>
-                {locked && (
-                  <Badge variant="outline" className="text-xs text-muted-foreground">
-                    <Lock className="h-3 w-3 mr-1" /> Locked
+    <Collapsible open={expanded} onOpenChange={setExpanded}>
+      <Card className={locked ? 'opacity-50' : ''}>
+        <CardHeader className="py-3 px-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                {task.sequence_order || '—'}
+              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
+                  <Badge variant={config.variant} className="text-xs">
+                    <StatusIcon className="h-3 w-3 mr-1" />
+                    {config.label}
                   </Badge>
+                  {locked && (
+                    <Badge variant="outline" className="text-xs text-muted-foreground">
+                      <Lock className="h-3 w-3 mr-1" /> Locked
+                    </Badge>
+                  )}
+                  {catItem?.blast_radius === 'high' && (
+                    <Badge variant="destructive" className="text-xs">
+                      <Zap className="h-3 w-3 mr-1" /> High Impact
+                    </Badge>
+                  )}
+                </div>
+                {task.description && (
+                  <CardDescription className="text-xs mt-0.5">{task.description}</CardDescription>
                 )}
-                {catItem?.blast_radius === 'high' && (
-                  <Badge variant="destructive" className="text-xs">
-                    <Zap className="h-3 w-3 mr-1" /> High Impact
-                  </Badge>
+                {catItem?.effort_minutes && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                    <Timer className="h-3 w-3" /> ~{catItem.effort_minutes} min
+                  </span>
                 )}
               </div>
-              {task.description && (
-                <CardDescription className="text-xs mt-0.5">{task.description}</CardDescription>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {catItem && (
+                <CollapsibleTrigger asChild>
+                  <Button size="sm" variant="ghost" className="h-8 px-2">
+                    <FileText className="h-3.5 w-3.5 mr-1" />
+                    Brief
+                    {expanded ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronRight className="h-3 w-3 ml-1" />}
+                  </Button>
+                </CollapsibleTrigger>
               )}
-              {catItem?.effort_minutes && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                  <Timer className="h-3 w-3" /> ~{catItem.effort_minutes} min
-                </span>
+              {!locked && (
+                <>
+                  {status === 'open' && (
+                    <Button size="sm" variant="outline" onClick={() => onStatusChange(task, 'in_progress')}>
+                      Start
+                    </Button>
+                  )}
+                  {status === 'in_progress' && (
+                    <Button size="sm" onClick={() => onStatusChange(task, 'done')}>
+                      <CheckCircle2 className="mr-1 h-3 w-3" /> Done
+                    </Button>
+                  )}
+                  {status === 'done' && (
+                    <Button size="sm" variant="ghost" onClick={() => onStatusChange(task, 'open')}>
+                      Reopen
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </div>
+        </CardHeader>
 
-          {!locked && (
-            <div className="flex gap-2 shrink-0">
-              {status === 'open' && (
-                <Button size="sm" variant="outline" onClick={() => onStatusChange(task, 'in_progress')}>
-                  Start
-                </Button>
-              )}
-              {status === 'in_progress' && (
-                <Button size="sm" onClick={() => onStatusChange(task, 'done')}>
-                  <CheckCircle2 className="mr-1 h-3 w-3" /> Done
-                </Button>
-              )}
-              {status === 'done' && (
-                <Button size="sm" variant="ghost" onClick={() => onStatusChange(task, 'open')}>
-                  Reopen
-                </Button>
+        {catItem && (
+          <CollapsibleContent>
+            <div className="px-4 pb-4">
+              {locked ? (
+                <TaskBriefPanel
+                  locked={true}
+                  brief={generateLockedBrief(catItem, catalogMap, completedSourceIds)}
+                  taskTitle={task.title}
+                />
+              ) : (
+                <TaskBriefPanel
+                  locked={false}
+                  brief={generateTaskBrief(catItem, catalogMap)}
+                />
               )}
             </div>
-          )}
-        </div>
-      </CardHeader>
-    </Card>
+          </CollapsibleContent>
+        )}
+      </Card>
+    </Collapsible>
   );
 }
