@@ -70,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
+        shouldCreateUser: true,
       },
     });
     return { error: error as Error | null };
