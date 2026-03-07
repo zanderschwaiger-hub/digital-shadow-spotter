@@ -133,7 +133,7 @@ export default function AgentLogPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Approved</CardTitle>
             </CardHeader>
-            <CardContent><p className="text-2xl font-bold text-emerald-600">{counts.approved}</p></CardContent>
+            <CardContent><p className="text-2xl font-bold text-primary">{counts.approved}</p></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
