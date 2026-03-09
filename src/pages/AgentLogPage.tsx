@@ -71,6 +71,8 @@ function auditToPlainLanguage(entry: AuditEntry): string {
       return 'Task marked completed';
     case 'task_skipped':
       return 'Task skipped';
+    case 'readiness_confirmed':
+      return `Pre-start readiness confirmed for task${payload?.title ? `: ${payload.title}` : ''}`;
     case 'welcome_tour_completed':
       return 'Welcome tour completed';
     case 'account_created':
