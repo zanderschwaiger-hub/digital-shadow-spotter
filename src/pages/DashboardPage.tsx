@@ -134,18 +134,18 @@ export default function DashboardPage() {
     <AppLayout>
       <WelcomeModal open={showWelcome} onClose={handleWelcomeClose} />
       
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Your digital footprint at a glance</p>
+          <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">Your digital footprint at a glance</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           <ExposureCard level={exposure.level} reason={exposure.reason} />
           <InventoryCompletenessCard counts={inventoryCounts} />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           <RecommendedActionCard />
           <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
