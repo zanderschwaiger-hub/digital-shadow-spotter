@@ -155,6 +155,18 @@ export default function TasksPage() {
     setGenerating(false);
   };
 
+  // Readiness confirmed — log it, then proceed to normal approval flow
+  const handleReadinessConfirmed = useCallback(async (task: Task) => {
+    await logEvent('readiness_confirmed', {
+      task_id: task.id,
+      source_id: task.source_id || '',
+      title: task.title,
+      checklist_completed: true,
+    });
+    // Now proceed to normal governed start flow
+    await requestStatusChange(task, 'in_progress');
+  }, [logEvent, requestStatusChange]);
+
   // Request a status change — propose through agent, then show approval dialog
   const requestStatusChange = useCallback(async (task: Task, newStatus: CourseStatus) => {
     const result = await proposeAction(
