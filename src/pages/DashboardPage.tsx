@@ -104,46 +104,8 @@ export default function DashboardPage() {
     }
   };
 
-  const handleTaskComplete = async (taskId: string) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ status: 'completed', completed_at: new Date().toISOString() })
-      .eq('id', taskId);
-
-    if (!error) {
-      await logEvent('task_completed', { task_id: taskId });
-      setTasks(prev => prev.map(t => 
-        t.id === taskId ? { ...t, status: 'completed' as const } : t
-      ));
-      toast({ title: 'Task completed!', description: 'Great job on maintaining your footprint.' });
-    }
-  };
-
-  const handleTaskSkip = async (taskId: string) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ status: 'skipped' })
-      .eq('id', taskId);
-
-    if (!error) {
-      await logEvent('task_skipped', { task_id: taskId });
-      setTasks(prev => prev.map(t => 
-        t.id === taskId ? { ...t, status: 'skipped' as const } : t
-      ));
-    }
-  };
-
-  const handleTaskRemind = async (taskId: string) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ status: 'reminded' })
-      .eq('id', taskId);
-
-    if (!error) {
-      await logEvent('task_reminded', { task_id: taskId });
-      toast({ title: 'Reminder set', description: 'We\'ll remind you about this task later.' });
-    }
-  };
+  // All task mutations are governed through the Tasks page.
+  // Dashboard is read-only for task state.
 
   const completeness = calculateInventoryCompleteness(inventoryCounts);
   const highSeverityCount = alerts.filter(a => a.severity === 'high' && !a.resolved_at).length;
@@ -185,12 +147,7 @@ export default function DashboardPage() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <RecommendedActionCard />
-          <TaskCard 
-            tasks={tasks}
-            onComplete={handleTaskComplete}
-            onSkip={handleTaskSkip}
-            onRemind={handleTaskRemind}
-          />
+          <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
           <MasterKeyCard 
             primaryEmail={primaryEmail}
