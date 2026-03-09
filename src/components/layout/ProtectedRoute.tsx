@@ -25,8 +25,15 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check if user has completed onboarding consent
-  if (profile && !profile.onboarding_completed && location.pathname !== '/onboarding-consent') {
+  // If user is authenticated but profile is missing (trigger race on new signup),
+  // route to onboarding so the profile can be created.
+  const onConsentPage = location.pathname === '/onboarding-consent';
+  if (!profile && !onConsentPage) {
+    return <Navigate to="/onboarding-consent" replace />;
+  }
+
+  // Profile loaded — check onboarding completion
+  if (profile && !profile.onboarding_completed && !onConsentPage) {
     return <Navigate to="/onboarding-consent" replace />;
   }
 
