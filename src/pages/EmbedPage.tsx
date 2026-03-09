@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { EmbedPasswordGate } from '@/components/embed/EmbedPasswordGate';
 import { EmbedLoginForm } from '@/components/embed/EmbedLoginForm';
 import { EmbedStatusWidget } from '@/components/embed/EmbedStatusWidget';
+import { FELogo } from '@/components/FELogo';
 
 export default function EmbedPage() {
   const { user, loading } = useAuth();
