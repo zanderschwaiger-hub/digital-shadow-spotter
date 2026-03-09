@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Shield, Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2 } from 'lucide-react';
+import { FELogo } from '@/components/FELogo';
 import { useToast } from '@/hooks/use-toast';
 
 const CONSENT_ITEMS = [
