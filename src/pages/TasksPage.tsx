@@ -411,6 +411,7 @@ export default function TasksPage() {
                           catItem={catItem || null}
                           locked={locked}
                           onStatusChange={requestStatusChange}
+                          onReadinessConfirmed={handleReadinessConfirmed}
                           catalogMap={catalogMap}
                           completedSourceIds={completedSourceIds}
                         />
