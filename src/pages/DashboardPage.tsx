@@ -147,12 +147,7 @@ export default function DashboardPage() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <RecommendedActionCard />
-          <TaskCard 
-            tasks={tasks}
-            onComplete={handleTaskComplete}
-            onSkip={handleTaskSkip}
-            onRemind={handleTaskRemind}
-          />
+          <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
           <MasterKeyCard 
             primaryEmail={primaryEmail}
