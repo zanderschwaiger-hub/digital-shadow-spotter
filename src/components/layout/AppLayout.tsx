@@ -180,7 +180,7 @@ function MobileLayout({ children, user, location, moreOpen, setMoreOpen, onSignO
       {/* Top bar — minimal */}
       <header className="sticky top-0 z-30 flex items-center gap-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-top">
         <div className="flex items-center gap-3 px-4 h-12 w-full">
-          <Shield className="h-5 w-5 text-primary shrink-0" />
+          <FELogo size="sm" className="shrink-0" />
           <span className="text-sm font-semibold truncate">Freedom Engine</span>
         </div>
       </header>
