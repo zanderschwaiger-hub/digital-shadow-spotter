@@ -50,9 +50,7 @@ export default function EmbedPage() {
       <div className="max-w-sm mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Shield className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <FELogo size="md" />
           <div>
             <h1 className="text-lg font-bold">Freedom Engine</h1>
             <p className="text-xs text-muted-foreground">Footprint Maintenance Agent</p>
