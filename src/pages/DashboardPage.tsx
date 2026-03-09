@@ -144,10 +144,7 @@ export default function DashboardPage() {
           <RecommendedActionCard />
           <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
-          <MasterKeyCard 
-            primaryEmail={primaryEmail}
-            checklistItems={masterKeyChecklist}
-          />
+          <MasterKeyCard primaryEmail={primaryEmail} />
         </div>
       </div>
     </AppLayout>
