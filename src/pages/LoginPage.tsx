@@ -59,9 +59,7 @@ export default function LoginPage() {
     <div className="flex min-h-[100dvh] items-center justify-center bg-background p-4 safe-top safe-bottom">
       <div className="w-full max-w-md space-y-8">
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary mb-4">
-            <Shield className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <FELogo size="lg" className="mb-4" />
           <h1 className="text-2xl font-bold">Freedom Engine</h1>
           <p className="text-muted-foreground mt-1">Digital Governance & Hygiene Agent</p>
           <p className="text-sm text-muted-foreground mt-2 italic">
