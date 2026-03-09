@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Loader2, Mail, CheckCircle2 } from 'lucide-react';
+import { Loader2, Mail, CheckCircle2 } from 'lucide-react';
+import { FELogo } from '@/components/FELogo';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
