@@ -327,11 +327,11 @@ export default function TasksPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Guided Plan</h1>
-            <p className="text-muted-foreground">{counts.done}/{counts.total} tasks completed</p>
+            <h1 className="text-xl sm:text-2xl font-bold">Guided Plan</h1>
+            <p className="text-sm text-muted-foreground">{counts.done}/{counts.total} tasks completed</p>
           </div>
         </div>
 
@@ -351,30 +351,30 @@ export default function TasksPage() {
         )}
 
         {/* Summary */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 grid-cols-3">
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <ListTodo className="h-4 w-4" /> Open
+            <CardHeader className="pb-1 pt-3 px-3 sm:px-6">
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <ListTodo className="h-3.5 w-3.5" /> Open
               </CardTitle>
             </CardHeader>
-            <CardContent><p className="text-3xl font-bold">{counts.open}</p></CardContent>
+            <CardContent className="px-3 sm:px-6 pb-3"><p className="text-2xl sm:text-3xl font-bold">{counts.open}</p></CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Clock className="h-4 w-4" /> In Progress
+            <CardHeader className="pb-1 pt-3 px-3 sm:px-6">
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" /> Active
               </CardTitle>
             </CardHeader>
-            <CardContent><p className="text-3xl font-bold">{counts.in_progress}</p></CardContent>
+            <CardContent className="px-3 sm:px-6 pb-3"><p className="text-2xl sm:text-3xl font-bold">{counts.in_progress}</p></CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CheckCheck className="h-4 w-4" /> Done
+            <CardHeader className="pb-1 pt-3 px-3 sm:px-6">
+              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <CheckCheck className="h-3.5 w-3.5" /> Done
               </CardTitle>
             </CardHeader>
-            <CardContent><p className="text-3xl font-bold">{counts.done}</p></CardContent>
+            <CardContent className="px-3 sm:px-6 pb-3"><p className="text-2xl sm:text-3xl font-bold">{counts.done}</p></CardContent>
           </Card>
         </div>
 
