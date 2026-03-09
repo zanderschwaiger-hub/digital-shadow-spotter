@@ -311,10 +311,12 @@ export default function TasksPage() {
               {pendingAction && (
                 <>
                   Change <strong>"{pendingAction.taskTitle}"</strong> to{' '}
-                  <Badge variant="outline">{pendingAction.newStatus}</Badge>?
+                  <Badge variant="outline">
+                    {STATUS_CONFIG[pendingAction.newStatus]?.label || pendingAction.newStatus}
+                  </Badge>?
                   <br /><br />
                   <span className="text-xs text-muted-foreground">
-                    Every action is logged. You can review your action history in Settings.
+                    Every action is logged. You can review your action history in the Agent Log.
                   </span>
                 </>
               )}
