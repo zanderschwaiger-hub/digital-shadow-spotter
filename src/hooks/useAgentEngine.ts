@@ -162,12 +162,18 @@ export function useAgentEngine() {
         .sort((a, b) => (a.sequence_order || 0) - (b.sequence_order || 0));
 
       for (const task of sorted) {
-        const deps = catalogDeps.get(task.source_id!);
-        if (!deps || deps.length === 0 || deps.every(d => completedSourceIds.has(d))) {
+        const deps = catalogDeps.get(task.source_id!) || [];
+        if (deps.length === 0 || deps.every(d => completedSourceIds.has(d))) {
+          const reason = deps.length > 0
+            ? 'Unlocked after you completed its prerequisite tasks.'
+            : completedSourceIds.size === 0
+              ? 'Start here — this is your first foundational task.'
+              : 'Next available task in your guided sequence.';
+
           return {
             title: task.title,
             source_id: task.source_id!,
-            reason: 'This is the next unlocked task in your guided plan.',
+            reason,
           };
         }
       }

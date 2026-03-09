@@ -112,13 +112,8 @@ export default function DashboardPage() {
   const unresolvedCount = alerts.filter(a => !a.resolved_at).length;
   const exposure = getExposureLevel(unresolvedCount, highSeverityCount, completeness);
 
-  // Mock checklist for Master Key - in reality this would be tracked
-  const masterKeyChecklist = [
-    { label: 'Two-factor authentication enabled', completed: false },
-    { label: 'Strong unique password', completed: false },
-    { label: 'Recovery options reviewed', completed: false },
-    { label: 'App passwords audited', completed: false }
-  ];
+  // Master key readiness is user-confirmed inside the card.
+
 
   if (loading) {
     return (
@@ -149,10 +144,7 @@ export default function DashboardPage() {
           <RecommendedActionCard />
           <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
-          <MasterKeyCard 
-            primaryEmail={primaryEmail}
-            checklistItems={masterKeyChecklist}
-          />
+          <MasterKeyCard primaryEmail={primaryEmail} />
         </div>
       </div>
     </AppLayout>
