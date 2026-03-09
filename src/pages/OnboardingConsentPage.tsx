@@ -105,9 +105,7 @@ export default function OnboardingConsentPage() {
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-2xl space-y-6">
         <div className="flex flex-col items-center text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary mb-4">
-            <Shield className="h-8 w-8 text-primary-foreground" />
-          </div>
+          <FELogo size="lg" className="mb-4" />
           <h1 className="text-2xl font-bold">Governance & Transparency</h1>
           <p className="text-muted-foreground mt-1">
             Before we begin, please review and accept our principles
