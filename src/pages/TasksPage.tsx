@@ -508,7 +508,8 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
       )}
 
       <Collapsible open={expanded} onOpenChange={setExpanded}>
-        <Card className={locked ? 'opacity-50' : ''}>
+        <div ref={cardRef}>
+        <Card className={`transition-all duration-700 ${locked ? 'opacity-50' : ''} ${highlighted ? 'ring-2 ring-primary/40 bg-primary/5' : ''}`}>
           <CardHeader className="py-3 px-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
