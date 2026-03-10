@@ -99,7 +99,7 @@ export function RecommendedActionCard() {
               <p className="text-sm font-medium">{recommendation.title}</p>
               <p className="text-xs text-muted-foreground mt-1">{recommendation.reason}</p>
             </div>
-            <Button size="sm" variant="outline" onClick={() => navigate('/tasks')}>
+            <Button size="sm" variant="outline" onClick={() => navigate(recommendedTaskId ? `/tasks?highlight=${recommendedTaskId}` : '/tasks')}>
               Open in Tasks <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           </div>
