@@ -433,6 +433,7 @@ export default function TasksPage() {
                           task={task}
                           catItem={catItem || null}
                           locked={locked}
+                          highlighted={task.id === highlightedId}
                           onStatusChange={requestStatusChange}
                           onReadinessConfirmed={handleReadinessConfirmed}
                           catalogMap={catalogMap}
