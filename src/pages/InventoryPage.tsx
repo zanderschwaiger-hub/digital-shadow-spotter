@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
+import {
   Mail, 
   User, 
   Briefcase, 
@@ -29,7 +29,9 @@ import {
   Plus,
   Trash2,
   Star,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Circle
 } from 'lucide-react';
 import { 
   InventoryEmail, 
@@ -37,7 +39,10 @@ import {
   InventoryAccount, 
   InventoryDomain, 
   InventoryPhone,
-  calculateInventoryCompleteness
+  calculateInventoryCompleteness,
+  buildIdentifierCoverage,
+  calculateIdentifierCoverage,
+  IDENTIFIER_META,
 } from '@/lib/types';
 
 type InventoryTab = 'emails' | 'usernames' | 'accounts' | 'domains' | 'phones';
