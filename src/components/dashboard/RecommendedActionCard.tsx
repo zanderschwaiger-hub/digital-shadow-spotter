@@ -51,6 +51,13 @@ export function RecommendedActionCard() {
     [tasks, completedSourceIds, catalogDeps, getNextRecommendation],
   );
 
+  // Resolve the actual task row ID for deep-link
+  const recommendedTaskId = useMemo(() => {
+    if (!recommendation) return null;
+    const match = tasks.find(t => t.source_id === recommendation.source_id);
+    return match?.id || null;
+  }, [recommendation, tasks]);
+
   const doneCount = tasks.filter(t => t.status === 'done').length;
   const totalCount = tasks.length;
 
