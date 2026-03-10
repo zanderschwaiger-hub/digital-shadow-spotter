@@ -83,6 +83,21 @@ export default function TasksPage() {
     if (user) loadData();
   }, [user]);
 
+  // When highlight param exists and tasks finish loading, switch to 'all' tab and set highlight
+  useEffect(() => {
+    if (!loading && highlightId && tasks.length > 0 && !highlightHandled.current) {
+      const match = tasks.find(t => t.id === highlightId);
+      if (match) {
+        // Switch tab to 'all' so the task is visible regardless of status
+        setActiveTab('all');
+        setHighlightedId(highlightId);
+        highlightHandled.current = true;
+        // Clear highlight after 4 seconds
+        setTimeout(() => setHighlightedId(null), 4000);
+      }
+    }
+  }, [loading, highlightId, tasks]);
+
   const loadData = async () => {
     if (!user) return;
     setLoading(true);
