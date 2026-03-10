@@ -51,6 +51,13 @@ export function RecommendedActionCard() {
     [tasks, completedSourceIds, catalogDeps, getNextRecommendation],
   );
 
+  // Resolve the actual task row ID for deep-link
+  const recommendedTaskId = useMemo(() => {
+    if (!recommendation) return null;
+    const match = tasks.find(t => t.source_id === recommendation.source_id);
+    return match?.id || null;
+  }, [recommendation, tasks]);
+
   const doneCount = tasks.filter(t => t.status === 'done').length;
   const totalCount = tasks.length;
 
@@ -92,7 +99,7 @@ export function RecommendedActionCard() {
               <p className="text-sm font-medium">{recommendation.title}</p>
               <p className="text-xs text-muted-foreground mt-1">{recommendation.reason}</p>
             </div>
-            <Button size="sm" variant="outline" onClick={() => navigate('/tasks')}>
+            <Button size="sm" variant="outline" onClick={() => navigate(recommendedTaskId ? `/tasks?highlight=${recommendedTaskId}` : '/tasks')}>
               Open in Tasks <ArrowRight className="ml-1 h-3 w-3" />
             </Button>
           </div>
