@@ -456,18 +456,33 @@ interface CourseTaskItemProps {
   task: Task;
   catItem: TaskCatalogItem | null;
   locked: boolean;
+  highlighted: boolean;
   onStatusChange: (task: Task, status: CourseStatus) => void;
   onReadinessConfirmed: (task: Task) => void;
   catalogMap: Map<string, TaskCatalogItem>;
   completedSourceIds: Set<string>;
 }
 
-function CourseTaskItem({ task, catItem, locked, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds }: CourseTaskItemProps) {
+function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds }: CourseTaskItemProps) {
   const [expanded, setExpanded] = useState(false);
   const [readinessOpen, setReadinessOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const scrollDone = useRef(false);
   const status = task.status as CourseStatus;
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.open;
   const StatusIcon = config.icon;
+
+  // Auto-expand and scroll when highlighted
+  useEffect(() => {
+    if (highlighted && catItem && !scrollDone.current) {
+      setExpanded(true);
+      scrollDone.current = true;
+      // Small delay to let DOM render expanded content
+      requestAnimationFrame(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }, [highlighted, catItem]);
 
   const brief = useMemo(() => {
     if (!catItem || locked) return null;
