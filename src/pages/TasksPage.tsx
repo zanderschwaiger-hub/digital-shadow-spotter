@@ -597,6 +597,7 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
             </CollapsibleContent>
           )}
         </Card>
+        </div>
       </Collapsible>
     </>
   );
