@@ -4,7 +4,7 @@ import { ExposureCard } from '@/components/dashboard/ExposureCard';
 import { TaskCard } from '@/components/dashboard/TaskCard';
 import { AlertsCard } from '@/components/dashboard/AlertsCard';
 import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
-import { InventoryCompletenessCard } from '@/components/dashboard/InventoryCompletenessCard';
+import { IdentifierCoverageCard } from '@/components/dashboard/IdentifierCoverageCard';
 import { RecommendedActionCard } from '@/components/dashboard/RecommendedActionCard';
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,9 +14,10 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Task, 
   Alert, 
-  InventoryCounts, 
-  getExposureLevel, 
-  calculateInventoryCompleteness 
+  IdentifierCoverage,
+  buildIdentifierCoverage,
+  calculateIdentifierCoverage,
+  getExposureLevel,
 } from '@/lib/types';
 
 const WELCOME_SEEN_KEY = 'freedom-engine-welcome-seen';
@@ -28,12 +29,12 @@ export default function DashboardPage() {
   
   const [tasks, setTasks] = useState<Task[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [inventoryCounts, setInventoryCounts] = useState<InventoryCounts>({
-    emails: 0,
-    usernames: 0,
-    accounts: 0,
-    domains: 0,
-    phones: 0
+  const [coverage, setCoverage] = useState<IdentifierCoverage>({
+    primaryEmail: false,
+    recoveryEmail: false,
+    phone: false,
+    username: false,
+    domain: false,
   });
   const [primaryEmail, setPrimaryEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,6 @@ export default function DashboardPage() {
     if (user) {
       loadDashboardData();
       
-      // Check if this is first visit
       const hasSeenWelcome = localStorage.getItem(`${WELCOME_SEEN_KEY}-${user.id}`);
       if (!hasSeenWelcome) {
         setShowWelcome(true);
@@ -64,23 +64,20 @@ export default function DashboardPage() {
     
     setLoading(true);
     try {
-      // Fetch all data in parallel
       const [
         tasksRes,
         alertsRes,
         emailsRes,
         usernamesRes,
-        accountsRes,
         domainsRes,
         phonesRes
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', user.id).order('priority', { ascending: false }),
         supabase.from('alerts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-        supabase.from('inventory_emails').select('*').eq('user_id', user.id),
-        supabase.from('inventory_usernames').select('*').eq('user_id', user.id),
-        supabase.from('inventory_accounts').select('*').eq('user_id', user.id),
-        supabase.from('inventory_domains').select('*').eq('user_id', user.id),
-        supabase.from('inventory_phones').select('*').eq('user_id', user.id)
+        supabase.from('inventory_emails').select('id, is_primary, email').eq('user_id', user.id),
+        supabase.from('inventory_usernames').select('id').eq('user_id', user.id),
+        supabase.from('inventory_domains').select('id').eq('user_id', user.id),
+        supabase.from('inventory_phones').select('id').eq('user_id', user.id)
       ]);
 
       if (tasksRes.data) setTasks(tasksRes.data as Task[]);
@@ -90,13 +87,12 @@ export default function DashboardPage() {
       const primary = emails.find(e => e.is_primary);
       if (primary) setPrimaryEmail(primary.email);
 
-      setInventoryCounts({
-        emails: emails.length,
+      setCoverage(buildIdentifierCoverage({
+        emails: emails.map(e => ({ is_primary: e.is_primary })),
+        phones: phonesRes.data?.length || 0,
         usernames: usernamesRes.data?.length || 0,
-        accounts: accountsRes.data?.length || 0,
         domains: domainsRes.data?.length || 0,
-        phones: phonesRes.data?.length || 0
-      });
+      }));
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -104,16 +100,13 @@ export default function DashboardPage() {
     }
   };
 
-  // All task mutations are governed through the Tasks page.
   // Dashboard is read-only for task state.
 
-  const completeness = calculateInventoryCompleteness(inventoryCounts);
+  const { level } = calculateIdentifierCoverage(coverage);
+  const coveragePercent = (level / 5) * 100;
   const highSeverityCount = alerts.filter(a => a.severity === 'high' && !a.resolved_at).length;
   const unresolvedCount = alerts.filter(a => !a.resolved_at).length;
-  const exposure = getExposureLevel(unresolvedCount, highSeverityCount, completeness);
-
-  // Master key readiness is user-confirmed inside the card.
-
+  const exposure = getExposureLevel(unresolvedCount, highSeverityCount, coveragePercent);
 
   if (loading) {
     return (
@@ -137,7 +130,7 @@ export default function DashboardPage() {
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           <ExposureCard level={exposure.level} reason={exposure.reason} />
-          <InventoryCompletenessCard counts={inventoryCounts} />
+          <IdentifierCoverageCard coverage={coverage} />
         </div>
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">

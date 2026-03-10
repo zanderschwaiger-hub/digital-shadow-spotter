@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
+import {
   Mail, 
   User, 
   Briefcase, 
@@ -29,7 +29,9 @@ import {
   Plus,
   Trash2,
   Star,
-  Loader2
+  Loader2,
+  CheckCircle2,
+  Circle
 } from 'lucide-react';
 import { 
   InventoryEmail, 
@@ -37,7 +39,10 @@ import {
   InventoryAccount, 
   InventoryDomain, 
   InventoryPhone,
-  calculateInventoryCompleteness
+  calculateInventoryCompleteness,
+  buildIdentifierCoverage,
+  calculateIdentifierCoverage,
+  IDENTIFIER_META,
 } from '@/lib/types';
 
 type InventoryTab = 'emails' | 'usernames' | 'accounts' | 'domains' | 'phones';
@@ -90,13 +95,13 @@ export default function InventoryPage() {
     setLoading(false);
   };
 
-  const completeness = calculateInventoryCompleteness({
-    emails: emails.length,
+  const identifierCoverage = buildIdentifierCoverage({
+    emails: emails.map(e => ({ is_primary: e.is_primary })),
+    phones: phones.length,
     usernames: usernames.length,
-    accounts: accounts.length,
     domains: domains.length,
-    phones: phones.length
   });
+  const { level: coverageLevel, total: coverageTotal } = calculateIdentifierCoverage(identifierCoverage);
 
   const addEmail = async () => {
     if (!user || !newEmail) return;
@@ -225,15 +230,40 @@ export default function InventoryPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Inventory Completeness</CardTitle>
+            <CardTitle className="text-lg">Identifier Coverage</CardTitle>
             <CardDescription>
-              Add more data to improve review accuracy
+              Adding identifiers increases exposure detection and cleanup guidance
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <Progress value={completeness} className="flex-1" />
-              <span className="font-bold text-lg">{completeness}%</span>
+          <CardContent className="space-y-4">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold">{coverageLevel}</span>
+              <span className="text-sm text-muted-foreground">/ {coverageTotal} identifiers</span>
+            </div>
+            <div className="flex gap-1">
+              {Array.from({ length: coverageTotal }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 flex-1 rounded-full transition-colors ${
+                    i < coverageLevel ? 'bg-primary' : 'bg-secondary'
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="space-y-1.5 text-sm">
+              {IDENTIFIER_META.map(({ key, label, description }) => {
+                const present = identifierCoverage[key];
+                return (
+                  <div key={key} className="flex items-start gap-2">
+                    {present ? (
+                      <CheckCircle2 className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                    ) : (
+                      <Circle className="h-4 w-4 mt-0.5 text-muted-foreground/40 shrink-0" />
+                    )}
+                    <span className={present ? 'font-medium' : 'text-muted-foreground'}>{label}</span>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
