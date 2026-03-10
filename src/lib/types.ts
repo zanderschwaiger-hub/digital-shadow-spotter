@@ -154,7 +154,7 @@ export interface NotificationSettings {
   created_at: string;
 }
 
-// Inventory completeness calculation
+// Inventory completeness calculation (legacy — still used by InventoryPage)
 export interface InventoryCounts {
   emails: number;
   usernames: number;
@@ -165,21 +165,71 @@ export interface InventoryCounts {
 
 export function calculateInventoryCompleteness(counts: InventoryCounts): number {
   const weights = {
-    emails: 30,      // Most important
-    accounts: 25,    // Key accounts
-    usernames: 20,   // Social handles
-    phones: 15,      // Optional but useful
-    domains: 10      // Business owners
+    emails: 30,
+    accounts: 25,
+    usernames: 20,
+    phones: 15,
+    domains: 10
   };
-  
   let score = 0;
   if (counts.emails >= 1) score += weights.emails;
   if (counts.accounts >= 3) score += weights.accounts;
   if (counts.usernames >= 1) score += weights.usernames;
   if (counts.phones >= 1) score += weights.phones;
   if (counts.domains >= 1) score += weights.domains;
-  
   return score;
+}
+
+// ── Identifier Coverage Model ──────────────────────────────────────────
+// Five optional identifiers that increase governance coverage.
+
+export interface IdentifierCoverage {
+  primaryEmail: boolean;
+  recoveryEmail: boolean;
+  phone: boolean;
+  username: boolean;
+  domain: boolean;
+}
+
+export const IDENTIFIER_META: {
+  key: keyof IdentifierCoverage;
+  label: string;
+  description: string;
+}[] = [
+  { key: 'primaryEmail', label: 'Primary Email', description: 'Enables breach-check and credential exposure detection for your main address.' },
+  { key: 'recoveryEmail', label: 'Recovery Email', description: 'Covers backup/recovery addresses that may appear in separate breach datasets.' },
+  { key: 'phone', label: 'Phone Number', description: 'Allows SIM-swap awareness and phone-linked account reviews.' },
+  { key: 'username', label: 'Primary Username / Handle', description: 'Tracks social-media and forum exposure tied to your public handle.' },
+  { key: 'domain', label: 'Domain', description: 'Enables DNS and WHOIS exposure checks for domains you own.' },
+];
+
+export function calculateIdentifierCoverage(cov: IdentifierCoverage): { level: number; total: number } {
+  const total = 5;
+  let level = 0;
+  if (cov.primaryEmail) level++;
+  if (cov.recoveryEmail) level++;
+  if (cov.phone) level++;
+  if (cov.username) level++;
+  if (cov.domain) level++;
+  return { level, total };
+}
+
+/** Build coverage flags from raw inventory data */
+export function buildIdentifierCoverage(data: {
+  emails: { is_primary: boolean }[];
+  phones: number;
+  usernames: number;
+  domains: number;
+}): IdentifierCoverage {
+  const hasPrimary = data.emails.some(e => e.is_primary);
+  const hasRecovery = data.emails.some(e => !e.is_primary);
+  return {
+    primaryEmail: hasPrimary,
+    recoveryEmail: hasRecovery,
+    phone: data.phones > 0,
+    username: data.usernames > 0,
+    domain: data.domains > 0,
+  };
 }
 
 export function getExposureLevel(
