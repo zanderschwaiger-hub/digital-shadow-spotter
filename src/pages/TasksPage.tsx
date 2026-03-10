@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { TaskBriefPanel } from '@/components/tasks/TaskBriefPanel';
 import { ReadinessChecklist } from '@/components/tasks/ReadinessChecklist';
@@ -66,6 +67,11 @@ export default function TasksPage() {
   const { logEvent } = useAuditLog();
   const { proposeAction, confirmAction, rejectAction, getNextRecommendation } = useAgentEngine();
 
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get('highlight');
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const highlightHandled = useRef(false);
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [catalog, setCatalog] = useState<TaskCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,6 +82,21 @@ export default function TasksPage() {
   useEffect(() => {
     if (user) loadData();
   }, [user]);
+
+  // When highlight param exists and tasks finish loading, switch to 'all' tab and set highlight
+  useEffect(() => {
+    if (!loading && highlightId && tasks.length > 0 && !highlightHandled.current) {
+      const match = tasks.find(t => t.id === highlightId);
+      if (match) {
+        // Switch tab to 'all' so the task is visible regardless of status
+        setActiveTab('all');
+        setHighlightedId(highlightId);
+        highlightHandled.current = true;
+        // Clear highlight after 4 seconds
+        setTimeout(() => setHighlightedId(null), 4000);
+      }
+    }
+  }, [loading, highlightId, tasks]);
 
   const loadData = async () => {
     if (!user) return;
@@ -412,6 +433,7 @@ export default function TasksPage() {
                           task={task}
                           catItem={catItem || null}
                           locked={locked}
+                          highlighted={task.id === highlightedId}
                           onStatusChange={requestStatusChange}
                           onReadinessConfirmed={handleReadinessConfirmed}
                           catalogMap={catalogMap}
@@ -434,18 +456,33 @@ interface CourseTaskItemProps {
   task: Task;
   catItem: TaskCatalogItem | null;
   locked: boolean;
+  highlighted: boolean;
   onStatusChange: (task: Task, status: CourseStatus) => void;
   onReadinessConfirmed: (task: Task) => void;
   catalogMap: Map<string, TaskCatalogItem>;
   completedSourceIds: Set<string>;
 }
 
-function CourseTaskItem({ task, catItem, locked, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds }: CourseTaskItemProps) {
+function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds }: CourseTaskItemProps) {
   const [expanded, setExpanded] = useState(false);
   const [readinessOpen, setReadinessOpen] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const scrollDone = useRef(false);
   const status = task.status as CourseStatus;
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.open;
   const StatusIcon = config.icon;
+
+  // Auto-expand and scroll when highlighted
+  useEffect(() => {
+    if (highlighted && catItem && !scrollDone.current) {
+      setExpanded(true);
+      scrollDone.current = true;
+      // Small delay to let DOM render expanded content
+      requestAnimationFrame(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+  }, [highlighted, catItem]);
 
   const brief = useMemo(() => {
     if (!catItem || locked) return null;
@@ -471,7 +508,8 @@ function CourseTaskItem({ task, catItem, locked, onStatusChange, onReadinessConf
       )}
 
       <Collapsible open={expanded} onOpenChange={setExpanded}>
-        <Card className={locked ? 'opacity-50' : ''}>
+        <div ref={cardRef}>
+        <Card className={`transition-all duration-700 ${locked ? 'opacity-50' : ''} ${highlighted ? 'ring-2 ring-primary/40 bg-primary/5' : ''}`}>
           <CardHeader className="py-3 px-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
@@ -559,6 +597,7 @@ function CourseTaskItem({ task, catItem, locked, onStatusChange, onReadinessConf
             </CollapsibleContent>
           )}
         </Card>
+        </div>
       </Collapsible>
     </>
   );
