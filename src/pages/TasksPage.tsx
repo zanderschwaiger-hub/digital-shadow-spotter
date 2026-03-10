@@ -67,6 +67,11 @@ export default function TasksPage() {
   const { logEvent } = useAuditLog();
   const { proposeAction, confirmAction, rejectAction, getNextRecommendation } = useAgentEngine();
 
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get('highlight');
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
+  const highlightHandled = useRef(false);
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [catalog, setCatalog] = useState<TaskCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
