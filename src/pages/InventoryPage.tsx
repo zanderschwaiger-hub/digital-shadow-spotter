@@ -95,13 +95,13 @@ export default function InventoryPage() {
     setLoading(false);
   };
 
-  const completeness = calculateInventoryCompleteness({
-    emails: emails.length,
+  const identifierCoverage = buildIdentifierCoverage({
+    emails: emails.map(e => ({ is_primary: e.is_primary })),
+    phones: phones.length,
     usernames: usernames.length,
-    accounts: accounts.length,
     domains: domains.length,
-    phones: phones.length
   });
+  const { level: coverageLevel, total: coverageTotal } = calculateIdentifierCoverage(identifierCoverage);
 
   const addEmail = async () => {
     if (!user || !newEmail) return;
