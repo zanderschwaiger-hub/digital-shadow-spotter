@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +32,9 @@ import {
   Star,
   Loader2,
   CheckCircle2,
-  Circle
+  Circle,
+  ShieldCheck,
+  Save,
 } from 'lucide-react';
 import { 
   InventoryEmail, 
@@ -43,6 +46,8 @@ import {
   buildIdentifierCoverage,
   calculateIdentifierCoverage,
   IDENTIFIER_META,
+  RecoveryMethod,
+  RECOVERY_METHOD_OPTIONS,
 } from '@/lib/types';
 
 type InventoryTab = 'emails' | 'usernames' | 'accounts' | 'domains' | 'phones';
