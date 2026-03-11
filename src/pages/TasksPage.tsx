@@ -610,10 +610,13 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                     taskTitle={task.title}
                   />
                 ) : (
-                  <TaskBriefPanel
-                    locked={false}
-                    brief={generateTaskBrief(catItem, catalogMap)}
-                  />
+                  <>
+                    <TaskBriefPanel
+                      locked={false}
+                      brief={generateTaskBrief(catItem, catalogMap)}
+                    />
+                    <CoveragePromptBanner pillarId={catItem.pillar_id} coverage={coverage} />
+                  </>
                 )}
               </div>
             </CollapsibleContent>
