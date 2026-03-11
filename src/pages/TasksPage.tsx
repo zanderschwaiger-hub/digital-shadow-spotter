@@ -482,9 +482,10 @@ interface CourseTaskItemProps {
   onReadinessConfirmed: (task: Task) => void;
   catalogMap: Map<string, TaskCatalogItem>;
   completedSourceIds: Set<string>;
+  coverage: IdentifierCoverage;
 }
 
-function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds }: CourseTaskItemProps) {
+function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds, coverage }: CourseTaskItemProps) {
   const [expanded, setExpanded] = useState(false);
   const [readinessOpen, setReadinessOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
