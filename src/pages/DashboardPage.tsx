@@ -109,8 +109,8 @@ export default function DashboardPage() {
 
   // Dashboard is read-only for task state.
 
-  const { level } = calculateIdentifierCoverage(coverage);
-  const coveragePercent = (level / 5) * 100;
+  const { level, total } = calculateIdentifierCoverage(coverage);
+  const coveragePercent = (level / total) * 100;
   const highSeverityCount = alerts.filter(a => a.severity === 'high' && !a.resolved_at).length;
   const unresolvedCount = alerts.filter(a => !a.resolved_at).length;
   const exposure = getExposureLevel(unresolvedCount, highSeverityCount, coveragePercent);
