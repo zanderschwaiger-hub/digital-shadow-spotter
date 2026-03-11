@@ -106,12 +106,27 @@ export default function TasksPage() {
   const loadData = async () => {
     if (!user) return;
     setLoading(true);
-    const [tasksRes, catalogRes] = await Promise.all([
+    const [tasksRes, catalogRes, emailsRes, usernamesRes, domainsRes, phonesRes, covInputsRes] = await Promise.all([
       supabase.from('tasks').select('*').eq('user_id', user.id).eq('source_type', 'course').order('sequence_order', { ascending: true }),
       supabase.from('task_catalog').select('*').order('course_order', { ascending: true }),
+      supabase.from('inventory_emails').select('id, is_primary').eq('user_id', user.id),
+      supabase.from('inventory_usernames').select('id').eq('user_id', user.id),
+      supabase.from('inventory_domains').select('id').eq('user_id', user.id),
+      supabase.from('inventory_phones').select('id').eq('user_id', user.id),
+      supabase.from('governance_coverage_inputs').select('recovery_phone, recovery_method').eq('user_id', user.id).maybeSingle(),
     ]);
     if (tasksRes.data) setTasks(tasksRes.data as Task[]);
     if (catalogRes.data) setCatalog(catalogRes.data as TaskCatalogItem[]);
+    const emails = emailsRes.data || [];
+    const covRow = covInputsRes.data;
+    setCoverage(buildIdentifierCoverage({
+      emails: emails.map(e => ({ is_primary: e.is_primary })),
+      phones: phonesRes.data?.length || 0,
+      usernames: usernamesRes.data?.length || 0,
+      domains: domainsRes.data?.length || 0,
+      recoveryPhone: covRow?.recovery_phone ?? null,
+      recoveryMethod: covRow?.recovery_method ?? null,
+    }));
     setLoading(false);
   };
 
