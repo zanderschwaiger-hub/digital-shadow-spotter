@@ -35,6 +35,8 @@ export default function DashboardPage() {
     phone: false,
     username: false,
     domain: false,
+    recoveryPhone: false,
+    recoveryMethod: false,
   });
   const [primaryEmail, setPrimaryEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
