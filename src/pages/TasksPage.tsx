@@ -23,7 +23,8 @@ import {
   Lock, PlayCircle, Zap, Timer, ShieldAlert, Info, ChevronDown, ChevronRight, FileText,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Task, TaskCatalogItem } from '@/lib/types';
+import { Task, TaskCatalogItem, IdentifierCoverage, buildIdentifierCoverage } from '@/lib/types';
+import { CoveragePromptBanner } from '@/components/tasks/CoveragePromptBanner';
 
 type CourseStatus = 'open' | 'in_progress' | 'done';
 
@@ -78,6 +79,10 @@ export default function TasksPage() {
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('open');
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [coverage, setCoverage] = useState<IdentifierCoverage>({
+    primaryEmail: false, recoveryEmail: false, phone: false,
+    username: false, domain: false, recoveryPhone: false, recoveryMethod: false,
+  });
 
   useEffect(() => {
     if (user) loadData();
@@ -101,12 +106,27 @@ export default function TasksPage() {
   const loadData = async () => {
     if (!user) return;
     setLoading(true);
-    const [tasksRes, catalogRes] = await Promise.all([
+    const [tasksRes, catalogRes, emailsRes, usernamesRes, domainsRes, phonesRes, covInputsRes] = await Promise.all([
       supabase.from('tasks').select('*').eq('user_id', user.id).eq('source_type', 'course').order('sequence_order', { ascending: true }),
       supabase.from('task_catalog').select('*').order('course_order', { ascending: true }),
+      supabase.from('inventory_emails').select('id, is_primary').eq('user_id', user.id),
+      supabase.from('inventory_usernames').select('id').eq('user_id', user.id),
+      supabase.from('inventory_domains').select('id').eq('user_id', user.id),
+      supabase.from('inventory_phones').select('id').eq('user_id', user.id),
+      supabase.from('governance_coverage_inputs').select('recovery_phone, recovery_method').eq('user_id', user.id).maybeSingle(),
     ]);
     if (tasksRes.data) setTasks(tasksRes.data as Task[]);
     if (catalogRes.data) setCatalog(catalogRes.data as TaskCatalogItem[]);
+    const emails = emailsRes.data || [];
+    const covRow = covInputsRes.data;
+    setCoverage(buildIdentifierCoverage({
+      emails: emails.map(e => ({ is_primary: e.is_primary })),
+      phones: phonesRes.data?.length || 0,
+      usernames: usernamesRes.data?.length || 0,
+      domains: domainsRes.data?.length || 0,
+      recoveryPhone: covRow?.recovery_phone ?? null,
+      recoveryMethod: covRow?.recovery_method ?? null,
+    }));
     setLoading(false);
   };
 
@@ -438,6 +458,7 @@ export default function TasksPage() {
                           onReadinessConfirmed={handleReadinessConfirmed}
                           catalogMap={catalogMap}
                           completedSourceIds={completedSourceIds}
+                          coverage={coverage}
                         />
                       );
                     })}
@@ -461,9 +482,10 @@ interface CourseTaskItemProps {
   onReadinessConfirmed: (task: Task) => void;
   catalogMap: Map<string, TaskCatalogItem>;
   completedSourceIds: Set<string>;
+  coverage: IdentifierCoverage;
 }
 
-function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds }: CourseTaskItemProps) {
+function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, onReadinessConfirmed, catalogMap, completedSourceIds, coverage }: CourseTaskItemProps) {
   const [expanded, setExpanded] = useState(false);
   const [readinessOpen, setReadinessOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -588,10 +610,13 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                     taskTitle={task.title}
                   />
                 ) : (
-                  <TaskBriefPanel
-                    locked={false}
-                    brief={generateTaskBrief(catItem, catalogMap)}
-                  />
+                  <>
+                    <TaskBriefPanel
+                      locked={false}
+                      brief={generateTaskBrief(catItem, catalogMap)}
+                    />
+                    <CoveragePromptBanner pillarId={catItem.pillar_id} coverage={coverage} />
+                  </>
                 )}
               </div>
             </CollapsibleContent>
