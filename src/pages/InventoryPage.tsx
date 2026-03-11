@@ -89,12 +89,13 @@ export default function InventoryPage() {
     if (!user) return;
     setLoading(true);
     
-    const [emailsRes, usernamesRes, accountsRes, domainsRes, phonesRes] = await Promise.all([
+    const [emailsRes, usernamesRes, accountsRes, domainsRes, phonesRes, covRes] = await Promise.all([
       supabase.from('inventory_emails').select('*').eq('user_id', user.id),
       supabase.from('inventory_usernames').select('*').eq('user_id', user.id),
       supabase.from('inventory_accounts').select('*').eq('user_id', user.id),
       supabase.from('inventory_domains').select('*').eq('user_id', user.id),
-      supabase.from('inventory_phones').select('*').eq('user_id', user.id)
+      supabase.from('inventory_phones').select('*').eq('user_id', user.id),
+      supabase.from('governance_coverage_inputs').select('*').eq('user_id', user.id).maybeSingle(),
     ]);
 
     if (emailsRes.data) setEmails(emailsRes.data as InventoryEmail[]);
@@ -102,6 +103,14 @@ export default function InventoryPage() {
     if (accountsRes.data) setAccounts(accountsRes.data as InventoryAccount[]);
     if (domainsRes.data) setDomains(domainsRes.data as InventoryDomain[]);
     if (phonesRes.data) setPhones(phonesRes.data as InventoryPhone[]);
+
+    if (covRes.data) {
+      setCovInputExists(true);
+      setRecoveryPhone(covRes.data.recovery_phone || '');
+      setRecoveryMethod((covRes.data.recovery_method as RecoveryMethod) || '');
+    } else {
+      setCovInputExists(false);
+    }
     
     setLoading(false);
   };
@@ -111,6 +120,8 @@ export default function InventoryPage() {
     phones: phones.length,
     usernames: usernames.length,
     domains: domains.length,
+    recoveryPhone: recoveryPhone || null,
+    recoveryMethod: recoveryMethod || null,
   });
   const { level: coverageLevel, total: coverageTotal } = calculateIdentifierCoverage(identifierCoverage);
 
