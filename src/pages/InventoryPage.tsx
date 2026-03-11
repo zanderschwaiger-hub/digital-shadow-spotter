@@ -728,6 +728,73 @@ export default function InventoryPage() {
           </TabsContent>
         </Tabs>
 
+        {/* Governance Coverage Inputs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5" />
+              Governance Coverage Inputs
+            </CardTitle>
+            <CardDescription>
+              These optional inputs improve the precision of your risk assessment and recovery posture review. They are stored separately from your general inventory.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Recovery Number */}
+            <div className="space-y-2">
+              <Label htmlFor="recovery-phone" className="font-medium">Recovery Number</Label>
+              <p className="text-xs text-muted-foreground">
+                Assesses account recovery exposure and SMS dependency across linked services.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  id="recovery-phone"
+                  type="tel"
+                  value={recoveryPhone}
+                  onChange={(e) => setRecoveryPhone(e.target.value)}
+                  placeholder="+1 555-000-0000"
+                  className="max-w-xs"
+                />
+                {recoveryPhone && (
+                  <Button variant="ghost" size="icon" onClick={clearRecoveryPhone}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Primary Recovery Method */}
+            <div className="space-y-2">
+              <Label className="font-medium">Primary Recovery Method</Label>
+              <p className="text-xs text-muted-foreground">
+                Evaluates the strength of your account recovery and MFA fallback posture.
+              </p>
+              <div className="flex gap-2 items-center">
+                <Select value={recoveryMethod} onValueChange={(v) => setRecoveryMethod(v as RecoveryMethod)}>
+                  <SelectTrigger className="max-w-xs">
+                    <SelectValue placeholder="Select method…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RECOVERY_METHOD_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {recoveryMethod && (
+                  <Button variant="ghost" size="icon" onClick={clearRecoveryMethod}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <Button onClick={saveGovernanceCoverage} disabled={savingCov} size="sm">
+              {savingCov ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Save Coverage Inputs
+            </Button>
+          </CardContent>
+        </Card>
+
         {/* Guided Discovery Section */}
         <Card>
           <CardHeader>
