@@ -189,7 +189,19 @@ export interface IdentifierCoverage {
   phone: boolean;
   username: boolean;
   domain: boolean;
+  recoveryPhone: boolean;
+  recoveryMethod: boolean;
 }
+
+export type RecoveryMethod = 'sms' | 'authenticator' | 'security_key' | 'mixed' | 'not_sure';
+
+export const RECOVERY_METHOD_OPTIONS: { value: RecoveryMethod; label: string }[] = [
+  { value: 'sms', label: 'SMS' },
+  { value: 'authenticator', label: 'Authenticator app' },
+  { value: 'security_key', label: 'Security key' },
+  { value: 'mixed', label: 'Mixed' },
+  { value: 'not_sure', label: 'Not sure' },
+];
 
 export const IDENTIFIER_META: {
   key: keyof IdentifierCoverage;
@@ -201,25 +213,38 @@ export const IDENTIFIER_META: {
   { key: 'phone', label: 'Phone Number', description: 'Allows SIM-swap awareness and phone-linked account reviews.' },
   { key: 'username', label: 'Primary Username / Handle', description: 'Tracks social-media and forum exposure tied to your public handle.' },
   { key: 'domain', label: 'Domain', description: 'Enables DNS and WHOIS exposure checks for domains you own.' },
+  { key: 'recoveryPhone', label: 'Recovery Number', description: 'Assesses account recovery exposure and SMS dependency across linked services.' },
+  { key: 'recoveryMethod', label: 'Primary Recovery Method', description: 'Evaluates the strength of your account recovery and MFA fallback posture.' },
 ];
 
 export function calculateIdentifierCoverage(cov: IdentifierCoverage): { level: number; total: number } {
-  const total = 5;
+  const total = 7;
   let level = 0;
   if (cov.primaryEmail) level++;
   if (cov.recoveryEmail) level++;
   if (cov.phone) level++;
   if (cov.username) level++;
   if (cov.domain) level++;
+  if (cov.recoveryPhone) level++;
+  if (cov.recoveryMethod) level++;
   return { level, total };
 }
 
-/** Build coverage flags from raw inventory data */
+export interface GovernanceCoverageInputs {
+  id?: string;
+  user_id: string;
+  recovery_phone: string | null;
+  recovery_method: RecoveryMethod | null;
+}
+
+/** Build coverage flags from raw inventory data + governance inputs */
 export function buildIdentifierCoverage(data: {
   emails: { is_primary: boolean }[];
   phones: number;
   usernames: number;
   domains: number;
+  recoveryPhone?: string | null;
+  recoveryMethod?: string | null;
 }): IdentifierCoverage {
   const hasPrimary = data.emails.some(e => e.is_primary);
   const hasRecovery = data.emails.some(e => !e.is_primary);
@@ -229,6 +254,8 @@ export function buildIdentifierCoverage(data: {
     phone: data.phones > 0,
     username: data.usernames > 0,
     domain: data.domains > 0,
+    recoveryPhone: !!data.recoveryPhone,
+    recoveryMethod: !!data.recoveryMethod,
   };
 }
 

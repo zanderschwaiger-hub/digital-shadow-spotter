@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -31,7 +32,9 @@ import {
   Star,
   Loader2,
   CheckCircle2,
-  Circle
+  Circle,
+  ShieldCheck,
+  Save,
 } from 'lucide-react';
 import { 
   InventoryEmail, 
@@ -43,6 +46,8 @@ import {
   buildIdentifierCoverage,
   calculateIdentifierCoverage,
   IDENTIFIER_META,
+  RecoveryMethod,
+  RECOVERY_METHOD_OPTIONS,
 } from '@/lib/types';
 
 type InventoryTab = 'emails' | 'usernames' | 'accounts' | 'domains' | 'phones';
@@ -59,6 +64,12 @@ export default function InventoryPage() {
   const [phones, setPhones] = useState<InventoryPhone[]>([]);
   const [loading, setLoading] = useState(true);
   const [addingItem, setAddingItem] = useState(false);
+
+  // Governance coverage inputs
+  const [recoveryPhone, setRecoveryPhone] = useState('');
+  const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod | ''>('');
+  const [covInputExists, setCovInputExists] = useState(false);
+  const [savingCov, setSavingCov] = useState(false);
 
   // Form states
   const [newEmail, setNewEmail] = useState('');
@@ -78,12 +89,13 @@ export default function InventoryPage() {
     if (!user) return;
     setLoading(true);
     
-    const [emailsRes, usernamesRes, accountsRes, domainsRes, phonesRes] = await Promise.all([
+    const [emailsRes, usernamesRes, accountsRes, domainsRes, phonesRes, covRes] = await Promise.all([
       supabase.from('inventory_emails').select('*').eq('user_id', user.id),
       supabase.from('inventory_usernames').select('*').eq('user_id', user.id),
       supabase.from('inventory_accounts').select('*').eq('user_id', user.id),
       supabase.from('inventory_domains').select('*').eq('user_id', user.id),
-      supabase.from('inventory_phones').select('*').eq('user_id', user.id)
+      supabase.from('inventory_phones').select('*').eq('user_id', user.id),
+      supabase.from('governance_coverage_inputs').select('*').eq('user_id', user.id).maybeSingle(),
     ]);
 
     if (emailsRes.data) setEmails(emailsRes.data as InventoryEmail[]);
@@ -91,6 +103,14 @@ export default function InventoryPage() {
     if (accountsRes.data) setAccounts(accountsRes.data as InventoryAccount[]);
     if (domainsRes.data) setDomains(domainsRes.data as InventoryDomain[]);
     if (phonesRes.data) setPhones(phonesRes.data as InventoryPhone[]);
+
+    if (covRes.data) {
+      setCovInputExists(true);
+      setRecoveryPhone(covRes.data.recovery_phone || '');
+      setRecoveryMethod((covRes.data.recovery_method as RecoveryMethod) || '');
+    } else {
+      setCovInputExists(false);
+    }
     
     setLoading(false);
   };
@@ -100,6 +120,8 @@ export default function InventoryPage() {
     phones: phones.length,
     usernames: usernames.length,
     domains: domains.length,
+    recoveryPhone: recoveryPhone || null,
+    recoveryMethod: recoveryMethod || null,
   });
   const { level: coverageLevel, total: coverageTotal } = calculateIdentifierCoverage(identifierCoverage);
 
@@ -206,6 +228,50 @@ export default function InventoryPage() {
       toast({ title: 'Item deleted' });
       loadInventory();
     }
+  };
+
+  const saveGovernanceCoverage = async () => {
+    if (!user) return;
+    setSavingCov(true);
+    const payload = {
+      user_id: user.id,
+      recovery_phone: recoveryPhone.trim() || null,
+      recovery_method: recoveryMethod || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (covInputExists) {
+      ({ error } = await supabase.from('governance_coverage_inputs').update(payload).eq('user_id', user.id));
+    } else {
+      ({ error } = await supabase.from('governance_coverage_inputs').insert([payload]));
+    }
+
+    if (!error) {
+      setCovInputExists(true);
+      await logEvent('governance_coverage_updated', { recovery_phone: !!payload.recovery_phone, recovery_method: payload.recovery_method });
+      toast({ title: 'Coverage inputs saved' });
+      loadInventory();
+    }
+    setSavingCov(false);
+  };
+
+  const clearRecoveryPhone = async () => {
+    setRecoveryPhone('');
+    if (!user || !covInputExists) return;
+    await supabase.from('governance_coverage_inputs').update({ recovery_phone: null, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+    await logEvent('governance_recovery_phone_cleared', {});
+    toast({ title: 'Recovery number cleared' });
+    loadInventory();
+  };
+
+  const clearRecoveryMethod = async () => {
+    setRecoveryMethod('');
+    if (!user || !covInputExists) return;
+    await supabase.from('governance_coverage_inputs').update({ recovery_method: null, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+    await logEvent('governance_recovery_method_cleared', {});
+    toast({ title: 'Recovery method cleared' });
+    loadInventory();
   };
 
   if (loading) {
@@ -661,6 +727,73 @@ export default function InventoryPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Governance Coverage Inputs */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldCheck className="h-5 w-5" />
+              Governance Coverage Inputs
+            </CardTitle>
+            <CardDescription>
+              These optional inputs improve the precision of your risk assessment and recovery posture review. They are stored separately from your general inventory.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Recovery Number */}
+            <div className="space-y-2">
+              <Label htmlFor="recovery-phone" className="font-medium">Recovery Number</Label>
+              <p className="text-xs text-muted-foreground">
+                Assesses account recovery exposure and SMS dependency across linked services.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  id="recovery-phone"
+                  type="tel"
+                  value={recoveryPhone}
+                  onChange={(e) => setRecoveryPhone(e.target.value)}
+                  placeholder="+1 555-000-0000"
+                  className="max-w-xs"
+                />
+                {recoveryPhone && (
+                  <Button variant="ghost" size="icon" onClick={clearRecoveryPhone}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Primary Recovery Method */}
+            <div className="space-y-2">
+              <Label className="font-medium">Primary Recovery Method</Label>
+              <p className="text-xs text-muted-foreground">
+                Evaluates the strength of your account recovery and MFA fallback posture.
+              </p>
+              <div className="flex gap-2 items-center">
+                <Select value={recoveryMethod} onValueChange={(v) => setRecoveryMethod(v as RecoveryMethod)}>
+                  <SelectTrigger className="max-w-xs">
+                    <SelectValue placeholder="Select method…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RECOVERY_METHOD_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {recoveryMethod && (
+                  <Button variant="ghost" size="icon" onClick={clearRecoveryMethod}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <Button onClick={saveGovernanceCoverage} disabled={savingCov} size="sm">
+              {savingCov ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Save Coverage Inputs
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Guided Discovery Section */}
         <Card>
