@@ -176,6 +176,33 @@ export type Database = {
         }
         Relationships: []
       }
+      governance_coverage_inputs: {
+        Row: {
+          created_at: string
+          id: string
+          recovery_method: string | null
+          recovery_phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recovery_method?: string | null
+          recovery_phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recovery_method?: string | null
+          recovery_phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       governance_pillars: {
         Row: {
           created_at: string
