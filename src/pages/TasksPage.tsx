@@ -79,6 +79,10 @@ export default function TasksPage() {
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('open');
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [coverage, setCoverage] = useState<IdentifierCoverage>({
+    primaryEmail: false, recoveryEmail: false, phone: false,
+    username: false, domain: false, recoveryPhone: false, recoveryMethod: false,
+  });
 
   useEffect(() => {
     if (user) loadData();
