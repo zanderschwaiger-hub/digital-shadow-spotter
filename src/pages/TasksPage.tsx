@@ -458,6 +458,7 @@ export default function TasksPage() {
                           onReadinessConfirmed={handleReadinessConfirmed}
                           catalogMap={catalogMap}
                           completedSourceIds={completedSourceIds}
+                          coverage={coverage}
                         />
                       );
                     })}
