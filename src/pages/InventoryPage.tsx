@@ -65,6 +65,12 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [addingItem, setAddingItem] = useState(false);
 
+  // Governance coverage inputs
+  const [recoveryPhone, setRecoveryPhone] = useState('');
+  const [recoveryMethod, setRecoveryMethod] = useState<RecoveryMethod | ''>('');
+  const [covInputExists, setCovInputExists] = useState(false);
+  const [savingCov, setSavingCov] = useState(false);
+
   // Form states
   const [newEmail, setNewEmail] = useState('');
   const [newEmailPrimary, setNewEmailPrimary] = useState(false);
