@@ -72,14 +72,16 @@ export default function DashboardPage() {
         emailsRes,
         usernamesRes,
         domainsRes,
-        phonesRes
+        phonesRes,
+        covInputsRes,
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', user.id).order('priority', { ascending: false }),
         supabase.from('alerts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('inventory_emails').select('id, is_primary, email').eq('user_id', user.id),
         supabase.from('inventory_usernames').select('id').eq('user_id', user.id),
         supabase.from('inventory_domains').select('id').eq('user_id', user.id),
-        supabase.from('inventory_phones').select('id').eq('user_id', user.id)
+        supabase.from('inventory_phones').select('id').eq('user_id', user.id),
+        supabase.from('governance_coverage_inputs').select('recovery_phone, recovery_method').eq('user_id', user.id).maybeSingle(),
       ]);
 
       if (tasksRes.data) setTasks(tasksRes.data as Task[]);
@@ -89,11 +91,14 @@ export default function DashboardPage() {
       const primary = emails.find(e => e.is_primary);
       if (primary) setPrimaryEmail(primary.email);
 
+      const covRow = covInputsRes.data;
       setCoverage(buildIdentifierCoverage({
         emails: emails.map(e => ({ is_primary: e.is_primary })),
         phones: phonesRes.data?.length || 0,
         usernames: usernamesRes.data?.length || 0,
         domains: domainsRes.data?.length || 0,
+        recoveryPhone: covRow?.recovery_phone ?? null,
+        recoveryMethod: covRow?.recovery_method ?? null,
       }));
     } catch (error) {
       console.error('Error loading dashboard:', error);
