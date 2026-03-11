@@ -230,6 +230,50 @@ export default function InventoryPage() {
     }
   };
 
+  const saveGovernanceCoverage = async () => {
+    if (!user) return;
+    setSavingCov(true);
+    const payload = {
+      user_id: user.id,
+      recovery_phone: recoveryPhone.trim() || null,
+      recovery_method: recoveryMethod || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    let error;
+    if (covInputExists) {
+      ({ error } = await supabase.from('governance_coverage_inputs').update(payload).eq('user_id', user.id));
+    } else {
+      ({ error } = await supabase.from('governance_coverage_inputs').insert([payload]));
+    }
+
+    if (!error) {
+      setCovInputExists(true);
+      await logEvent('governance_coverage_updated', { recovery_phone: !!payload.recovery_phone, recovery_method: payload.recovery_method });
+      toast({ title: 'Coverage inputs saved' });
+      loadInventory();
+    }
+    setSavingCov(false);
+  };
+
+  const clearRecoveryPhone = async () => {
+    setRecoveryPhone('');
+    if (!user || !covInputExists) return;
+    await supabase.from('governance_coverage_inputs').update({ recovery_phone: null, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+    await logEvent('governance_recovery_phone_cleared', {});
+    toast({ title: 'Recovery number cleared' });
+    loadInventory();
+  };
+
+  const clearRecoveryMethod = async () => {
+    setRecoveryMethod('');
+    if (!user || !covInputExists) return;
+    await supabase.from('governance_coverage_inputs').update({ recovery_method: null, updated_at: new Date().toISOString() }).eq('user_id', user.id);
+    await logEvent('governance_recovery_method_cleared', {});
+    toast({ title: 'Recovery method cleared' });
+    loadInventory();
+  };
+
   if (loading) {
     return (
       <AppLayout>
