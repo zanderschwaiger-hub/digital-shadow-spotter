@@ -23,7 +23,8 @@ import {
   Lock, PlayCircle, Zap, Timer, ShieldAlert, Info, ChevronDown, ChevronRight, FileText,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Task, TaskCatalogItem } from '@/lib/types';
+import { Task, TaskCatalogItem, IdentifierCoverage, buildIdentifierCoverage } from '@/lib/types';
+import { CoveragePromptBanner } from '@/components/tasks/CoveragePromptBanner';
 
 type CourseStatus = 'open' | 'in_progress' | 'done';
 
