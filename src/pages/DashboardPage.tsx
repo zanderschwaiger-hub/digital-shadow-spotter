@@ -8,6 +8,8 @@ import { IdentifierCoverageCard } from '@/components/dashboard/IdentifierCoverag
 import { RecommendedActionCard } from '@/components/dashboard/RecommendedActionCard';
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
+import { DigitalBaselineCard } from '@/components/dashboard/DigitalBaselineCard';
+import { calculateBaseline } from '@/lib/baseline-status';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -115,6 +117,7 @@ export default function DashboardPage() {
   const highSeverityCount = alerts.filter(a => a.severity === 'high' && !a.resolved_at).length;
   const unresolvedCount = alerts.filter(a => !a.resolved_at).length;
   const exposure = getExposureLevel(unresolvedCount, highSeverityCount, coveragePercent);
+  const baseline = calculateBaseline(tasks, coverage);
 
   if (loading) {
     return (
@@ -142,6 +145,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <DigitalBaselineCard baseline={baseline} />
           <RecommendedActionCard />
           <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
