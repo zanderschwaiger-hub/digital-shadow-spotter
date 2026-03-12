@@ -21,6 +21,7 @@ import AssessmentPage from "./pages/AssessmentPage";
 import ExposuresPage from "./pages/ExposuresPage";
 import DecisionsPage from "./pages/DecisionsPage";
 import AgentLogPage from "./pages/AgentLogPage";
+import PlaybooksPage from "./pages/PlaybooksPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,9 @@ const App = () => (
             } />
             <Route path="/agent-log" element={
               <ProtectedRoute><AgentLogPage /></ProtectedRoute>
+            } />
+            <Route path="/playbooks" element={
+              <ProtectedRoute><PlaybooksPage /></ProtectedRoute>
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>

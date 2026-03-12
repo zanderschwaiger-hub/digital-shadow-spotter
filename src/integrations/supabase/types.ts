@@ -600,6 +600,30 @@ export type Database = {
           },
         ]
       }
+      user_playbook_progress: {
+        Row: {
+          completed_at: string
+          id: string
+          playbook_id: string
+          step_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          playbook_id: string
+          step_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          playbook_id?: string
+          step_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       user_entitlements: {

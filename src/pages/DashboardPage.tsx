@@ -7,6 +7,7 @@ import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
 import { IdentifierCoverageCard } from '@/components/dashboard/IdentifierCoverageCard';
 import { RecommendedActionCard } from '@/components/dashboard/RecommendedActionCard';
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
+import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -145,6 +146,7 @@ export default function DashboardPage() {
           <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
           <MasterKeyCard primaryEmail={primaryEmail} />
+          <ContainmentCard />
         </div>
       </div>
     </AppLayout>
