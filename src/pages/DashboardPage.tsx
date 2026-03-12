@@ -140,6 +140,8 @@ export default function DashboardPage() {
           <p className="text-sm text-muted-foreground">Your digital footprint at a glance</p>
         </div>
 
+        <GovernanceStatusBar baselineLabel={baseline.label} hasTasks={tasks.length > 0} />
+
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           <ExposureCard level={exposure.level} reason={exposure.reason} />
           <IdentifierCoverageCard coverage={coverage} />
