@@ -10,6 +10,7 @@ import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
 import { DigitalBaselineCard } from '@/components/dashboard/DigitalBaselineCard';
 import { calculateBaseline } from '@/lib/baseline-status';
+import { GovernanceStatusBar } from '@/components/dashboard/GovernanceStatusBar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
@@ -138,6 +139,8 @@ export default function DashboardPage() {
           <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
           <p className="text-sm text-muted-foreground">Your digital footprint at a glance</p>
         </div>
+
+        <GovernanceStatusBar baselineLabel={baseline.label} hasTasks={tasks.length > 0} />
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           <ExposureCard level={exposure.level} reason={exposure.reason} />
