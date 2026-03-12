@@ -10,6 +10,7 @@ import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
 import { DigitalBaselineCard } from '@/components/dashboard/DigitalBaselineCard';
 import { calculateBaseline } from '@/lib/baseline-status';
+import { GovernanceStatusBar } from '@/components/dashboard/GovernanceStatusBar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
