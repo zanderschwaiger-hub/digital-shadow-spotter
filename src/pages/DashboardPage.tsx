@@ -117,6 +117,7 @@ export default function DashboardPage() {
   const highSeverityCount = alerts.filter(a => a.severity === 'high' && !a.resolved_at).length;
   const unresolvedCount = alerts.filter(a => !a.resolved_at).length;
   const exposure = getExposureLevel(unresolvedCount, highSeverityCount, coveragePercent);
+  const baseline = calculateBaseline(tasks, coverage);
 
   if (loading) {
     return (
