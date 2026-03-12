@@ -146,6 +146,7 @@ export default function DashboardPage() {
           <TaskCard tasks={tasks} />
           <AlertsCard alerts={alerts} />
           <MasterKeyCard primaryEmail={primaryEmail} />
+          <ContainmentCard />
         </div>
       </div>
     </AppLayout>

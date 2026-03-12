@@ -79,6 +79,9 @@ const App = () => (
             <Route path="/agent-log" element={
               <ProtectedRoute><AgentLogPage /></ProtectedRoute>
             } />
+            <Route path="/playbooks" element={
+              <ProtectedRoute><PlaybooksPage /></ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
