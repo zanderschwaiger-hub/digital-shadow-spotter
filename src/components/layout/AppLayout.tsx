@@ -46,12 +46,17 @@ interface AppLayoutProps {
 const PRIMARY_TABS = [
   { title: 'Home', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Tasks', url: '/tasks', icon: CheckSquare },
-  { title: 'Governance', url: '/governance', icon: BookOpen },
+  { title: 'Console', url: '/governance-console', icon: Shield },
   { title: 'Log', url: '/agent-log', icon: ScrollText },
 ];
 
 const SECONDARY_NAV = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Governance Console', url: '/governance-console', icon: Shield },
+  { title: 'Pillar Directory', url: '/pillar-directory', icon: BookOpen },
+  { title: 'Decision Queue', url: '/decision-queue', icon: GitBranch },
+  { title: 'Governance Cadence', url: '/governance-cadence', icon: ClipboardList },
+  { title: 'Audit History', url: '/governance-audit', icon: ScrollText },
   { title: 'Governance', url: '/governance', icon: BookOpen },
   { title: 'Governance File', url: '/governance-file', icon: ClipboardList },
   { title: 'Exposures', url: '/exposures', icon: Target },
