@@ -57,7 +57,7 @@ export function RiskProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const approveRisk = useCallback((riskId: string, notes = '') => {
-    recordDecision(riskId, 'Approved', notes || 'Action approved.', 'Approved', 'Approved');
+    recordDecision(riskId, 'Approved', notes || 'Action approved.', 'Approved', 'Approved', 'Not Started');
   }, [recordDecision]);
 
   const modifyRisk = useCallback((riskId: string, notes: string) => {
@@ -69,7 +69,15 @@ export function RiskProvider({ children }: { children: ReactNode }) {
   }, [recordDecision]);
 
   const resolveRisk = useCallback((riskId: string, notes = '') => {
-    recordDecision(riskId, 'Resolved', notes || 'Resolved.', 'Resolved', 'Approved');
+    recordDecision(riskId, 'Resolved', notes || 'Resolved.', 'Resolved', 'Approved', 'Completed');
+  }, [recordDecision]);
+
+  const startRisk = useCallback((riskId: string) => {
+    recordDecision(riskId, 'Started', 'Work started.', 'Approved', 'Approved', 'In Progress');
+  }, [recordDecision]);
+
+  const markRiskComplete = useCallback((riskId: string, notes = '') => {
+    recordDecision(riskId, 'Completed', notes || 'Work completed.', 'Resolved', 'Approved', 'Completed');
   }, [recordDecision]);
 
   return (
