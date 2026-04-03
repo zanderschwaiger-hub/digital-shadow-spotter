@@ -93,6 +93,13 @@ export default function PillarDetailPage() {
                         <Badge variant="outline" className={IMPACT_STYLE[risk.impact_level]}>
                           {risk.impact_level}
                         </Badge>
+                        <Badge variant="outline" className={
+                          risk.execution_state === 'Completed' ? 'bg-primary/10 text-primary' :
+                          risk.execution_state === 'In Progress' ? 'bg-accent/50 text-accent-foreground' :
+                          'bg-muted text-muted-foreground'
+                        }>
+                          {risk.execution_state}
+                        </Badge>
                         <span className="text-xs text-muted-foreground">
                           {Math.round(risk.confidence_score * 100)}%
                         </span>
