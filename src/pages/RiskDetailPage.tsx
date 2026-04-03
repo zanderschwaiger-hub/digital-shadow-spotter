@@ -17,7 +17,7 @@ const IMPACT_STYLE: Record<string, string> = {
 export default function RiskDetailPage() {
   const { riskId } = useParams<{ riskId: string }>();
   const navigate = useNavigate();
-  const { risks, approveRisk, modifyRisk, deferRisk } = useRiskContext();
+  const { risks, approveRisk, modifyRisk, deferRisk, startRisk, markRiskComplete } = useRiskContext();
   const [notes, setNotes] = useState('');
   const [acted, setActed] = useState(false);
 
