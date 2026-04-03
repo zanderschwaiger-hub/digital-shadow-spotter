@@ -8,6 +8,7 @@
 export type ImpactLevel = 'High' | 'Medium' | 'Low';
 export type RiskStatus = 'Needs Review' | 'Approved' | 'Deferred' | 'Resolved';
 export type DecisionState = 'Pending' | 'Approved' | 'Modified' | 'Deferred';
+export type ExecutionState = 'Not Started' | 'In Progress' | 'Completed';
 
 export interface PillarRisk {
   id: string;
