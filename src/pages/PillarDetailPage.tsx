@@ -120,15 +120,29 @@ export default function PillarDetailPage() {
                       <p className="text-sm">{risk.recommended_action}</p>
                     </div>
                     <div className="flex gap-2 pt-1">
-                      <Button size="sm" onClick={() => approveRisk(risk.id)}>
-                        Approve Action
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => navigate(`/risk-detail/${risk.id}`)}>
-                        Modify
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => deferRisk(risk.id)}>
-                        Defer
-                      </Button>
+                      {risk.decision_state === 'Pending' && (
+                        <>
+                          <Button size="sm" onClick={() => approveRisk(risk.id)}>
+                            Approve Action
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/risk-detail/${risk.id}`)}>
+                            Modify
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => deferRisk(risk.id)}>
+                            Defer
+                          </Button>
+                        </>
+                      )}
+                      {risk.execution_state === 'Not Started' && risk.decision_state === 'Approved' && (
+                        <Button size="sm" variant="outline" onClick={() => startRisk(risk.id)}>
+                          Start Work
+                        </Button>
+                      )}
+                      {risk.execution_state === 'In Progress' && (
+                        <Button size="sm" onClick={() => markRiskComplete(risk.id)}>
+                          Mark as Completed
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
