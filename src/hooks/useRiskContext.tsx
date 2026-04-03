@@ -31,6 +31,7 @@ export function RiskProvider({ children }: { children: ReactNode }) {
     notes: string,
     newStatus: RiskStatus,
     newDecision: DecisionState,
+    newExecution?: ExecutionState,
   ) => {
     const now = new Date().toISOString();
 
@@ -44,7 +45,13 @@ export function RiskProvider({ children }: { children: ReactNode }) {
 
     setRisks(prev => prev.map(r =>
       r.id === riskId
-        ? { ...r, status: newStatus, decision_state: newDecision, last_reviewed_at: now }
+        ? {
+            ...r,
+            status: newStatus,
+            decision_state: newDecision,
+            last_reviewed_at: now,
+            ...(newExecution !== undefined ? { execution_state: newExecution } : {}),
+          }
         : r
     ));
   }, []);
