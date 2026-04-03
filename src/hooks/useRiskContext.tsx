@@ -5,6 +5,7 @@ import {
   SEED_RISKS,
   type DecisionState,
   type RiskStatus,
+  type ExecutionState,
 } from '@/lib/pillar-risks';
 
 interface RiskContextValue {
