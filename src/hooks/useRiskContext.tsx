@@ -15,6 +15,8 @@ interface RiskContextValue {
   modifyRisk: (riskId: string, notes: string) => void;
   deferRisk: (riskId: string, notes?: string) => void;
   resolveRisk: (riskId: string, notes?: string) => void;
+  startRisk: (riskId: string) => void;
+  markRiskComplete: (riskId: string, notes?: string) => void;
 }
 
 const RiskContext = createContext<RiskContextValue | null>(null);
