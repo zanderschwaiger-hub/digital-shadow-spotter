@@ -21,6 +21,7 @@ export interface PillarRisk {
   why_flagged: string[];
   recommended_action: string;
   decision_state: DecisionState;
+  execution_state: ExecutionState;
   created_at: string;
   last_reviewed_at: string | null;
 }
