@@ -17,7 +17,7 @@ const IMPACT_STYLE: Record<string, string> = {
 export default function RiskDetailPage() {
   const { riskId } = useParams<{ riskId: string }>();
   const navigate = useNavigate();
-  const { risks, approveRisk, modifyRisk, deferRisk } = useRiskContext();
+  const { risks, approveRisk, modifyRisk, deferRisk, startRisk, markRiskComplete } = useRiskContext();
   const [notes, setNotes] = useState('');
   const [acted, setActed] = useState(false);
 
@@ -85,8 +85,34 @@ export default function RiskDetailPage() {
               </p>
             </div>
 
+            {/* Execution Status */}
+            {risk.decision_state !== 'Pending' && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-2">Execution Status</p>
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className={
+                    risk.execution_state === 'Completed' ? 'bg-primary/10 text-primary' :
+                    risk.execution_state === 'In Progress' ? 'bg-accent/50 text-accent-foreground' :
+                    'bg-muted text-muted-foreground'
+                  }>
+                    {risk.execution_state}
+                  </Badge>
+                  {risk.execution_state === 'Not Started' && (
+                    <Button size="sm" variant="outline" onClick={() => startRisk(risk.id)}>
+                      Start Work
+                    </Button>
+                  )}
+                  {risk.execution_state === 'In Progress' && (
+                    <Button size="sm" onClick={() => markRiskComplete(risk.id, notes)}>
+                      Mark as Completed
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Notes */}
-            {!acted && (
+            {!acted && risk.decision_state === 'Pending' && (
               <>
                 <div>
                   <p className="text-xs font-medium text-muted-foreground mb-1">Your notes (optional)</p>

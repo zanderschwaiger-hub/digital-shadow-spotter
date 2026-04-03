@@ -5,6 +5,7 @@ import {
   SEED_RISKS,
   type DecisionState,
   type RiskStatus,
+  type ExecutionState,
 } from '@/lib/pillar-risks';
 
 interface RiskContextValue {
@@ -14,6 +15,8 @@ interface RiskContextValue {
   modifyRisk: (riskId: string, notes: string) => void;
   deferRisk: (riskId: string, notes?: string) => void;
   resolveRisk: (riskId: string, notes?: string) => void;
+  startRisk: (riskId: string) => void;
+  markRiskComplete: (riskId: string, notes?: string) => void;
 }
 
 const RiskContext = createContext<RiskContextValue | null>(null);
@@ -28,6 +31,7 @@ export function RiskProvider({ children }: { children: ReactNode }) {
     notes: string,
     newStatus: RiskStatus,
     newDecision: DecisionState,
+    newExecution?: ExecutionState,
   ) => {
     const now = new Date().toISOString();
 
@@ -41,13 +45,19 @@ export function RiskProvider({ children }: { children: ReactNode }) {
 
     setRisks(prev => prev.map(r =>
       r.id === riskId
-        ? { ...r, status: newStatus, decision_state: newDecision, last_reviewed_at: now }
+        ? {
+            ...r,
+            status: newStatus,
+            decision_state: newDecision,
+            last_reviewed_at: now,
+            ...(newExecution !== undefined ? { execution_state: newExecution } : {}),
+          }
         : r
     ));
   }, []);
 
   const approveRisk = useCallback((riskId: string, notes = '') => {
-    recordDecision(riskId, 'Approved', notes || 'Action approved.', 'Approved', 'Approved');
+    recordDecision(riskId, 'Approved', notes || 'Action approved.', 'Approved', 'Approved', 'Not Started');
   }, [recordDecision]);
 
   const modifyRisk = useCallback((riskId: string, notes: string) => {
@@ -59,11 +69,19 @@ export function RiskProvider({ children }: { children: ReactNode }) {
   }, [recordDecision]);
 
   const resolveRisk = useCallback((riskId: string, notes = '') => {
-    recordDecision(riskId, 'Resolved', notes || 'Resolved.', 'Resolved', 'Approved');
+    recordDecision(riskId, 'Resolved', notes || 'Resolved.', 'Resolved', 'Approved', 'Completed');
+  }, [recordDecision]);
+
+  const startRisk = useCallback((riskId: string) => {
+    recordDecision(riskId, 'Started', 'Work started.', 'Approved', 'Approved', 'In Progress');
+  }, [recordDecision]);
+
+  const markRiskComplete = useCallback((riskId: string, notes = '') => {
+    recordDecision(riskId, 'Completed', notes || 'Work completed.', 'Resolved', 'Approved', 'Completed');
   }, [recordDecision]);
 
   return (
-    <RiskContext.Provider value={{ risks, decisions, approveRisk, modifyRisk, deferRisk, resolveRisk }}>
+    <RiskContext.Provider value={{ risks, decisions, approveRisk, modifyRisk, deferRisk, resolveRisk, startRisk, markRiskComplete }}>
       {children}
     </RiskContext.Provider>
   );

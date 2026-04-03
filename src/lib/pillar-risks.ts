@@ -8,6 +8,7 @@
 export type ImpactLevel = 'High' | 'Medium' | 'Low';
 export type RiskStatus = 'Needs Review' | 'Approved' | 'Deferred' | 'Resolved';
 export type DecisionState = 'Pending' | 'Approved' | 'Modified' | 'Deferred';
+export type ExecutionState = 'Not Started' | 'In Progress' | 'Completed';
 
 export interface PillarRisk {
   id: string;
@@ -20,6 +21,7 @@ export interface PillarRisk {
   why_flagged: string[];
   recommended_action: string;
   decision_state: DecisionState;
+  execution_state: ExecutionState;
   created_at: string;
   last_reviewed_at: string | null;
 }
@@ -27,7 +29,7 @@ export interface PillarRisk {
 export interface RiskDecisionEvent {
   id: string;
   risk_id: string;
-  action: 'Approved' | 'Modified' | 'Deferred' | 'Resolved';
+  action: 'Approved' | 'Modified' | 'Deferred' | 'Resolved' | 'Started' | 'Completed';
   notes: string;
   timestamp: string;
 }
@@ -76,6 +78,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Review and diversify recovery options for your primary email. Document backup codes and add an alternative recovery address.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-15T10:00:00Z',
     last_reviewed_at: null,
   },
@@ -94,6 +97,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Adopt a dedicated password manager and generate unique passwords for all critical accounts. Begin with financial and email accounts.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-16T08:30:00Z',
     last_reviewed_at: null,
   },
@@ -111,6 +115,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Upgrade MFA on critical accounts from SMS to authenticator app or hardware security key.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-17T14:00:00Z',
     last_reviewed_at: null,
   },
@@ -128,6 +133,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Complete a full account audit using your password manager export and email search history.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-18T09:00:00Z',
     last_reviewed_at: null,
   },
@@ -146,6 +152,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Review all OAuth connections on Google, Apple, and social accounts. Revoke unused apps and downgrade permissions where possible.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-19T11:00:00Z',
     last_reviewed_at: null,
   },
@@ -163,6 +170,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Change passwords on all accounts identified in breach databases. Enable breach notification subscriptions for key emails.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-20T07:45:00Z',
     last_reviewed_at: null,
   },
@@ -180,6 +188,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Perform a self-search and check major data broker sites. Submit opt-out requests where listings are found.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-21T16:00:00Z',
     last_reviewed_at: null,
   },
@@ -197,6 +206,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Establish a monthly governance review cadence and document a basic containment playbook for credential compromise.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-22T12:00:00Z',
     last_reviewed_at: null,
   },
@@ -214,6 +224,7 @@ export const SEED_RISKS: PillarRisk[] = [
     ],
     recommended_action: 'Review active sessions on email, social, and financial accounts. Remove unfamiliar sessions and devices.',
     decision_state: 'Pending',
+    execution_state: 'Not Started',
     created_at: '2026-03-23T09:30:00Z',
     last_reviewed_at: null,
   },
