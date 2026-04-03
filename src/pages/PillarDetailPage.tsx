@@ -25,7 +25,7 @@ const STATUS_ICON = {
 export default function PillarDetailPage() {
   const { pillarId } = useParams<{ pillarId: string }>();
   const navigate = useNavigate();
-  const { risks, decisions, approveRisk, deferRisk } = useRiskContext();
+  const { risks, decisions, approveRisk, deferRisk, startRisk, markRiskComplete } = useRiskContext();
 
   const id = Number(pillarId);
   const pillar = PILLAR_META.find(p => p.id === id);
