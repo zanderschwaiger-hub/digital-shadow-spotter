@@ -29,7 +29,7 @@ export interface PillarRisk {
 export interface RiskDecisionEvent {
   id: string;
   risk_id: string;
-  action: 'Approved' | 'Modified' | 'Deferred' | 'Resolved';
+  action: 'Approved' | 'Modified' | 'Deferred' | 'Resolved' | 'Started' | 'Completed';
   notes: string;
   timestamp: string;
 }
