@@ -14,6 +14,8 @@ const ACTION_STYLE: Record<string, string> = {
   Modified: 'bg-primary/15 text-primary',
   Deferred: 'bg-[hsl(var(--severity-medium))]/15 text-[hsl(var(--severity-medium))]',
   Resolved: 'bg-[hsl(var(--severity-low))]/15 text-[hsl(var(--severity-low))]',
+  Started: 'bg-accent/50 text-accent-foreground',
+  Completed: 'bg-primary/15 text-primary',
 };
 
 export default function GovernanceAuditPage() {
