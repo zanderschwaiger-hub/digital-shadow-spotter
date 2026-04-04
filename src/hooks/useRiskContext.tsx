@@ -11,6 +11,7 @@ import {
 interface RiskContextValue {
   risks: PillarRisk[];
   decisions: RiskDecisionEvent[];
+  lastSystemReviewAt: string | null;
   approveRisk: (riskId: string, notes?: string) => void;
   modifyRisk: (riskId: string, notes: string) => void;
   deferRisk: (riskId: string, notes?: string) => void;
