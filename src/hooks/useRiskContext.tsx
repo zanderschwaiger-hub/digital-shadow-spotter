@@ -25,6 +25,11 @@ const RiskContext = createContext<RiskContextValue | null>(null);
 export function RiskProvider({ children }: { children: ReactNode }) {
   const [risks, setRisks] = useState<PillarRisk[]>(SEED_RISKS);
   const [decisions, setDecisions] = useState<RiskDecisionEvent[]>([]);
+  const [lastSystemReviewAt, setLastSystemReviewAt] = useState<string | null>(null);
+
+  const updateReviewTimestamp = useCallback(() => {
+    setLastSystemReviewAt(new Date().toISOString());
+  }, []);
 
   const recordDecision = useCallback((
     riskId: string,
