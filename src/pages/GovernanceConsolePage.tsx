@@ -10,9 +10,13 @@ import {
   getCategoryStatus,
   getTopRisks,
   getDecisionSummary,
+  getSystemStatus,
+  getDriftSignal,
+  getRiskTag,
   type GovernanceCategory,
 } from '@/lib/pillar-risks';
-import { Shield, ChevronRight, Clock, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Shield, ChevronRight, Clock, CheckCircle2, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 const CATEGORY_ORDER: GovernanceCategory[] = ['Control', 'Coverage', 'Defense', 'Maintenance'];
 
@@ -28,12 +32,34 @@ const IMPACT_STYLE: Record<string, string> = {
   Low: 'bg-[hsl(var(--severity-low))]/15 text-[hsl(var(--severity-low))]',
 };
 
+const SYSTEM_STATUS_STYLE: Record<string, string> = {
+  'Stable': 'text-[hsl(var(--severity-low))]',
+  'Needs attention': 'text-[hsl(var(--severity-medium))]',
+  'High risk': 'text-[hsl(var(--severity-high))]',
+};
+
+const TAG_STYLE: Record<string, string> = {
+  'New': 'bg-primary/15 text-primary',
+  'Updated': 'bg-[hsl(var(--severity-medium))]/15 text-[hsl(var(--severity-medium))]',
+};
+
 export default function GovernanceConsolePage() {
-  const { risks } = useRiskContext();
+  const { risks, lastSystemReviewAt } = useRiskContext();
   const navigate = useNavigate();
 
   const topRisks = getTopRisks(risks, 3);
   const summary = getDecisionSummary(risks);
+  const systemStatus = getSystemStatus(risks);
+  const drift = getDriftSignal(risks, lastSystemReviewAt);
+  const pendingReviewCount = risks.filter(r => r.decision_state === 'Pending').length;
+
+  const lastReviewedLabel = lastSystemReviewAt
+    ? `Last reviewed ${formatDistanceToNow(new Date(lastSystemReviewAt), { addSuffix: true })}`
+    : 'No review recorded';
+
+  const DriftIcon = drift === 'increasing' ? TrendingUp : drift === 'improving' ? TrendingDown : Minus;
+  const driftLabel = drift === 'increasing' ? 'System drift increasing' : drift === 'improving' ? 'System improving' : 'System stable';
+  const driftColor = drift === 'increasing' ? 'text-[hsl(var(--severity-medium))]' : drift === 'improving' ? 'text-[hsl(var(--severity-low))]' : 'text-muted-foreground';
 
   return (
     <AppLayout>
@@ -42,6 +68,30 @@ export default function GovernanceConsolePage() {
           <h1 className="text-2xl font-bold">Governance Status</h1>
           <p className="text-muted-foreground">Pillar-based risk overview and decision queue.</p>
         </div>
+
+        {/* Status strip */}
+        <Card className="border-border/50">
+          <CardContent className="py-3">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <span className="text-muted-foreground">{lastReviewedLabel}</span>
+              <Separator orientation="vertical" className="h-4 hidden sm:block" />
+              <span className={SYSTEM_STATUS_STYLE[systemStatus]}>Status: {systemStatus}</span>
+              <Separator orientation="vertical" className="h-4 hidden sm:block" />
+              <span className={`flex items-center gap-1 ${driftColor}`}>
+                <DriftIcon className="h-3.5 w-3.5" />
+                {driftLabel}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Review banner */}
+        {pendingReviewCount > 0 && (
+          <div className="flex items-center gap-2 rounded-md border border-[hsl(var(--severity-medium))]/30 bg-[hsl(var(--severity-medium))]/5 px-4 py-2.5 text-sm">
+            <AlertTriangle className="h-4 w-4 text-[hsl(var(--severity-medium))] shrink-0" />
+            <span>{pendingReviewCount} item{pendingReviewCount !== 1 ? 's' : ''} need{pendingReviewCount === 1 ? 's' : ''} review</span>
+          </div>
+        )}
 
         {/* Category cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -86,30 +136,38 @@ export default function GovernanceConsolePage() {
               </CardContent>
             </Card>
           ) : (
-            topRisks.map(risk => (
-              <Card key={risk.id} className="hover:border-primary/20 transition-colors">
-                <CardContent className="flex items-center gap-4 py-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-sm font-medium">{risk.pillar_name}</span>
-                      <Separator orientation="vertical" className="h-3" />
-                      <span className="text-sm text-muted-foreground">{risk.risk_type}</span>
+            topRisks.map(risk => {
+              const tag = getRiskTag(risk, lastSystemReviewAt);
+              return (
+                <Card key={risk.id} className="hover:border-primary/20 transition-colors">
+                  <CardContent className="flex items-center gap-4 py-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-sm font-medium">{risk.pillar_name}</span>
+                        <Separator orientation="vertical" className="h-3" />
+                        <span className="text-sm text-muted-foreground">{risk.risk_type}</span>
+                        {tag && (
+                          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${TAG_STYLE[tag]}`}>
+                            {tag}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={IMPACT_STYLE[risk.impact_level]}>
+                          {risk.impact_level}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          Confidence: {Math.round(risk.confidence_score * 100)}%
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={IMPACT_STYLE[risk.impact_level]}>
-                        {risk.impact_level}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        Confidence: {Math.round(risk.confidence_score * 100)}%
-                      </span>
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/risk-detail/${risk.id}`)}>
-                    Review <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))
+                    <Button size="sm" variant="outline" onClick={() => navigate(`/risk-detail/${risk.id}`)}>
+                      Review <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
 

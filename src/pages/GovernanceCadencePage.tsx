@@ -4,10 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useRiskContext } from '@/hooks/useRiskContext';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, AlertCircle, CheckCircle2, Shield } from 'lucide-react';
+import { getSystemStatus, getDriftSignal } from '@/lib/pillar-risks';
+import { Calendar, AlertCircle, CheckCircle2, Shield, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 export default function GovernanceCadencePage() {
-  const { risks, decisions } = useRiskContext();
+  const { risks, decisions, lastSystemReviewAt } = useRiskContext();
   const navigate = useNavigate();
 
   const unresolvedRisks = risks.filter(r => r.status !== 'Resolved');
@@ -15,6 +17,9 @@ export default function GovernanceCadencePage() {
   const pendingCount = risks.filter(r => r.decision_state === 'Pending').length;
   const resolvedCount = risks.filter(r => r.status === 'Resolved').length;
   const totalRisks = risks.length;
+  const highUnresolved = unresolvedRisks.filter(r => r.impact_level === 'High').length;
+  const systemStatus = getSystemStatus(risks);
+  const drift = getDriftSignal(risks, lastSystemReviewAt);
 
   // Next review: mock — 30 days from now
   const nextReview = new Date();
@@ -30,6 +35,14 @@ export default function GovernanceCadencePage() {
     ? 'bg-[hsl(var(--severity-low))]/15 text-[hsl(var(--severity-low))]'
     : 'bg-[hsl(var(--severity-medium))]/15 text-[hsl(var(--severity-medium))]';
 
+  const timeSinceReview = lastSystemReviewAt
+    ? formatDistanceToNow(new Date(lastSystemReviewAt), { addSuffix: true })
+    : 'Never';
+
+  const changesSinceReview = lastSystemReviewAt
+    ? decisions.filter(d => d.timestamp >= lastSystemReviewAt).length
+    : decisions.length;
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -43,10 +56,10 @@ export default function GovernanceCadencePage() {
           <Card>
             <CardContent className="py-4">
               <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-primary" />
+                <Clock className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Next Review</p>
-                  <p className="text-sm font-medium">{nextReview.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  <p className="text-xs text-muted-foreground">Time Since Last Review</p>
+                  <p className="text-sm font-medium">{timeSinceReview}</p>
                 </div>
               </div>
             </CardContent>
@@ -54,10 +67,10 @@ export default function GovernanceCadencePage() {
           <Card>
             <CardContent className="py-4">
               <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-[hsl(var(--severity-medium))]" />
+                <AlertCircle className="h-5 w-5 text-[hsl(var(--severity-high))]" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Unresolved Risks</p>
-                  <p className="text-sm font-medium">{unresolvedRisks.length}</p>
+                  <p className="text-xs text-muted-foreground">Unresolved High-Risk</p>
+                  <p className="text-sm font-medium">{highUnresolved}</p>
                 </div>
               </div>
             </CardContent>
@@ -78,8 +91,8 @@ export default function GovernanceCadencePage() {
               <div className="flex items-center gap-3">
                 <Shield className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Readiness</p>
-                  <Badge variant="outline" className={readinessStyle}>{readiness}</Badge>
+                  <p className="text-xs text-muted-foreground">System Changes Since Last Check</p>
+                  <p className="text-sm font-medium">{changesSinceReview} decision{changesSinceReview !== 1 ? 's' : ''}</p>
                 </div>
               </div>
             </CardContent>
@@ -107,6 +120,14 @@ export default function GovernanceCadencePage() {
                 <span className="text-muted-foreground">Pending decisions</span>
                 <span>{pendingCount}</span>
               </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">System status</span>
+                <span>{systemStatus}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Drift</span>
+                <span className="capitalize">{drift}</span>
+              </div>
             </CardContent>
           </Card>
 
@@ -130,7 +151,7 @@ export default function GovernanceCadencePage() {
             </CardContent>
           </Card>
 
-          {/* System Changes */}
+          {/* Recent Decisions */}
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Recent Decisions</CardTitle>

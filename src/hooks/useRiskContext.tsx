@@ -11,6 +11,7 @@ import {
 interface RiskContextValue {
   risks: PillarRisk[];
   decisions: RiskDecisionEvent[];
+  lastSystemReviewAt: string | null;
   approveRisk: (riskId: string, notes?: string) => void;
   modifyRisk: (riskId: string, notes: string) => void;
   deferRisk: (riskId: string, notes?: string) => void;
@@ -24,6 +25,11 @@ const RiskContext = createContext<RiskContextValue | null>(null);
 export function RiskProvider({ children }: { children: ReactNode }) {
   const [risks, setRisks] = useState<PillarRisk[]>(SEED_RISKS);
   const [decisions, setDecisions] = useState<RiskDecisionEvent[]>([]);
+  const [lastSystemReviewAt, setLastSystemReviewAt] = useState<string | null>(null);
+
+  const updateReviewTimestamp = useCallback(() => {
+    setLastSystemReviewAt(new Date().toISOString());
+  }, []);
 
   const recordDecision = useCallback((
     riskId: string,
@@ -58,7 +64,8 @@ export function RiskProvider({ children }: { children: ReactNode }) {
 
   const approveRisk = useCallback((riskId: string, notes = '') => {
     recordDecision(riskId, 'Approved', notes || 'Action approved.', 'Approved', 'Approved', 'Not Started');
-  }, [recordDecision]);
+    updateReviewTimestamp();
+  }, [recordDecision, updateReviewTimestamp]);
 
   const modifyRisk = useCallback((riskId: string, notes: string) => {
     recordDecision(riskId, 'Modified', notes, 'Needs Review', 'Modified');
@@ -78,10 +85,11 @@ export function RiskProvider({ children }: { children: ReactNode }) {
 
   const markRiskComplete = useCallback((riskId: string, notes = '') => {
     recordDecision(riskId, 'Completed', notes || 'Work completed.', 'Resolved', 'Approved', 'Completed');
-  }, [recordDecision]);
+    updateReviewTimestamp();
+  }, [recordDecision, updateReviewTimestamp]);
 
   return (
-    <RiskContext.Provider value={{ risks, decisions, approveRisk, modifyRisk, deferRisk, resolveRisk, startRisk, markRiskComplete }}>
+    <RiskContext.Provider value={{ risks, decisions, lastSystemReviewAt, approveRisk, modifyRisk, deferRisk, resolveRisk, startRisk, markRiskComplete }}>
       {children}
     </RiskContext.Provider>
   );
