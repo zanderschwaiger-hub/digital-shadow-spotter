@@ -85,7 +85,8 @@ export function RiskProvider({ children }: { children: ReactNode }) {
 
   const markRiskComplete = useCallback((riskId: string, notes = '') => {
     recordDecision(riskId, 'Completed', notes || 'Work completed.', 'Resolved', 'Approved', 'Completed');
-  }, [recordDecision]);
+    updateReviewTimestamp();
+  }, [recordDecision, updateReviewTimestamp]);
 
   return (
     <RiskContext.Provider value={{ risks, decisions, approveRisk, modifyRisk, deferRisk, resolveRisk, startRisk, markRiskComplete }}>
