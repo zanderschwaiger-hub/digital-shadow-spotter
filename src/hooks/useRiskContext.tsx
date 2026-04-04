@@ -89,7 +89,7 @@ export function RiskProvider({ children }: { children: ReactNode }) {
   }, [recordDecision, updateReviewTimestamp]);
 
   return (
-    <RiskContext.Provider value={{ risks, decisions, approveRisk, modifyRisk, deferRisk, resolveRisk, startRisk, markRiskComplete }}>
+    <RiskContext.Provider value={{ risks, decisions, lastSystemReviewAt, approveRisk, modifyRisk, deferRisk, resolveRisk, startRisk, markRiskComplete }}>
       {children}
     </RiskContext.Provider>
   );

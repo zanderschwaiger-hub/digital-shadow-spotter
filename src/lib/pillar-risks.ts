@@ -274,6 +274,32 @@ export function getTopRisks(risks: PillarRisk[], count = 3): PillarRisk[] {
     .slice(0, count);
 }
 
+export function getSystemStatus(risks: PillarRisk[]): 'Stable' | 'Needs attention' | 'High risk' {
+  const active = risks.filter(r => r.status !== 'Resolved');
+  const highCount = active.filter(r => r.impact_level === 'High').length;
+  if (highCount >= 2) return 'High risk';
+  if (active.length > 0) return 'Needs attention';
+  return 'Stable';
+}
+
+export function getDriftSignal(risks: PillarRisk[], lastReviewAt: string | null): 'increasing' | 'stable' | 'improving' {
+  if (!lastReviewAt) return 'increasing';
+  const unresolved = risks.filter(r => r.status !== 'Resolved');
+  const newSinceReview = unresolved.filter(r => r.created_at > lastReviewAt);
+  const resolvedSinceReview = risks.filter(r => r.status === 'Resolved' && r.last_reviewed_at && r.last_reviewed_at >= lastReviewAt);
+  if (newSinceReview.length > resolvedSinceReview.length) return 'increasing';
+  if (resolvedSinceReview.length > 0) return 'improving';
+  return 'stable';
+}
+
+export function getRiskTag(risk: PillarRisk, lastReviewAt: string | null): 'New' | 'Updated' | null {
+  if (!lastReviewAt) return 'New';
+  if (risk.created_at > lastReviewAt) return 'New';
+  // confidence_score changes are tracked via last_reviewed_at updates
+  if (risk.last_reviewed_at && risk.last_reviewed_at > lastReviewAt) return 'Updated';
+  return null;
+}
+
 export function getDecisionSummary(risks: PillarRisk[]): {
   pending: number;
   resolvedThisMonth: number;
