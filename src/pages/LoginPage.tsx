@@ -20,7 +20,6 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Redirect authenticated users
   useEffect(() => {
     if (user) navigate('/dashboard', { replace: true });
   }, [user, navigate]);
@@ -56,28 +55,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background p-4 safe-top safe-bottom">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-8">
-        <div className="flex flex-col items-center text-center">
-          <FELogo size="lg" className="mb-4" />
+        <div className="text-center">
+          <FELogo size="lg" className="mb-4 mx-auto" />
           <h1 className="text-2xl font-bold">Freedom Engine</h1>
-          <p className="text-muted-foreground mt-1">Digital Governance & Hygiene Agent</p>
-          <p className="text-sm text-muted-foreground mt-2 italic">
-            "Digital safety through technical discipline."
-          </p>
         </div>
 
         {sent ? (
           <Card>
             <CardContent className="py-12 text-center space-y-4">
               <CheckCircle2 className="h-12 w-12 mx-auto text-primary" />
-              <p className="text-lg font-medium">Check your email</p>
-              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                We sent a sign-in link to <strong>{email}</strong>. Click the link in your email to continue.
-              </p>
-              <Button variant="ghost" onClick={() => setSent(false)} className="mt-4">
-                Use a different email
-              </Button>
+              <p>Check your email</p>
             </CardContent>
           </Card>
         ) : (
@@ -85,41 +74,26 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit}>
               <CardHeader>
                 <CardTitle>Sign in</CardTitle>
-                <CardDescription>
-                  Enter your email to receive a sign-in link. No password required.
-                </CardDescription>
+                <CardDescription>No password required</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                    autoFocus
-                  />
-                </div>
+
+              <CardContent>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </CardContent>
+
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Mail className="mr-2 h-4 w-4" />
-                  )}
-                  Send Sign-in Link
+                <Button type="submit" disabled={loading}>
+                  {loading ? 'Sending...' : 'Send Sign-in Link'}
                 </Button>
               </CardFooter>
             </form>
           </Card>
         )}
-
-        <p className="text-center text-xs text-muted-foreground">
-          By continuing, you agree to our governance-first approach to digital security.
-        </p>
       </div>
     </div>
   );
