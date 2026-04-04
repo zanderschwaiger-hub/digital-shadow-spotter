@@ -64,7 +64,8 @@ export function RiskProvider({ children }: { children: ReactNode }) {
 
   const approveRisk = useCallback((riskId: string, notes = '') => {
     recordDecision(riskId, 'Approved', notes || 'Action approved.', 'Approved', 'Approved', 'Not Started');
-  }, [recordDecision]);
+    updateReviewTimestamp();
+  }, [recordDecision, updateReviewTimestamp]);
 
   const modifyRisk = useCallback((riskId: string, notes: string) => {
     recordDecision(riskId, 'Modified', notes, 'Needs Review', 'Modified');
