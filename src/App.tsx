@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RiskProvider } from "@/hooks/useRiskContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+
 import LoginPage from "./pages/LoginPage";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
 import OnboardingConsentPage from "./pages/OnboardingConsentPage";
 import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
@@ -45,74 +47,207 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/embed" element={<EmbedPage />} />
-              <Route path="/onboarding-consent" element={
-                <ProtectedRoute><OnboardingConsentPage /></ProtectedRoute>
-              } />
-              <Route path="/dashboard" element={
-                <ProtectedRoute><DashboardPage /></ProtectedRoute>
-              } />
-              <Route path="/inventory" element={
-                <ProtectedRoute><InventoryPage /></ProtectedRoute>
-              } />
-              <Route path="/signals" element={
-                <ProtectedRoute><SignalsPage /></ProtectedRoute>
-              } />
-              <Route path="/tasks" element={
-                <ProtectedRoute><TasksPage /></ProtectedRoute>
-              } />
-              <Route path="/brokers" element={
-                <ProtectedRoute><BrokersPage /></ProtectedRoute>
-              } />
-              <Route path="/reports" element={
-                <ProtectedRoute><ReportsPage /></ProtectedRoute>
-              } />
-              <Route path="/settings" element={
-                <ProtectedRoute><SettingsPage /></ProtectedRoute>
-              } />
-              <Route path="/governance" element={
-                <ProtectedRoute><GovernancePage /></ProtectedRoute>
-              } />
-              <Route path="/governance-file" element={
-                <ProtectedRoute><GovernanceFilePage /></ProtectedRoute>
-              } />
-              <Route path="/assessment" element={
-                <ProtectedRoute><AssessmentPage /></ProtectedRoute>
-              } />
-              <Route path="/exposures" element={
-                <ProtectedRoute><ExposuresPage /></ProtectedRoute>
-              } />
-              <Route path="/decisions" element={
-                <ProtectedRoute><DecisionsPage /></ProtectedRoute>
-              } />
-              <Route path="/agent-log" element={
-                <ProtectedRoute><AgentLogPage /></ProtectedRoute>
-              } />
-              <Route path="/playbooks" element={
-                <ProtectedRoute><PlaybooksPage /></ProtectedRoute>
-              } />
-              {/* Governance Console (V1) */}
-              <Route path="/governance-console" element={
-                <ProtectedRoute><GovernanceConsolePage /></ProtectedRoute>
-              } />
-              <Route path="/pillar-directory" element={
-                <ProtectedRoute><PillarDirectoryPage /></ProtectedRoute>
-              } />
-              <Route path="/pillar-detail/:pillarId" element={
-                <ProtectedRoute><PillarDetailPage /></ProtectedRoute>
-              } />
-              <Route path="/decision-queue" element={
-                <ProtectedRoute><DecisionQueuePage /></ProtectedRoute>
-              } />
-              <Route path="/risk-detail/:riskId" element={
-                <ProtectedRoute><RiskDetailPage /></ProtectedRoute>
-              } />
-              <Route path="/governance-audit" element={
-                <ProtectedRoute><GovernanceAuditPage /></ProtectedRoute>
-              } />
-              <Route path="/governance-cadence" element={
-                <ProtectedRoute><GovernanceCadencePage /></ProtectedRoute>
-              } />
+
+              <Route
+                path="/onboarding-consent"
+                element={
+                  <ProtectedRoute>
+                    <OnboardingConsentPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/inventory"
+                element={
+                  <ProtectedRoute>
+                    <InventoryPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/signals"
+                element={
+                  <ProtectedRoute>
+                    <SignalsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/tasks"
+                element={
+                  <ProtectedRoute>
+                    <TasksPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/brokers"
+                element={
+                  <ProtectedRoute>
+                    <BrokersPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <ReportsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/governance"
+                element={
+                  <ProtectedRoute>
+                    <GovernancePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/governance-file"
+                element={
+                  <ProtectedRoute>
+                    <GovernanceFilePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/assessment"
+                element={
+                  <ProtectedRoute>
+                    <AssessmentPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/exposures"
+                element={
+                  <ProtectedRoute>
+                    <ExposuresPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/decisions"
+                element={
+                  <ProtectedRoute>
+                    <DecisionsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/agent-log"
+                element={
+                  <ProtectedRoute>
+                    <AgentLogPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/playbooks"
+                element={
+                  <ProtectedRoute>
+                    <PlaybooksPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/governance-console"
+                element={
+                  <ProtectedRoute>
+                    <GovernanceConsolePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/pillar-directory"
+                element={
+                  <ProtectedRoute>
+                    <PillarDirectoryPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/pillar-detail/:pillarId"
+                element={
+                  <ProtectedRoute>
+                    <PillarDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/decision-queue"
+                element={
+                  <ProtectedRoute>
+                    <DecisionQueuePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/risk-detail/:riskId"
+                element={
+                  <ProtectedRoute>
+                    <RiskDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/governance-audit"
+                element={
+                  <ProtectedRoute>
+                    <GovernanceAuditPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/governance-cadence"
+                element={
+                  <ProtectedRoute>
+                    <GovernanceCadencePage />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
