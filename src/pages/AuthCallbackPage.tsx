@@ -7,30 +7,53 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     let mounted = true;
+    let redirected = false;
 
-    const handleAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-
-      if (!mounted) return;
-
-      if (data.session?.user) {
-        navigate('/dashboard', { replace: true });
-      } else {
-        navigate('/login', { replace: true });
-      }
+    const goToDashboard = () => {
+      if (!mounted || redirected) return;
+      redirected = true;
+      navigate('/dashboard', { replace: true });
     };
 
-    handleAuth();
+    const goToLogin = () => {
+      if (!mounted || redirected) return;
+      redirected = true;
+      navigate('/login', { replace: true });
+    };
+
+    const resolveSession = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (!mounted || redirected) return;
+
+      if (data.session?.user) {
+        goToDashboard();
+        return;
+      }
+
+      // Give Supabase a moment to process the auth return URL
+      window.setTimeout(async () => {
+        const { data: retryData } = await supabase.auth.getSession();
+
+        if (!mounted || redirected) return;
+
+        if (retryData.session?.user) {
+          goToDashboard();
+        } else {
+          goToLogin();
+        }
+      }, 1500);
+    };
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!mounted) return;
-
       if (session?.user) {
-        navigate('/dashboard', { replace: true });
+        goToDashboard();
       }
     });
+
+    resolveSession();
 
     return () => {
       mounted = false;
