@@ -652,7 +652,21 @@ export type Database = {
       }
     }
     Functions: {
+      agent_action_immutable_check: {
+        Args: {
+          _action_type: string
+          _id: string
+          _proposed_payload: Json
+          _target_id: string
+          _target_type: string
+        }
+        Returns: boolean
+      }
       generate_course_tasks: { Args: never; Returns: undefined }
+      profile_tier_unchanged: {
+        Args: { _tier: string; _tier_level: number; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
