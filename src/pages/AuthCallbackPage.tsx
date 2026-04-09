@@ -22,8 +22,25 @@ export default function AuthCallbackPage() {
     };
 
     const resolveSession = async () => {
-      const { data } = await supabase.auth.getSession();
+      // PKCE flow: Supabase magic links redirect with ?code= in the URL.
+      // We must exchange the code for a session before checking getSession().
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get('code');
 
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!mounted || redirected) return;
+
+        if (!error) {
+          goToDashboard();
+          return;
+        }
+        // If the exchange failed (e.g. expired code), fall through to retry logic.
+        console.warn('Code exchange failed:', error.message);
+      }
+
+      // Fallback: check if session was already established (e.g. hash-based flow).
+      const { data } = await supabase.auth.getSession();
       if (!mounted || redirected) return;
 
       if (data.session?.user) {
@@ -31,10 +48,9 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      // Give Supabase a moment to process the auth return URL
+      // Give Supabase a moment to process any remaining auth return URL tokens.
       window.setTimeout(async () => {
         const { data: retryData } = await supabase.auth.getSession();
-
         if (!mounted || redirected) return;
 
         if (retryData.session?.user) {
@@ -42,9 +58,10 @@ export default function AuthCallbackPage() {
         } else {
           goToLogin();
         }
-      }, 1500);
+      }, 2000);
     };
 
+    // Also listen for auth state changes in case the session resolves via another path.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
