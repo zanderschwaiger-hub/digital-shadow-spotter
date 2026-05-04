@@ -176,6 +176,30 @@ export type Database = {
         }
         Relationships: []
       }
+      exposure_checks: {
+        Row: {
+          answers_json: Json
+          band: string
+          created_at: string
+          id: string
+          score: number
+        }
+        Insert: {
+          answers_json?: Json
+          band: string
+          created_at?: string
+          id?: string
+          score: number
+        }
+        Update: {
+          answers_json?: Json
+          band?: string
+          created_at?: string
+          id?: string
+          score?: number
+        }
+        Relationships: []
+      }
       governance_coverage_inputs: {
         Row: {
           created_at: string
@@ -400,32 +424,38 @@ export type Database = {
       }
       profiles: {
         Row: {
+          baseline_completed: boolean
           consent_accepted_at: string | null
           created_at: string
           id: string
           onboarding_completed: boolean
           tier: string
           tier_level: number
+          tier2_completed: boolean
           updated_at: string
           user_id: string
         }
         Insert: {
+          baseline_completed?: boolean
           consent_accepted_at?: string | null
           created_at?: string
           id?: string
           onboarding_completed?: boolean
           tier?: string
           tier_level?: number
+          tier2_completed?: boolean
           updated_at?: string
           user_id: string
         }
         Update: {
+          baseline_completed?: boolean
           consent_accepted_at?: string | null
           created_at?: string
           id?: string
           onboarding_completed?: boolean
           tier?: string
           tier_level?: number
+          tier2_completed?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -662,6 +692,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      complete_baseline: { Args: never; Returns: undefined }
+      complete_tier2: { Args: never; Returns: undefined }
       generate_course_tasks: { Args: never; Returns: undefined }
       profile_tier_unchanged: {
         Args: { _tier: string; _tier_level: number; _user_id: string }

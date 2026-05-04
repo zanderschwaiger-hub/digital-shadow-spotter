@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RiskProvider } from "@/hooks/useRiskContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { TierGate } from "@/components/layout/TierGate";
 
+import ExposureCheckPage from "./pages/ExposureCheckPage";
 import LoginPage from "./pages/LoginPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import OnboardingConsentPage from "./pages/OnboardingConsentPage";
@@ -45,7 +47,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/exposure-check" replace />} />
+              <Route path="/exposure-check" element={<ExposureCheckPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/embed" element={<EmbedPage />} />
@@ -72,7 +75,7 @@ const App = () => (
                 path="/inventory"
                 element={
                   <ProtectedRoute>
-                    <InventoryPage />
+                    <TierGate required={2}><InventoryPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -99,7 +102,7 @@ const App = () => (
                 path="/brokers"
                 element={
                   <ProtectedRoute>
-                    <BrokersPage />
+                    <TierGate required={2}><BrokersPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -162,7 +165,7 @@ const App = () => (
                 path="/decisions"
                 element={
                   <ProtectedRoute>
-                    <DecisionsPage />
+                    <TierGate required={3}><DecisionsPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -171,7 +174,7 @@ const App = () => (
                 path="/agent-log"
                 element={
                   <ProtectedRoute>
-                    <AgentLogPage />
+                    <TierGate required={3}><AgentLogPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -189,7 +192,7 @@ const App = () => (
                 path="/governance-console"
                 element={
                   <ProtectedRoute>
-                    <GovernanceConsolePage />
+                    <TierGate required={3}><GovernanceConsolePage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -216,7 +219,7 @@ const App = () => (
                 path="/decision-queue"
                 element={
                   <ProtectedRoute>
-                    <DecisionQueuePage />
+                    <TierGate required={3}><DecisionQueuePage /></TierGate>
                   </ProtectedRoute>
                 }
               />
