@@ -165,7 +165,7 @@ const App = () => (
                 path="/decisions"
                 element={
                   <ProtectedRoute>
-                    <DecisionsPage />
+                    <TierGate required={3}><DecisionsPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
