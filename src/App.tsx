@@ -192,7 +192,7 @@ const App = () => (
                 path="/governance-console"
                 element={
                   <ProtectedRoute>
-                    <GovernanceConsolePage />
+                    <TierGate required={3}><GovernanceConsolePage /></TierGate>
                   </ProtectedRoute>
                 }
               />
