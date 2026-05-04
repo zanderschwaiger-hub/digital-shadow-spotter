@@ -75,7 +75,7 @@ const App = () => (
                 path="/inventory"
                 element={
                   <ProtectedRoute>
-                    <InventoryPage />
+                    <TierGate required={2}><InventoryPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
