@@ -219,7 +219,7 @@ const App = () => (
                 path="/decision-queue"
                 element={
                   <ProtectedRoute>
-                    <DecisionQueuePage />
+                    <TierGate required={3}><DecisionQueuePage /></TierGate>
                   </ProtectedRoute>
                 }
               />
