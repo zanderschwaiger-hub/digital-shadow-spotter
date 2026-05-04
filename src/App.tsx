@@ -174,7 +174,7 @@ const App = () => (
                 path="/agent-log"
                 element={
                   <ProtectedRoute>
-                    <AgentLogPage />
+                    <TierGate required={3}><AgentLogPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
