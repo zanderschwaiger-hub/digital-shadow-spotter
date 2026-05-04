@@ -102,7 +102,7 @@ const App = () => (
                 path="/brokers"
                 element={
                   <ProtectedRoute>
-                    <BrokersPage />
+                    <TierGate required={2}><BrokersPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
