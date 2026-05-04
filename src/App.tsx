@@ -6,7 +6,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RiskProvider } from "@/hooks/useRiskContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { TierGate } from "@/components/layout/TierGate";
 
+import ExposureCheckPage from "./pages/ExposureCheckPage";
 import LoginPage from "./pages/LoginPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import OnboardingConsentPage from "./pages/OnboardingConsentPage";
