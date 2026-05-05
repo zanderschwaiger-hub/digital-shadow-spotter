@@ -422,6 +422,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pillar_progress: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          id: string
+          pillar_index: number
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          pillar_index: number
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          pillar_index?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           baseline_completed: boolean
@@ -490,6 +517,36 @@ export type Database = {
           last_check_at?: string | null
           next_check_at?: string | null
           signal_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          last_payment_date: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          last_payment_date?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          last_payment_date?: string | null
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
