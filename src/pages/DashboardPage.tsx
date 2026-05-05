@@ -9,6 +9,7 @@ import { RecommendedActionCard } from '@/components/dashboard/RecommendedActionC
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
 import { DigitalBaselineCard } from '@/components/dashboard/DigitalBaselineCard';
+import { TierProgressionCard } from '@/components/dashboard/TierProgressionCard';
 import { calculateBaseline } from '@/lib/baseline-status';
 import { GovernanceStatusBar } from '@/components/dashboard/GovernanceStatusBar';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,7 +28,7 @@ import {
 const WELCOME_SEEN_KEY = 'freedom-engine-welcome-seen';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { logEvent } = useAuditLog();
   const { toast } = useToast();
   
