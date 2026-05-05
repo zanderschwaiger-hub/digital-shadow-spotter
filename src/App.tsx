@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { RiskProvider } from "@/hooks/useRiskContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { TierGate } from "@/components/layout/TierGate";
+import { RootRedirect } from "@/components/layout/RootRedirect";
 
 import ExposureCheckPage from "./pages/ExposureCheckPage";
 import LoginPage from "./pages/LoginPage";
@@ -47,7 +48,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Navigate to="/exposure-check" replace />} />
+              <Route path="/" element={<RootRedirect />} />
               <Route path="/exposure-check" element={<ExposureCheckPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
