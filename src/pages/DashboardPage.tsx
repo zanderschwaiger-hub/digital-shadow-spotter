@@ -10,6 +10,7 @@ import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
 import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
 import { DigitalBaselineCard } from '@/components/dashboard/DigitalBaselineCard';
 import { TierProgressionCard } from '@/components/dashboard/TierProgressionCard';
+import { PaymentReminderBanner } from '@/components/dashboard/PaymentReminderBanner';
 import { calculateBaseline } from '@/lib/baseline-status';
 import { GovernanceStatusBar } from '@/components/dashboard/GovernanceStatusBar';
 import { supabase } from '@/integrations/supabase/client';
@@ -142,6 +143,8 @@ export default function DashboardPage() {
         </div>
 
         <GovernanceStatusBar baselineLabel={baseline.label} hasTasks={tasks.length > 0} />
+
+        <PaymentReminderBanner />
 
         <TierProgressionCard tierLevel={profile?.tier_level ?? 0} />
 
