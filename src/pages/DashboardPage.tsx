@@ -133,36 +133,45 @@ export default function DashboardPage() {
     );
   }
 
+  const needsAuthorization = !profile?.authorization_confirmed;
+
   return (
     <AppLayout>
-      <WelcomeModal open={showWelcome} onClose={handleWelcomeClose} />
-      
-      <div className="space-y-4 sm:space-y-6">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Your digital footprint at a glance</p>
+      <AuthorizationConfirmModal open={needsAuthorization} onConfirmed={() => {}} />
+      {!needsAuthorization && <WelcomeModal open={showWelcome} onClose={handleWelcomeClose} />}
+
+      {needsAuthorization ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
+      ) : (
+        <div className="space-y-4 sm:space-y-6">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">Your digital footprint at a glance</p>
+          </div>
 
-        <GovernanceStatusBar baselineLabel={baseline.label} hasTasks={tasks.length > 0} />
+          <GovernanceStatusBar baselineLabel={baseline.label} hasTasks={tasks.length > 0} />
 
-        <PaymentReminderBanner />
+          <PaymentReminderBanner />
 
-        <TierProgressionCard />
+          <TierProgressionCard />
 
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-          <ExposureCard level={exposure.level} reason={exposure.reason} />
-          <IdentifierCoverageCard coverage={coverage} />
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+            <ExposureCard level={exposure.level} reason={exposure.reason} />
+            <IdentifierCoverageCard coverage={coverage} />
+          </div>
+
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <DigitalBaselineCard baseline={baseline} />
+            <RecommendedActionCard />
+            <TaskCard tasks={tasks} />
+            <AlertsCard alerts={alerts} />
+            <MasterKeyCard primaryEmail={primaryEmail} />
+            <ContainmentCard />
+          </div>
         </div>
-
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <DigitalBaselineCard baseline={baseline} />
-          <RecommendedActionCard />
-          <TaskCard tasks={tasks} />
-          <AlertsCard alerts={alerts} />
-          <MasterKeyCard primaryEmail={primaryEmail} />
-          <ContainmentCard />
-        </div>
-      </div>
+      )}
     </AppLayout>
   );
 }
