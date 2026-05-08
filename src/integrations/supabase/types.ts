@@ -451,6 +451,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          authorization_confirmed: boolean
           baseline_completed: boolean
           consent_accepted_at: string | null
           created_at: string
@@ -463,6 +464,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          authorization_confirmed?: boolean
           baseline_completed?: boolean
           consent_accepted_at?: string | null
           created_at?: string
@@ -475,6 +477,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          authorization_confirmed?: boolean
           baseline_completed?: boolean
           consent_accepted_at?: string | null
           created_at?: string
