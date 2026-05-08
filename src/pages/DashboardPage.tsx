@@ -11,6 +11,7 @@ import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
 import { DigitalBaselineCard } from '@/components/dashboard/DigitalBaselineCard';
 import { TierProgressionCard } from '@/components/dashboard/TierProgressionCard';
 import { PaymentReminderBanner } from '@/components/dashboard/PaymentReminderBanner';
+import { AuthorizationConfirmModal } from '@/components/dashboard/AuthorizationConfirmModal';
 import { calculateBaseline } from '@/lib/baseline-status';
 import { GovernanceStatusBar } from '@/components/dashboard/GovernanceStatusBar';
 import { supabase } from '@/integrations/supabase/client';
