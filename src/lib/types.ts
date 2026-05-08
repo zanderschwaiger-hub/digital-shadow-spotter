@@ -19,6 +19,7 @@ export interface Profile {
   tier_level: number;
   baseline_completed: boolean;
   tier2_completed: boolean;
+  authorization_confirmed: boolean;
   onboarding_completed: boolean;
   consent_accepted_at: string | null;
   created_at: string;
