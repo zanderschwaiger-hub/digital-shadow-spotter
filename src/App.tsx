@@ -77,7 +77,7 @@ const App = () => (
                 path="/inventory"
                 element={
                   <ProtectedRoute>
-                    <TierGate required={2}><InventoryPage /></TierGate>
+                    <TierGate mode="baseline"><InventoryPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -104,7 +104,7 @@ const App = () => (
                 path="/brokers"
                 element={
                   <ProtectedRoute>
-                    <TierGate required={2}><BrokersPage /></TierGate>
+                    <TierGate mode="baseline"><BrokersPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -176,7 +176,7 @@ const App = () => (
                 path="/decisions"
                 element={
                   <ProtectedRoute>
-                    <TierGate required={3}><DecisionsPage /></TierGate>
+                    <TierGate mode="subscription"><DecisionsPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -185,7 +185,7 @@ const App = () => (
                 path="/agent-log"
                 element={
                   <ProtectedRoute>
-                    <TierGate required={3}><AgentLogPage /></TierGate>
+                    <TierGate mode="subscription"><AgentLogPage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -203,7 +203,7 @@ const App = () => (
                 path="/governance-console"
                 element={
                   <ProtectedRoute>
-                    <TierGate required={3}><GovernanceConsolePage /></TierGate>
+                    <TierGate mode="subscription"><GovernanceConsolePage /></TierGate>
                   </ProtectedRoute>
                 }
               />
@@ -230,7 +230,7 @@ const App = () => (
                 path="/decision-queue"
                 element={
                   <ProtectedRoute>
-                    <TierGate required={3}><DecisionQueuePage /></TierGate>
+                    <TierGate mode="subscription"><DecisionQueuePage /></TierGate>
                   </ProtectedRoute>
                 }
               />

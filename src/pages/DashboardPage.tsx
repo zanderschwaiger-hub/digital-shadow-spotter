@@ -146,7 +146,7 @@ export default function DashboardPage() {
 
         <PaymentReminderBanner />
 
-        <TierProgressionCard tierLevel={profile?.tier_level ?? 0} />
+        <TierProgressionCard />
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           <ExposureCard level={exposure.level} reason={exposure.reason} />
