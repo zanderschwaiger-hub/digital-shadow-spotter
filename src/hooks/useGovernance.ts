@@ -38,7 +38,8 @@ export function useGovernance() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const tierLevel = profile?.tier_level ?? 3;
+  const tierLevel = profile?.tier_level ?? 0;
+  const baselineCompleted = !!profile?.baseline_completed;
 
   const loadGovernanceData = useCallback(async () => {
     if (!user) return;
@@ -73,7 +74,7 @@ export function useGovernance() {
         questions_json: pillar.questions_json as unknown[],
         steps_json: (pillar.steps_json as unknown[] || []) as PillarStep[],
         progress: progressMap.get(pillar.id) as UserPillarProgress | null ?? null,
-        isAccessible: tierLevel >= pillar.minimum_tier,
+        isAccessible: baselineCompleted,
       }));
 
       setPillars(pillarsWithProgress);
@@ -83,7 +84,7 @@ export function useGovernance() {
     } finally {
       setLoading(false);
     }
-  }, [user, tierLevel]);
+  }, [user, baselineCompleted]);
 
   useEffect(() => {
     loadGovernanceData();
