@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { RiskProvider } from "@/hooks/useRiskContext";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { TierGate } from "@/components/layout/TierGate";
+import { RequiresAuthorization } from "@/components/layout/RequiresAuthorization";
 import { RootRedirect } from "@/components/layout/RootRedirect";
 
 import ExposureCheckPage from "./pages/ExposureCheckPage";
@@ -77,7 +78,9 @@ const App = () => (
                 path="/inventory"
                 element={
                   <ProtectedRoute>
-                    <TierGate mode="baseline"><InventoryPage /></TierGate>
+                    <RequiresAuthorization>
+                      <TierGate mode="baseline"><InventoryPage /></TierGate>
+                    </RequiresAuthorization>
                   </ProtectedRoute>
                 }
               />
@@ -95,7 +98,9 @@ const App = () => (
                 path="/tasks"
                 element={
                   <ProtectedRoute>
-                    <TasksPage />
+                    <RequiresAuthorization>
+                      <TasksPage />
+                    </RequiresAuthorization>
                   </ProtectedRoute>
                 }
               />
@@ -104,7 +109,9 @@ const App = () => (
                 path="/brokers"
                 element={
                   <ProtectedRoute>
-                    <TierGate mode="baseline"><BrokersPage /></TierGate>
+                    <RequiresAuthorization>
+                      <TierGate mode="baseline"><BrokersPage /></TierGate>
+                    </RequiresAuthorization>
                   </ProtectedRoute>
                 }
               />
@@ -113,7 +120,9 @@ const App = () => (
                 path="/reports"
                 element={
                   <ProtectedRoute>
-                    <ReportsPage />
+                    <RequiresAuthorization>
+                      <ReportsPage />
+                    </RequiresAuthorization>
                   </ProtectedRoute>
                 }
               />
