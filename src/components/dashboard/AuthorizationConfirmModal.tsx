@@ -7,6 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
+export const CURRENT_AUTHORIZATION_VERSION = 'v1.0';
+
 interface Props {
   open: boolean;
   onConfirmed: () => void;
@@ -19,19 +21,50 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
   const [submitting, setSubmitting] = useState(false);
 
   const handleConfirm = async () => {
-    if (!user || !checked) return;
+    if (!user || !checked || submitting) return;
     setSubmitting(true);
-    const { error } = await supabase
+
+    // Step 1: Update profile
+    const { error: profileError } = await supabase
       .from('profiles')
-      .update({ authorization_confirmed: true })
+      .update({
+        authorization_confirmed: true,
+        authorization_confirmed_at: new Date().toISOString(),
+        authorization_version: CURRENT_AUTHORIZATION_VERSION,
+      })
       .eq('user_id', user.id);
 
-    if (error) {
-      toast({ title: 'Could not save confirmation', description: error.message, variant: 'destructive' });
+    if (profileError) {
+      toast({
+        title: 'Confirmation failed',
+        description: profileError.message,
+        variant: 'destructive',
+      });
       setSubmitting(false);
       return;
     }
 
+    // Step 2: Write audit log — must succeed
+    const { error: auditError } = await supabase
+      .from('authorization_audit_logs')
+      .insert({
+        user_id: user.id,
+        authorization_version: CURRENT_AUTHORIZATION_VERSION,
+        user_agent: navigator.userAgent,
+        ip_address: null,
+      });
+
+    if (auditError) {
+      toast({
+        title: 'Audit log failed — confirmation not saved',
+        description: auditError.message,
+        variant: 'destructive',
+      });
+      setSubmitting(false);
+      return;
+    }
+
+    // Step 3: Sync profile context, then unlock
     await refreshProfile();
     setSubmitting(false);
     onConfirmed();
@@ -48,7 +81,7 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
         <DialogHeader>
           <DialogTitle>Before you begin</DialogTitle>
           <DialogDescription>
-            I confirm that I own or am authorized to manage the accounts and information in scope.
+            Before accessing your dashboard, confirm you are authorized to manage the accounts and information in scope.
           </DialogDescription>
         </DialogHeader>
 
@@ -57,9 +90,10 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
             id="authorization-confirm"
             checked={checked}
             onCheckedChange={(v) => setChecked(v === true)}
+            disabled={submitting}
           />
           <Label htmlFor="authorization-confirm" className="leading-snug cursor-pointer">
-            I confirm I am authorized to manage these accounts and information.
+            Freedom Engine only works properly when you are authorized to manage the accounts and information being scanned. I confirm I have that authorization.
           </Label>
         </div>
 
