@@ -113,6 +113,33 @@ export type Database = {
         }
         Relationships: []
       }
+      authorization_audit_logs: {
+        Row: {
+          authorization_version: string | null
+          confirmed_at: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          authorization_version?: string | null
+          confirmed_at?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          authorization_version?: string | null
+          confirmed_at?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       baseline_artifacts: {
         Row: {
           artifact_type: string
@@ -452,6 +479,8 @@ export type Database = {
       profiles: {
         Row: {
           authorization_confirmed: boolean
+          authorization_confirmed_at: string | null
+          authorization_version: string | null
           baseline_completed: boolean
           consent_accepted_at: string | null
           created_at: string
@@ -465,6 +494,8 @@ export type Database = {
         }
         Insert: {
           authorization_confirmed?: boolean
+          authorization_confirmed_at?: string | null
+          authorization_version?: string | null
           baseline_completed?: boolean
           consent_accepted_at?: string | null
           created_at?: string
@@ -478,6 +509,8 @@ export type Database = {
         }
         Update: {
           authorization_confirmed?: boolean
+          authorization_confirmed_at?: string | null
+          authorization_version?: string | null
           baseline_completed?: boolean
           consent_accepted_at?: string | null
           created_at?: string
