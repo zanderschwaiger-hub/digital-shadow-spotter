@@ -20,6 +20,8 @@ export interface Profile {
   baseline_completed: boolean;
   tier2_completed: boolean;
   authorization_confirmed: boolean;
+  authorization_confirmed_at: string | null;
+  authorization_version: string | null;
   onboarding_completed: boolean;
   consent_accepted_at: string | null;
   created_at: string;
