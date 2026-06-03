@@ -35,7 +35,9 @@ import {
   History
 } from 'lucide-react';
 import { NotificationSettings, AuditLogEntry } from '@/lib/types';
+import { PaymentReminderBanner } from '@/components/dashboard/PaymentReminderBanner';
 import { formatDistanceToNow } from 'date-fns';
+
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
