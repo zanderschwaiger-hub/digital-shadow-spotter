@@ -34,19 +34,19 @@ const STATUS_CONFIG: Record<CourseStatus, { label: string; icon: typeof CheckCir
   done: { label: 'Done', icon: CheckCircle2, variant: 'default' },
 };
 
-const PILLAR_NAMES: Record<string, string> = {
-  'master-key-control': 'Pillar 1 — Master Key Control',
-  'credential-system': 'Pillar 2 — Credential System',
-  'mfa-standard': 'Pillar 3 — MFA Standard',
-  'account-inventory': 'Pillar 4 — Account Inventory',
-  'account-closure': 'Pillar 5 — Account Closure & Data Minimization',
-  'breach-reality': 'Pillar 6 — Breach Reality & Alerts',
-  'session-device-control': 'Pillar 7 — Session & Device Control',
-  'connected-apps': 'Pillar 8 — Connected Apps & Permissions',
-  'inbox-cloud-hygiene': 'Pillar 9 — Inbox & Cloud Vault Hygiene',
-  'personal-content': 'Pillar 10 — Personal Content & Social Footprint',
-  'public-footprint': 'Pillar 11 — Public Footprint & Data Brokers',
-  'governance-cadence': 'Pillar 12 — Governance Cadence & Containment',
+const AREA_NAMES: Record<string, string> = {
+  'master-key-control': 'Email & Recovery Control',
+  'credential-system': 'Passwords & Credentials',
+  'mfa-standard': 'Two-Factor Authentication',
+  'account-inventory': 'Account Inventory',
+  'account-closure': 'Unused Accounts',
+  'breach-reality': 'Breach Exposure',
+  'session-device-control': 'Sessions & Devices',
+  'connected-apps': 'Connected Apps',
+  'inbox-cloud-hygiene': 'Inbox & Cloud Storage',
+  'personal-content': 'Social Media & Content',
+  'public-footprint': 'Public Footprint',
+  'governance-cadence': 'Review Cadence',
 };
 
 const PILLAR_ORDER = [
@@ -54,6 +54,7 @@ const PILLAR_ORDER = [
   'account-closure', 'breach-reality', 'session-device-control', 'connected-apps',
   'inbox-cloud-hygiene', 'personal-content', 'public-footprint', 'governance-cadence',
 ];
+
 
 interface PendingAction {
   actionId: string;
