@@ -152,6 +152,24 @@ export default function SettingsPage() {
           </p>
         </div>
 
+        <PaymentReminderBanner />
+
+        <Card>
+          <CardContent className="py-4">
+            <a
+              href="/governance-console"
+              className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Advanced governance →
+            </a>
+            <p className="text-xs text-muted-foreground mt-1">
+              Access the full governance console, decision queue, and audit history.
+            </p>
+          </CardContent>
+        </Card>
+
+
+
         {/* Notification Settings */}
         <Card>
           <CardHeader>
