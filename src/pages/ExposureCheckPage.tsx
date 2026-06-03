@@ -55,42 +55,78 @@ export default function ExposureCheckPage() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
-    // "Not sure" counts as No. Score = number of Yes answers (0..18).
     const score = QUESTIONS.reduce((acc, _, i) => acc + (answers[i] === 'yes' ? 1 : 0), 0);
     const band = bandFor(score);
     const answers_json = QUESTIONS.map((q, i) => ({ q, a: answers[i] }));
     await supabase.from('exposure_checks').insert({ score, band, answers_json });
-    setSubmitted({ score, band });
+
+    // Locked scoring adjustment for high "not sure" counts
+    const notSureCount = Object.values(answers).filter(a => a === 'unsure').length;
+    let adjustedBand = band;
+    if (notSureCount > 3) {
+      if (adjustedBand === 'low') adjustedBand = 'medium';
+      else if (adjustedBand === 'medium') adjustedBand = 'high';
+    }
+    setSubmitted({ score, band: adjustedBand });
     setSubmitting(false);
   };
 
   if (submitted) {
-    const labels = {
-      high: 'High exposure',
-      medium: 'Medium exposure',
-      low: 'Low exposure',
+    const bandLabels = {
+      high: 'Significant gaps found',
+      medium: 'Some gaps to address',
+      low: 'Looking solid',
     } as const;
+
+    const hasGap = (range: number[]) =>
+      range.some(i => answers[i] === 'no' || answers[i] === 'unsure');
+
+    const problems: string[] = [];
+    if (hasGap([0, 1, 2, 3])) problems.push('Credential control gaps detected');
+    if (hasGap([4, 5, 6])) problems.push('Recovery path weaknesses found');
+    if (hasGap([7, 8, 9])) problems.push('Monitoring blind spots present');
+    if (hasGap([10, 11, 12])) problems.push('Social & public exposure risk');
+    if (hasGap([13, 14, 15])) problems.push('No recovery plan documented');
+    if (hasGap([16, 17])) problems.push('No review cadence set');
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <Card className="max-w-lg w-full p-8 space-y-6">
-          <div>
+          <div className="space-y-2">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Tier 0 — Exposure Check</p>
-            <h1 className="text-3xl font-bold mt-2">{labels[submitted.band]}</h1>
-            <p className="text-sm text-muted-foreground mt-2">
-              Score: {submitted.score} / 18
+            <div className="text-5xl font-medium">{submitted.score}/18</div>
+            <h1 className="text-xl font-semibold">{bandLabels[submitted.band]}</h1>
+            <p className="text-sm text-muted-foreground">
+              Here's what we found based on your answers.
             </p>
           </div>
-          <p className="text-sm">
-            This is a starting signal, not a verdict. The next step is to establish a baseline so you have
-            a written record of your controls and recovery paths.
-          </p>
-          <Button asChild className="w-full">
-            <Link to="/login">Start Baseline</Link>
-          </Button>
+
+          {problems.length > 0 && (
+            <div className="space-y-2">
+              {problems.slice(0, 3).map((p) => (
+                <div
+                  key={p}
+                  className="rounded-md border border-l-4 border-l-amber-500 bg-card px-3 py-2 text-sm"
+                >
+                  {p}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Button asChild className="w-full">
+              <Link to="/login">Build my action plan</Link>
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Takes 2 minutes. No credit card.
+            </p>
+          </div>
         </Card>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-background p-6">
