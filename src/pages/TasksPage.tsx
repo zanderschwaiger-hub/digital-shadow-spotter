@@ -441,7 +441,7 @@ export default function TasksPage() {
               return (
                 <div key={pillarId}>
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-semibold">{PILLAR_NAMES[pillarId] || pillarId}</h2>
+                    <h2 className="text-lg font-semibold">{AREA_NAMES[pillarId] || pillarId}</h2>
                     <Badge variant="outline">{pillarDone}/{allPillarTasks.length}</Badge>
                   </div>
                   <div className="space-y-3">
