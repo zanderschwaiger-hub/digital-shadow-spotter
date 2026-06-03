@@ -71,6 +71,7 @@ export default function TasksPage() {
 
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get('highlight');
+  const tabParam = searchParams.get('tab');
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const highlightHandled = useRef(false);
 
@@ -78,7 +79,8 @@ export default function TasksPage() {
   const [catalog, setCatalog] = useState<TaskCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('open');
+  const [activeTab, setActiveTab] = useState<string>(tabParam || 'open');
+
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [coverage, setCoverage] = useState<IdentifierCoverage>({
     primaryEmail: false, recoveryEmail: false, phone: false,
