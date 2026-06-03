@@ -35,7 +35,9 @@ import {
   History
 } from 'lucide-react';
 import { NotificationSettings, AuditLogEntry } from '@/lib/types';
+import { PaymentReminderBanner } from '@/components/dashboard/PaymentReminderBanner';
 import { formatDistanceToNow } from 'date-fns';
+
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
@@ -151,6 +153,24 @@ export default function SettingsPage() {
             Manage your preferences and data
           </p>
         </div>
+
+        <PaymentReminderBanner />
+
+        <Card>
+          <CardContent className="py-4">
+            <a
+              href="/governance-console"
+              className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Advanced governance →
+            </a>
+            <p className="text-xs text-muted-foreground mt-1">
+              Access the full governance console, decision queue, and audit history.
+            </p>
+          </CardContent>
+        </Card>
+
+
 
         {/* Notification Settings */}
         <Card>

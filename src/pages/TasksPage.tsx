@@ -34,19 +34,19 @@ const STATUS_CONFIG: Record<CourseStatus, { label: string; icon: typeof CheckCir
   done: { label: 'Done', icon: CheckCircle2, variant: 'default' },
 };
 
-const PILLAR_NAMES: Record<string, string> = {
-  'master-key-control': 'Pillar 1 — Master Key Control',
-  'credential-system': 'Pillar 2 — Credential System',
-  'mfa-standard': 'Pillar 3 — MFA Standard',
-  'account-inventory': 'Pillar 4 — Account Inventory',
-  'account-closure': 'Pillar 5 — Account Closure & Data Minimization',
-  'breach-reality': 'Pillar 6 — Breach Reality & Alerts',
-  'session-device-control': 'Pillar 7 — Session & Device Control',
-  'connected-apps': 'Pillar 8 — Connected Apps & Permissions',
-  'inbox-cloud-hygiene': 'Pillar 9 — Inbox & Cloud Vault Hygiene',
-  'personal-content': 'Pillar 10 — Personal Content & Social Footprint',
-  'public-footprint': 'Pillar 11 — Public Footprint & Data Brokers',
-  'governance-cadence': 'Pillar 12 — Governance Cadence & Containment',
+const AREA_NAMES: Record<string, string> = {
+  'master-key-control': 'Email & Recovery Control',
+  'credential-system': 'Passwords & Credentials',
+  'mfa-standard': 'Two-Factor Authentication',
+  'account-inventory': 'Account Inventory',
+  'account-closure': 'Unused Accounts',
+  'breach-reality': 'Breach Exposure',
+  'session-device-control': 'Sessions & Devices',
+  'connected-apps': 'Connected Apps',
+  'inbox-cloud-hygiene': 'Inbox & Cloud Storage',
+  'personal-content': 'Social Media & Content',
+  'public-footprint': 'Public Footprint',
+  'governance-cadence': 'Review Cadence',
 };
 
 const PILLAR_ORDER = [
@@ -54,6 +54,7 @@ const PILLAR_ORDER = [
   'account-closure', 'breach-reality', 'session-device-control', 'connected-apps',
   'inbox-cloud-hygiene', 'personal-content', 'public-footprint', 'governance-cadence',
 ];
+
 
 interface PendingAction {
   actionId: string;
@@ -70,6 +71,7 @@ export default function TasksPage() {
 
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get('highlight');
+  const tabParam = searchParams.get('tab');
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const highlightHandled = useRef(false);
 
@@ -77,7 +79,8 @@ export default function TasksPage() {
   const [catalog, setCatalog] = useState<TaskCatalogItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('open');
+  const [activeTab, setActiveTab] = useState<string>(tabParam || 'open');
+
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [coverage, setCoverage] = useState<IdentifierCoverage>({
     primaryEmail: false, recoveryEmail: false, phone: false,
@@ -190,7 +193,7 @@ export default function TasksPage() {
     } else {
       if (result.action_id) await confirmAction(result.action_id);
       await logEvent('plan_generated', { task_count: 72 });
-      toast({ title: 'Guided Plan generated', description: '72 tasks created across 12 pillars.' });
+      toast({ title: 'Action plan generated', description: 'Your personalized tasks are ready.' });
       await loadData();
     }
     setGenerating(false);
@@ -317,22 +320,23 @@ export default function TasksPage() {
       <AppLayout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold">Guided Plan</h1>
-            <p className="text-muted-foreground">72 tasks across 12 pillars — your governance course.</p>
+            <h1 className="text-2xl font-bold">Action plan</h1>
+            <p className="text-muted-foreground">Work through these to reduce your exposure.</p>
           </div>
           <Card className="border-dashed">
             <CardContent className="py-16 text-center space-y-4">
               <ListTodo className="h-12 w-12 mx-auto text-muted-foreground" />
-              <p className="text-lg font-medium">No guided plan yet</p>
+              <p className="text-lg font-medium">Your action plan is being built…</p>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Generate your personalized course of 72 tasks organized by the 12 governance pillars.
+                Generate your personalized set of actions to reduce exposure.
               </p>
               <Button onClick={generatePlan} disabled={generating} size="lg">
                 {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
-                Generate Guided Plan
+                Build my action plan
               </Button>
             </CardContent>
           </Card>
+
         </div>
       </AppLayout>
     );
@@ -373,8 +377,9 @@ export default function TasksPage() {
       <div className="space-y-4 sm:space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Guided Plan</h1>
-            <p className="text-sm text-muted-foreground">{counts.done}/{counts.total} tasks completed</p>
+            <h1 className="text-xl sm:text-2xl font-bold">Action plan</h1>
+            <p className="text-sm text-muted-foreground">Work through these to reduce your exposure. {counts.done}/{counts.total} done</p>
+
           </div>
         </div>
 
@@ -440,7 +445,7 @@ export default function TasksPage() {
               return (
                 <div key={pillarId}>
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-semibold">{PILLAR_NAMES[pillarId] || pillarId}</h2>
+                    <h2 className="text-lg font-semibold">{AREA_NAMES[pillarId] || pillarId}</h2>
                     <Badge variant="outline">{pillarDone}/{allPillarTasks.length}</Badge>
                   </div>
                   <div className="space-y-3">

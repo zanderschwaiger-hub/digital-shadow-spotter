@@ -1,39 +1,49 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ExposureCard } from '@/components/dashboard/ExposureCard';
-import { TaskCard } from '@/components/dashboard/TaskCard';
 import { AlertsCard } from '@/components/dashboard/AlertsCard';
 import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
 import { IdentifierCoverageCard } from '@/components/dashboard/IdentifierCoverageCard';
-import { RecommendedActionCard } from '@/components/dashboard/RecommendedActionCard';
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
-import { ContainmentCard } from '@/components/dashboard/ContainmentCard';
-import { DigitalBaselineCard } from '@/components/dashboard/DigitalBaselineCard';
-import { TierProgressionCard } from '@/components/dashboard/TierProgressionCard';
-import { PaymentReminderBanner } from '@/components/dashboard/PaymentReminderBanner';
 import { AuthorizationConfirmModal, CURRENT_AUTHORIZATION_VERSION } from '@/components/dashboard/AuthorizationConfirmModal';
-import { calculateBaseline } from '@/lib/baseline-status';
-import { GovernanceStatusBar } from '@/components/dashboard/GovernanceStatusBar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useAssessment } from '@/hooks/useAssessment';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  Task, 
-  Alert, 
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CheckCircle2, X, ArrowRight } from 'lucide-react';
+import {
+  Task,
+  Alert,
   IdentifierCoverage,
   buildIdentifierCoverage,
-  calculateIdentifierCoverage,
-  getExposureLevel,
 } from '@/lib/types';
 
 const WELCOME_SEEN_KEY = 'freedom-engine-welcome-seen';
 
+function scoreStatusLabel(score: number): string {
+  if (score < 40) return 'High exposure — action needed';
+  if (score < 65) return 'Getting there — keep going';
+  if (score < 85) return 'Good control — stay consistent';
+  return 'Strong posture — maintain it';
+}
+
+const SEVERITY_BORDER: Record<string, string> = {
+  P0: 'border-l-destructive',
+  P1: 'border-l-amber-500',
+  P2: 'border-l-muted-foreground/40',
+};
+
 export default function DashboardPage() {
   const { user, profile } = useAuth();
   const { logEvent } = useAuditLog();
+  const { overallScore } = useAssessment();
   const { toast } = useToast();
-  
+  const navigate = useNavigate();
+
   const [tasks, setTasks] = useState<Task[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [coverage, setCoverage] = useState<IdentifierCoverage>({
@@ -48,17 +58,42 @@ export default function DashboardPage() {
   const [primaryEmail, setPrimaryEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showCadence, setShowCadence] = useState(false);
+  const [daysSinceVisit, setDaysSinceVisit] = useState(0);
 
   useEffect(() => {
     if (user) {
       loadDashboardData();
-      
+
       const hasSeenWelcome = localStorage.getItem(`${WELCOME_SEEN_KEY}-${user.id}`);
       if (!hasSeenWelcome) {
         setShowWelcome(true);
       }
     }
   }, [user]);
+
+  // Weekly cadence check + last-visit tracking
+  useEffect(() => {
+    if (!user || loading) return;
+    const visitKey = `fe-last-visit-${user.id}`;
+    const dismissedKey = `fe-cadence-dismissed-${user.id}`;
+    const lastVisit = localStorage.getItem(visitKey);
+    const dismissed = localStorage.getItem(dismissedKey);
+    const now = Date.now();
+    const doneCount = tasks.filter(t => t.status === 'done').length;
+
+    if (lastVisit) {
+      const days = Math.floor((now - parseInt(lastVisit, 10)) / (1000 * 60 * 60 * 24));
+      setDaysSinceVisit(days);
+      const dismissedRecently = dismissed
+        ? (now - parseInt(dismissed, 10)) < 1000 * 60 * 60 * 24 * 7
+        : false;
+      if (days >= 7 && doneCount > 0 && !dismissedRecently) {
+        setShowCadence(true);
+      }
+    }
+    localStorage.setItem(visitKey, String(now));
+  }, [user, loading, tasks]);
 
   const handleWelcomeClose = () => {
     if (user) {
@@ -68,9 +103,16 @@ export default function DashboardPage() {
     setShowWelcome(false);
   };
 
+  const dismissCadence = () => {
+    if (user) {
+      localStorage.setItem(`fe-cadence-dismissed-${user.id}`, String(Date.now()));
+    }
+    setShowCadence(false);
+  };
+
   const loadDashboardData = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     try {
       const [
@@ -82,7 +124,7 @@ export default function DashboardPage() {
         phonesRes,
         covInputsRes,
       ] = await Promise.all([
-        supabase.from('tasks').select('*').eq('user_id', user.id).order('priority', { ascending: false }),
+        supabase.from('tasks').select('*').eq('user_id', user.id).order('priority', { ascending: true }),
         supabase.from('alerts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
         supabase.from('inventory_emails').select('id, is_primary, email').eq('user_id', user.id),
         supabase.from('inventory_usernames').select('id').eq('user_id', user.id),
@@ -93,7 +135,7 @@ export default function DashboardPage() {
 
       if (tasksRes.data) setTasks(tasksRes.data as Task[]);
       if (alertsRes.data) setAlerts(alertsRes.data as Alert[]);
-      
+
       const emails = emailsRes.data || [];
       const primary = emails.find(e => e.is_primary);
       if (primary) setPrimaryEmail(primary.email);
@@ -114,14 +156,34 @@ export default function DashboardPage() {
     }
   };
 
-  // Dashboard is read-only for task state.
+  const score = Math.round(overallScore?.score ?? 0);
+  const statusLabel = scoreStatusLabel(score);
+  const triggered = overallScore?.triggeredExposures ?? [];
 
-  const { level, total } = calculateIdentifierCoverage(coverage);
-  const coveragePercent = (level / total) * 100;
-  const highSeverityCount = alerts.filter(a => a.severity === 'high' && !a.resolved_at).length;
-  const unresolvedCount = alerts.filter(a => !a.resolved_at).length;
-  const exposure = getExposureLevel(unresolvedCount, highSeverityCount, coveragePercent);
-  const baseline = calculateBaseline(tasks, coverage);
+  const thisWeekTasks = useMemo(
+    () =>
+      tasks
+        .filter(t => t.status !== 'done')
+        .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99))
+        .slice(0, 3),
+    [tasks],
+  );
+
+  const doneCount = tasks.filter(t => t.status === 'done').length;
+  const allDone = tasks.length > 0 && thisWeekTasks.length === 0;
+
+  const completeTask = async (task: Task) => {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ status: 'done', completed_at: new Date().toISOString() })
+      .eq('id', task.id);
+    if (error) {
+      toast({ title: 'Could not update', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'done', completed_at: new Date().toISOString() } : t));
+    await logEvent('task_status_changed', { task_id: task.id, new_status: 'done' });
+  };
 
   if (loading) {
     return (
@@ -147,31 +209,129 @@ export default function DashboardPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : (
-        <div className="space-y-4 sm:space-y-6">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Your digital footprint at a glance</p>
-          </div>
+        <div className="space-y-6">
+          {/* Weekly cadence prompt */}
+          {showCadence && (
+            <div className="flex items-start justify-between gap-3 rounded-md border border-l-4 border-l-primary bg-muted/30 px-4 py-3">
+              <div className="flex-1">
+                <p className="text-sm font-medium">
+                  It's been {daysSinceVisit} days — time for your weekly review.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => navigate('/tasks?tab=open')}
+                >
+                  Start review
+                </Button>
+              </div>
+              <button
+                onClick={dismissCadence}
+                aria-label="Dismiss"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
 
-          <GovernanceStatusBar baselineLabel={baseline.label} hasTasks={tasks.length > 0} />
+          {/* Score Hero */}
+          <Card>
+            <CardContent className="py-8 text-center space-y-4">
+              <div>
+                <div
+                  className="text-foreground"
+                  style={{ fontSize: '56px', fontWeight: 500, lineHeight: 1 }}
+                >
+                  {score}
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">{statusLabel}</p>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all"
+                  style={{ width: `${score}%` }}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
-          <PaymentReminderBanner />
+          {/* This week */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">This week</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {tasks.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Your action plan is being built…</p>
+              ) : allDone ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  You're up to date. Check back next week.
+                </div>
+              ) : (
+                <>
+                  <ul className="space-y-2">
+                    {thisWeekTasks.map(task => (
+                      <li key={task.id} className="flex items-start gap-3">
+                        <Checkbox
+                          className="mt-0.5"
+                          checked={false}
+                          onCheckedChange={() => completeTask(task)}
+                          aria-label={`Mark "${task.title}" complete`}
+                        />
+                        <span className="text-sm">{task.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => navigate('/tasks')}
+                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    See all tasks <ArrowRight className="h-3 w-3" />
+                  </button>
+                </>
+              )}
+            </CardContent>
+          </Card>
 
-          <TierProgressionCard />
+          {/* Open problems */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Open problems</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {triggered.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No critical problems found. Run your weekly review.
+                </p>
+              ) : (
+                triggered.slice(0, 4).map((ex, i) => (
+                  <div
+                    key={ex.exposureType.id + i}
+                    className={`flex items-center justify-between gap-3 rounded-md border border-l-4 ${SEVERITY_BORDER[ex.severity] || 'border-l-muted'} bg-card px-3 py-2`}
+                  >
+                    <span className="text-sm font-medium truncate">{ex.exposureType.name}</span>
+                    <button
+                      onClick={() => navigate('/tasks')}
+                      className="text-xs text-primary hover:underline shrink-0"
+                    >
+                      Fix this →
+                    </button>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
 
+          {/* Coverage + Master Key side-by-side */}
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-            <ExposureCard level={exposure.level} reason={exposure.reason} />
+            <MasterKeyCard primaryEmail={primaryEmail} />
             <IdentifierCoverageCard coverage={coverage} />
           </div>
 
-          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <DigitalBaselineCard baseline={baseline} />
-            <RecommendedActionCard />
-            <TaskCard tasks={tasks} />
-            <AlertsCard alerts={alerts} />
-            <MasterKeyCard primaryEmail={primaryEmail} />
-            <ContainmentCard />
-          </div>
+          <AlertsCard alerts={alerts} />
         </div>
       )}
     </AppLayout>
