@@ -71,8 +71,9 @@ export default function PillarAssessmentPage() {
     <AppLayout>
       <div className="mx-auto max-w-2xl space-y-4">
         <p className="text-xs uppercase tracking-wider text-muted-foreground">
-          Pillar {requested} of {TOTAL_PILLARS}
+          Step {requested} of {TOTAL_PILLARS}
         </p>
+
         <h1 className="text-2xl font-bold">{pillar.name}</h1>
         <p className="text-sm text-muted-foreground">{pillar.description}</p>
 
