@@ -191,7 +191,7 @@ export default function TasksPage() {
     } else {
       if (result.action_id) await confirmAction(result.action_id);
       await logEvent('plan_generated', { task_count: 72 });
-      toast({ title: 'Guided Plan generated', description: '72 tasks created across 12 pillars.' });
+      toast({ title: 'Action plan generated', description: 'Your personalized tasks are ready.' });
       await loadData();
     }
     setGenerating(false);
