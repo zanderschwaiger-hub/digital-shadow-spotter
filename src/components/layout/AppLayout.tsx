@@ -42,33 +42,24 @@ interface AppLayoutProps {
   children: ReactNode;
 }
 
-// Bottom nav — 4 primary tabs + More
+// Bottom nav — 3 primary tabs + More
 const PRIMARY_TABS = [
   { title: 'Home', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Tasks', url: '/tasks', icon: CheckSquare },
-  { title: 'Console', url: '/governance-console', icon: Shield },
-  { title: 'Log', url: '/agent-log', icon: ScrollText },
+  { title: 'Actions', url: '/tasks', icon: CheckSquare },
+  { title: 'Coverage', url: '/inventory', icon: User },
 ];
 
 const SECONDARY_NAV = [
-  { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-  { title: 'Governance Console', url: '/governance-console', icon: Shield },
-  { title: 'Pillar Directory', url: '/pillar-directory', icon: BookOpen },
-  { title: 'Decision Queue', url: '/decision-queue', icon: GitBranch },
-  { title: 'Governance Cadence', url: '/governance-cadence', icon: ClipboardList },
-  { title: 'Audit History', url: '/governance-audit', icon: ScrollText },
-  { title: 'Governance', url: '/governance', icon: BookOpen },
-  { title: 'Governance File', url: '/governance-file', icon: ClipboardList },
-  { title: 'Exposures', url: '/exposures', icon: Target },
-  { title: 'Decisions', url: '/decisions', icon: GitBranch },
-  { title: 'Identity Inventory', url: '/inventory', icon: User },
-  { title: 'Signals', url: '/signals', icon: Radio },
-  { title: 'Tasks', url: '/tasks', icon: CheckSquare },
-  { title: 'Broker Opt-outs', url: '/brokers', icon: Building2 },
-  { title: 'Agent Log', url: '/agent-log', icon: ScrollText },
+  { title: 'Home', url: '/dashboard', icon: LayoutDashboard },
+  { title: 'Action plan', url: '/tasks', icon: CheckSquare },
+  { title: 'My coverage', url: '/inventory', icon: User },
+  { title: 'Breach check', url: '/signals', icon: Radio },
+  { title: 'Data brokers', url: '/brokers', icon: Building2 },
+  { title: 'Playbooks', url: '/playbooks', icon: BookOpen },
   { title: 'Reports', url: '/reports', icon: FileText },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
+
 
 export function AppLayout({ children }: AppLayoutProps) {
   const { signOut, user } = useAuth();
