@@ -318,22 +318,23 @@ export default function TasksPage() {
       <AppLayout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold">Guided Plan</h1>
-            <p className="text-muted-foreground">72 tasks across 12 pillars — your governance course.</p>
+            <h1 className="text-2xl font-bold">Action plan</h1>
+            <p className="text-muted-foreground">Work through these to reduce your exposure.</p>
           </div>
           <Card className="border-dashed">
             <CardContent className="py-16 text-center space-y-4">
               <ListTodo className="h-12 w-12 mx-auto text-muted-foreground" />
-              <p className="text-lg font-medium">No guided plan yet</p>
+              <p className="text-lg font-medium">Your action plan is being built…</p>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Generate your personalized course of 72 tasks organized by the 12 governance pillars.
+                Generate your personalized set of actions to reduce exposure.
               </p>
               <Button onClick={generatePlan} disabled={generating} size="lg">
                 {generating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlayCircle className="mr-2 h-4 w-4" />}
-                Generate Guided Plan
+                Build my action plan
               </Button>
             </CardContent>
           </Card>
+
         </div>
       </AppLayout>
     );
