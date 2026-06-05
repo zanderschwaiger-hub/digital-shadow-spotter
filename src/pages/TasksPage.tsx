@@ -554,7 +554,7 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
+                    <CardTitle className={`text-sm font-medium ${status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{task.title}</CardTitle>
                     <Badge variant={config.variant} className="text-xs">
                       <StatusIcon className="h-3 w-3 mr-1" />
                       {config.label}
@@ -570,10 +570,14 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                       </Badge>
                     )}
                   </div>
-                  {task.description && (
+                  {status === 'done' && task.completed_at ? (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Completed {formatDistanceToNow(new Date(task.completed_at), { addSuffix: true })}
+                    </p>
+                  ) : task.description ? (
                     <CardDescription className="text-xs mt-0.5">{task.description}</CardDescription>
-                  )}
-                  {catItem?.effort_minutes && (
+                  ) : null}
+                  {catItem?.effort_minutes && status !== 'done' && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                       <Timer className="h-3 w-3" /> ~{catItem.effort_minutes} min
                     </span>
