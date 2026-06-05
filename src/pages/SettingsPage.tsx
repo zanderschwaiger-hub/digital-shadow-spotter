@@ -154,7 +154,24 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        <PaymentReminderBanner />
+        <Card>
+          <CardContent className="py-4 space-y-2">
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); document.getElementById('payment-reminder')?.scrollIntoView(); }}
+              className="hidden"
+            >hidden</a>
+            <div id="payment-reminder">
+              <PaymentReminderBanner />
+            </div>
+            <a
+              href="/settings#billing"
+              className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Manage plan →
+            </a>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardContent className="py-4">
