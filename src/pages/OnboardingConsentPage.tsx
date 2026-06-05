@@ -173,6 +173,27 @@ export default function OnboardingConsentPage() {
                 operates with my explicit consent and will never perform unauthorized actions.
               </label>
             </div>
+
+            <div className="w-full space-y-2">
+              <p className="text-sm font-medium">I'm using Freedom Engine to protect:</p>
+              <div className="space-y-2">
+                {([
+                  { value: 'personal', label: 'My personal digital life' },
+                  { value: 'creator', label: 'My creator or online business accounts' },
+                  { value: 'business', label: 'A small business I run' },
+                ] as Array<{ value: AccountType; label: string }>).map(opt => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    variant={selectedAccountType === opt.value ? 'default' : 'outline'}
+                    className="w-full justify-start"
+                    onClick={() => setSelectedAccountType(opt.value)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
             <Button 
               className="w-full" 
               disabled={!accepted || loading}
