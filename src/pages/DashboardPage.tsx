@@ -297,7 +297,7 @@ export default function DashboardPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium truncate">{task.title}</p>
                           <p className="text-xs text-muted-foreground capitalize">
-                            {task.category || task.type || 'Action'}
+                            {task.type || 'Action'}
                           </p>
                         </div>
                         <ChevronRight className="h-4 w-4 text-muted-foreground mt-1" />
