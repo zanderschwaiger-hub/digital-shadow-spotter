@@ -10,11 +10,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useAssessment } from '@/hooks/useAssessment';
-import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { CheckCircle2, X, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  CheckCircle2,
+  X,
+  ShieldCheck,
+  ChevronRight,
+  Mail,
+  Smartphone,
+  Users,
+  ShieldAlert,
+  Globe,
+} from 'lucide-react';
+import { CONTAINMENT_PLAYBOOKS } from '@/lib/containment-playbooks';
 import {
   Task,
   Alert,
@@ -24,24 +34,40 @@ import {
 
 const WELCOME_SEEN_KEY = 'freedom-engine-welcome-seen';
 
-function scoreStatusLabel(score: number): string {
-  if (score < 40) return 'High exposure — action needed';
-  if (score < 65) return 'Getting there — keep going';
+const ICON_MAP: Record<string, React.ElementType> = {
+  Mail, Smartphone, Users, ShieldAlert, Globe,
+};
+
+function scoreLabel(score: number): string {
+  if (score < 40) return 'Significant gaps — work through your action plan';
+  if (score < 65) return 'Getting there — keep going this week';
   if (score < 85) return 'Good control — stay consistent';
   return 'Strong posture — maintain it';
 }
 
+function scoreBarClass(score: number): string {
+  if (score < 40) return 'bg-destructive';
+  if (score < 65) return 'bg-[hsl(var(--severity-medium))]';
+  if (score < 85) return 'bg-[hsl(var(--severity-low))]';
+  return 'bg-primary';
+}
+
 const SEVERITY_BORDER: Record<string, string> = {
   P0: 'border-l-destructive',
-  P1: 'border-l-amber-500',
+  P1: 'border-l-[hsl(var(--severity-medium))]',
   P2: 'border-l-muted-foreground/40',
+};
+
+const SEVERITY_LABEL: Record<string, string> = {
+  P0: 'High',
+  P1: 'Medium',
+  P2: 'Low',
 };
 
 export default function DashboardPage() {
   const { user, profile } = useAuth();
   const { logEvent } = useAuditLog();
-  const { overallScore } = useAssessment();
-  const { toast } = useToast();
+  const { overallScore, loading: scoreLoading } = useAssessment();
   const navigate = useNavigate();
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -72,7 +98,6 @@ export default function DashboardPage() {
     }
   }, [user]);
 
-  // Weekly cadence check + last-visit tracking
   useEffect(() => {
     if (!user || loading) return;
     const visitKey = `fe-last-visit-${user.id}`;
@@ -80,15 +105,13 @@ export default function DashboardPage() {
     const lastVisit = localStorage.getItem(visitKey);
     const dismissed = localStorage.getItem(dismissedKey);
     const now = Date.now();
-    const doneCount = tasks.filter(t => t.status === 'done').length;
+    const todayKey = new Date().toISOString().slice(0, 10);
 
     if (lastVisit) {
       const days = Math.floor((now - parseInt(lastVisit, 10)) / (1000 * 60 * 60 * 24));
       setDaysSinceVisit(days);
-      const dismissedRecently = dismissed
-        ? (now - parseInt(dismissed, 10)) < 1000 * 60 * 60 * 24 * 7
-        : false;
-      if (days >= 7 && doneCount > 0 && !dismissedRecently) {
+      const dismissedToday = dismissed === todayKey;
+      if (days >= 7 && tasks.length > 0 && !dismissedToday) {
         setShowCadence(true);
       }
     }
@@ -105,7 +128,8 @@ export default function DashboardPage() {
 
   const dismissCadence = () => {
     if (user) {
-      localStorage.setItem(`fe-cadence-dismissed-${user.id}`, String(Date.now()));
+      const todayKey = new Date().toISOString().slice(0, 10);
+      localStorage.setItem(`fe-cadence-dismissed-${user.id}`, todayKey);
     }
     setShowCadence(false);
   };
@@ -156,34 +180,20 @@ export default function DashboardPage() {
     }
   };
 
-  const score = Math.round(overallScore?.score ?? 0);
-  const statusLabel = scoreStatusLabel(score);
+  const healthScore = Math.round(overallScore?.score ?? 0);
   const triggered = overallScore?.triggeredExposures ?? [];
 
   const thisWeekTasks = useMemo(
     () =>
       tasks
-        .filter(t => t.status !== 'done')
+        .filter(t => t.status !== 'done' && t.status !== 'completed')
         .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99))
         .slice(0, 3),
     [tasks],
   );
 
-  const doneCount = tasks.filter(t => t.status === 'done').length;
   const allDone = tasks.length > 0 && thisWeekTasks.length === 0;
-
-  const completeTask = async (task: Task) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ status: 'done', completed_at: new Date().toISOString() })
-      .eq('id', task.id);
-    if (error) {
-      toast({ title: 'Could not update', description: error.message, variant: 'destructive' });
-      return;
-    }
-    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, status: 'done', completed_at: new Date().toISOString() } : t));
-    await logEvent('task_status_changed', { task_id: task.id, new_status: 'done' });
-  };
+  const showScorePlaceholder = scoreLoading || (healthScore === 0 && !overallScore);
 
   if (loading) {
     return (
@@ -199,6 +209,8 @@ export default function DashboardPage() {
     !profile?.authorization_confirmed ||
     profile?.authorization_version !== CURRENT_AUTHORIZATION_VERSION;
 
+  const playbookPreview = CONTAINMENT_PLAYBOOKS.slice(0, 3);
+
   return (
     <AppLayout>
       <AuthorizationConfirmModal open={needsAuthorization} onConfirmed={() => {}} />
@@ -210,50 +222,50 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Weekly cadence prompt */}
           {showCadence && (
-            <div className="flex items-start justify-between gap-3 rounded-md border border-l-4 border-l-primary bg-muted/30 px-4 py-3">
-              <div className="flex-1">
-                <p className="text-sm font-medium">
-                  It's been {daysSinceVisit} days — time for your weekly review.
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mt-2"
-                  onClick={() => navigate('/tasks?tab=open')}
-                >
-                  Start review
-                </Button>
-              </div>
+            <div className="flex items-start justify-between gap-3 rounded-r-lg border-l-4 border-primary bg-muted/40 px-4 py-3">
+              <p className="text-sm flex-1">
+                It's been {daysSinceVisit} days — time for your weekly review.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => navigate('/tasks?tab=open')}
+              >
+                Review now
+              </Button>
               <button
                 onClick={dismissCadence}
                 aria-label="Dismiss"
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors mt-1"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
           )}
 
-          {/* Score Hero */}
+          {/* Health Score Hero */}
           <Card>
-            <CardContent className="py-8 text-center space-y-4">
-              <div>
-                <div
-                  className="text-foreground"
-                  style={{ fontSize: '56px', fontWeight: 500, lineHeight: 1 }}
-                >
-                  {score}
-                </div>
-                <p className="text-sm text-muted-foreground mt-2">{statusLabel}</p>
-              </div>
-              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all"
-                  style={{ width: `${score}%` }}
-                />
-              </div>
+            <CardContent className="p-6 text-center space-y-3">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Digital health score
+              </p>
+              {showScorePlaceholder ? (
+                <p className="text-sm text-muted-foreground py-6">
+                  Complete your action plan to build your score
+                </p>
+              ) : (
+                <>
+                  <div className="text-5xl font-medium">{healthScore}</div>
+                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full transition-all ${scoreBarClass(healthScore)}`}
+                      style={{ width: `${healthScore}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{scoreLabel(healthScore)}</p>
+                </>
+              )}
             </CardContent>
           </Card>
 
@@ -264,7 +276,9 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {tasks.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Your action plan is being built…</p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground animate-pulse">
+                  Building your plan…
+                </div>
               ) : allDone ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
@@ -272,66 +286,103 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <>
-                  <ul className="space-y-2">
+                  <ul className="divide-y">
                     {thisWeekTasks.map(task => (
-                      <li key={task.id} className="flex items-start gap-3">
-                        <Checkbox
-                          className="mt-0.5"
-                          checked={false}
-                          onCheckedChange={() => completeTask(task)}
-                          aria-label={`Mark "${task.title}" complete`}
-                        />
-                        <span className="text-sm">{task.title}</span>
+                      <li
+                        key={task.id}
+                        onClick={() => navigate(`/tasks?highlight=${task.id}`)}
+                        className="flex items-start gap-3 py-2.5 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded transition-colors"
+                      >
+                        <span className="mt-0.5 h-4 w-4 shrink-0 rounded-full border border-border" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium truncate">{task.title}</p>
+                          <p className="text-xs text-muted-foreground capitalize">
+                            {task.category || task.type || 'Action'}
+                          </p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground mt-1" />
                       </li>
                     ))}
                   </ul>
                   <button
                     onClick={() => navigate('/tasks')}
-                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                    className="text-sm text-primary hover:underline"
                   >
-                    See all tasks <ArrowRight className="h-3 w-3" />
+                    See all actions →
                   </button>
                 </>
               )}
             </CardContent>
           </Card>
 
-          {/* Open problems */}
+          {/* Open risks */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Open problems</CardTitle>
+              <CardTitle className="text-base">Open risks</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-0">
               {triggered.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No critical problems found. Run your weekly review.
-                </p>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  No critical risks detected.
+                </div>
               ) : (
                 triggered.slice(0, 4).map((ex, i) => (
                   <div
                     key={ex.exposureType.id + i}
-                    className={`flex items-center justify-between gap-3 rounded-md border border-l-4 ${SEVERITY_BORDER[ex.severity] || 'border-l-muted'} bg-card px-3 py-2`}
+                    onClick={() => navigate('/tasks')}
+                    className={`relative pl-4 py-2.5 border-b last:border-0 cursor-pointer hover:bg-muted/40 border-l-4 ${SEVERITY_BORDER[ex.severity] || 'border-l-muted'} flex items-center justify-between gap-3`}
                   >
                     <span className="text-sm font-medium truncate">{ex.exposureType.name}</span>
-                    <button
-                      onClick={() => navigate('/tasks')}
-                      className="text-xs text-primary hover:underline shrink-0"
-                    >
-                      Fix this →
-                    </button>
+                    <Badge variant="outline" className="shrink-0 text-xs">
+                      {SEVERITY_LABEL[ex.severity] || ex.severity}
+                    </Badge>
                   </div>
                 ))
               )}
             </CardContent>
           </Card>
 
-          {/* Coverage + Master Key side-by-side */}
+          {/* Coverage */}
+          <IdentifierCoverageCard coverage={coverage} />
+
+          {/* Emergency / If something goes wrong */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">If something goes wrong</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Step-by-step guides for common situations
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-0">
+              {playbookPreview.map(pb => {
+                const Icon = ICON_MAP[pb.icon] || ShieldAlert;
+                return (
+                  <div
+                    key={pb.id}
+                    onClick={() => navigate('/playbooks')}
+                    className="flex items-center gap-3 py-2.5 border-b last:border-0 cursor-pointer hover:bg-muted/40 -mx-2 px-2 rounded transition-colors"
+                  >
+                    <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm flex-1 truncate">{pb.title}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                );
+              })}
+              <button
+                onClick={() => navigate('/playbooks')}
+                className="text-sm text-primary hover:underline mt-3"
+              >
+                See all playbooks →
+              </button>
+            </CardContent>
+          </Card>
+
+          {/* Master Key + Alerts */}
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
             <MasterKeyCard primaryEmail={primaryEmail} />
-            <IdentifierCoverageCard coverage={coverage} />
+            <AlertsCard alerts={alerts} />
           </div>
-
-          <AlertsCard alerts={alerts} />
         </div>
       )}
     </AppLayout>

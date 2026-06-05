@@ -35,18 +35,18 @@ const STATUS_CONFIG: Record<CourseStatus, { label: string; icon: typeof CheckCir
 };
 
 const AREA_NAMES: Record<string, string> = {
-  'master-key-control': 'Email & Recovery Control',
-  'credential-system': 'Passwords & Credentials',
-  'mfa-standard': 'Two-Factor Authentication',
-  'account-inventory': 'Account Inventory',
-  'account-closure': 'Unused Accounts',
-  'breach-reality': 'Breach Exposure',
-  'session-device-control': 'Sessions & Devices',
-  'connected-apps': 'Connected Apps',
-  'inbox-cloud-hygiene': 'Inbox & Cloud Storage',
-  'personal-content': 'Social Media & Content',
-  'public-footprint': 'Public Footprint',
-  'governance-cadence': 'Review Cadence',
+  'master-key-control': 'Email & recovery control',
+  'credential-system': 'Passwords & credentials',
+  'mfa-standard': 'Two-factor authentication',
+  'account-inventory': 'Account inventory',
+  'account-closure': 'Unused accounts',
+  'breach-reality': 'Breach exposure',
+  'session-device-control': 'Sessions & devices',
+  'connected-apps': 'Connected apps',
+  'inbox-cloud-hygiene': 'Inbox & cloud storage',
+  'personal-content': 'Social media & content',
+  'public-footprint': 'Public footprint',
+  'governance-cadence': 'Review cadence',
 };
 
 const PILLAR_ORDER = [

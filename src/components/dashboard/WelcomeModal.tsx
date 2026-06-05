@@ -21,33 +21,33 @@ import {
 
 const WELCOME_STEPS = [
   {
+    icon: Shield,
+    title: "You're in the right place",
+    description: "Freedom Engine helps you clean up your digital life and stay in control — without becoming a security expert.",
+    action: '/tasks',
+    actionLabel: 'See my action plan'
+  },
+  {
     icon: ListChecks,
-    title: 'Complete Your Inventory',
-    description: 'Add your emails, usernames, and accounts so we can check for exposures.',
+    title: 'Your action plan is ready',
+    description: "We've built a starter set of tasks based on what most people need to fix first. Work through them at your own pace.",
+    action: '/tasks',
+    actionLabel: 'Start my first task'
+  },
+  {
+    icon: Mail,
+    title: 'Add your accounts',
+    description: 'Add your emails and important accounts so we can check for breaches and track your coverage.',
     action: '/inventory',
-    actionLabel: 'Go to Inventory'
+    actionLabel: 'Add my accounts'
   },
   {
     icon: Lock,
-    title: 'Set Up a Password Manager',
-    description: 'A password manager is the foundation of good digital hygiene.',
-    action: '/tasks',
-    actionLabel: 'View Tasks'
+    title: 'When things go wrong',
+    description: "If something gets compromised, we have step-by-step response guides. You'll never have to figure it out alone.",
+    action: '/playbooks',
+    actionLabel: 'See response guides'
   },
-  {
-    icon: Shield,
-    title: 'Enable Two-Factor Authentication',
-    description: 'Protect your most important accounts with an extra layer of security.',
-    action: '/tasks',
-    actionLabel: 'View Tasks'
-  },
-  {
-    icon: Eye,
-    title: 'Start Data Broker Opt-Outs',
-    description: 'Remove your personal information from people-search websites.',
-    action: '/brokers',
-    actionLabel: 'View Brokers'
-  }
 ];
 
 interface WelcomeModalProps {
