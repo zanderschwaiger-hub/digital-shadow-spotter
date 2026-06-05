@@ -378,7 +378,7 @@ export default function TasksPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">Action plan</h1>
-            <p className="text-sm text-muted-foreground">Work through these to reduce your exposure. {counts.done}/{counts.total} done</p>
+            <p className="text-sm text-muted-foreground">Work through these to clean up your digital life. {counts.done}/{counts.total} done</p>
 
           </div>
         </div>
