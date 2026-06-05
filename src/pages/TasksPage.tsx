@@ -70,6 +70,7 @@ export default function TasksPage() {
   const { toast } = useToast();
   const { logEvent } = useAuditLog();
   const { proposeAction, confirmAction, rejectAction, getNextRecommendation } = useAgentEngine();
+  const { overallScore } = useAssessment();
 
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get('highlight');
