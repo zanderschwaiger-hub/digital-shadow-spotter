@@ -386,6 +386,12 @@ export default function TasksPage() {
           </div>
         </div>
 
+        {overallScore && overallScore.score > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Your score: {Math.round(overallScore.score)}/100 · Complete more actions to improve it
+          </p>
+        )}
+
         {/* Agent recommendation */}
         {recommendation && (
           <Card className="border-primary/30 bg-primary/5">
