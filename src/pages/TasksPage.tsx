@@ -321,7 +321,7 @@ export default function TasksPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold">Action plan</h1>
-            <p className="text-muted-foreground">Work through these to reduce your exposure.</p>
+            <p className="text-muted-foreground">Work through these to clean up your digital life.</p>
           </div>
           <Card className="border-dashed">
             <CardContent className="py-16 text-center space-y-4">
