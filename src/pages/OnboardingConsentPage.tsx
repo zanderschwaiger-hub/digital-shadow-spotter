@@ -47,8 +47,11 @@ const CONSENT_ITEMS = [
   }
 ];
 
+type AccountType = 'personal' | 'creator' | 'business';
+
 export default function OnboardingConsentPage() {
   const [accepted, setAccepted] = useState(false);
+  const [selectedAccountType, setSelectedAccountType] = useState<AccountType>('personal');
   const [loading, setLoading] = useState(false);
   const { user, refreshProfile } = useAuth();
   const { logEvent } = useAuditLog();
@@ -65,8 +68,9 @@ export default function OnboardingConsentPage() {
         .upsert({
           user_id: user.id,
           onboarding_completed: true,
-          consent_accepted_at: new Date().toISOString()
-        }, {
+          consent_accepted_at: new Date().toISOString(),
+          account_type: selectedAccountType,
+        } as never, {
           onConflict: 'user_id'
         });
 
@@ -168,6 +172,27 @@ export default function OnboardingConsentPage() {
                 I understand and accept these principles. I acknowledge that Freedom Engine 
                 operates with my explicit consent and will never perform unauthorized actions.
               </label>
+            </div>
+
+            <div className="w-full space-y-2">
+              <p className="text-sm font-medium">I'm using Freedom Engine to protect:</p>
+              <div className="space-y-2">
+                {([
+                  { value: 'personal', label: 'My personal digital life' },
+                  { value: 'creator', label: 'My creator or online business accounts' },
+                  { value: 'business', label: 'A small business I run' },
+                ] as Array<{ value: AccountType; label: string }>).map(opt => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    variant={selectedAccountType === opt.value ? 'default' : 'outline'}
+                    className="w-full justify-start"
+                    onClick={() => setSelectedAccountType(opt.value)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
             </div>
             <Button 
               className="w-full" 

@@ -21,7 +21,7 @@ export function IdentifierCoverageCard({ coverage }: IdentifierCoverageCardProps
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
           <Shield className="h-4 w-4" />
-          Coverage Level
+          Account coverage
         </CardTitle>
         <Link to="/inventory">
           <Button variant="ghost" size="sm" className="text-xs">

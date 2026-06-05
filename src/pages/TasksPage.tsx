@@ -9,6 +9,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useAgentEngine } from '@/hooks/useAgentEngine';
 import { useAuditLog } from '@/hooks/useAuditLog';
+import { useAssessment } from '@/hooks/useAssessment';
+import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,18 +37,18 @@ const STATUS_CONFIG: Record<CourseStatus, { label: string; icon: typeof CheckCir
 };
 
 const AREA_NAMES: Record<string, string> = {
-  'master-key-control': 'Email & Recovery Control',
-  'credential-system': 'Passwords & Credentials',
-  'mfa-standard': 'Two-Factor Authentication',
-  'account-inventory': 'Account Inventory',
-  'account-closure': 'Unused Accounts',
-  'breach-reality': 'Breach Exposure',
-  'session-device-control': 'Sessions & Devices',
-  'connected-apps': 'Connected Apps',
-  'inbox-cloud-hygiene': 'Inbox & Cloud Storage',
-  'personal-content': 'Social Media & Content',
-  'public-footprint': 'Public Footprint',
-  'governance-cadence': 'Review Cadence',
+  'master-key-control': 'Email & recovery control',
+  'credential-system': 'Passwords & credentials',
+  'mfa-standard': 'Two-factor authentication',
+  'account-inventory': 'Account inventory',
+  'account-closure': 'Unused accounts',
+  'breach-reality': 'Breach exposure',
+  'session-device-control': 'Sessions & devices',
+  'connected-apps': 'Connected apps',
+  'inbox-cloud-hygiene': 'Inbox & cloud storage',
+  'personal-content': 'Social media & content',
+  'public-footprint': 'Public footprint',
+  'governance-cadence': 'Review cadence',
 };
 
 const PILLAR_ORDER = [
@@ -68,6 +70,7 @@ export default function TasksPage() {
   const { toast } = useToast();
   const { logEvent } = useAuditLog();
   const { proposeAction, confirmAction, rejectAction, getNextRecommendation } = useAgentEngine();
+  const { overallScore } = useAssessment();
 
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get('highlight');
@@ -321,7 +324,7 @@ export default function TasksPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold">Action plan</h1>
-            <p className="text-muted-foreground">Work through these to reduce your exposure.</p>
+            <p className="text-muted-foreground">Work through these to clean up your digital life.</p>
           </div>
           <Card className="border-dashed">
             <CardContent className="py-16 text-center space-y-4">
@@ -378,10 +381,16 @@ export default function TasksPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold">Action plan</h1>
-            <p className="text-sm text-muted-foreground">Work through these to reduce your exposure. {counts.done}/{counts.total} done</p>
+            <p className="text-sm text-muted-foreground">Work through these to clean up your digital life. {counts.done}/{counts.total} done</p>
 
           </div>
         </div>
+
+        {overallScore && overallScore.score > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Your score: {Math.round(overallScore.score)}/100 · Complete more actions to improve it
+          </p>
+        )}
 
         {/* Agent recommendation */}
         {recommendation && (
@@ -545,7 +554,7 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <CardTitle className="text-sm font-medium">{task.title}</CardTitle>
+                    <CardTitle className={`text-sm font-medium ${status === 'done' ? 'line-through text-muted-foreground' : ''}`}>{task.title}</CardTitle>
                     <Badge variant={config.variant} className="text-xs">
                       <StatusIcon className="h-3 w-3 mr-1" />
                       {config.label}
@@ -561,10 +570,14 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                       </Badge>
                     )}
                   </div>
-                  {task.description && (
+                  {status === 'done' && task.completed_at ? (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Completed {formatDistanceToNow(new Date(task.completed_at), { addSuffix: true })}
+                    </p>
+                  ) : task.description ? (
                     <CardDescription className="text-xs mt-0.5">{task.description}</CardDescription>
-                  )}
-                  {catItem?.effort_minutes && (
+                  ) : null}
+                  {catItem?.effort_minutes && status !== 'done' && (
                     <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                       <Timer className="h-3 w-3" /> ~{catItem.effort_minutes} min
                     </span>

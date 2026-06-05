@@ -478,6 +478,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string | null
           authorization_confirmed: boolean
           authorization_confirmed_at: string | null
           authorization_version: string | null
@@ -493,6 +494,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_type?: string | null
           authorization_confirmed?: boolean
           authorization_confirmed_at?: string | null
           authorization_version?: string | null
@@ -508,6 +510,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_type?: string | null
           authorization_confirmed?: boolean
           authorization_confirmed_at?: string | null
           authorization_version?: string | null

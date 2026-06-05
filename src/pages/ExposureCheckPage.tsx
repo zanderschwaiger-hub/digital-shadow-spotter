@@ -34,6 +34,15 @@ function bandFor(score: number): 'high' | 'medium' | 'low' {
   return 'low';
 }
 
+const PROBLEM_GROUPS: Array<{ indices: number[]; label: string; tip: string }> = [
+  { indices: [0, 1, 2, 3], label: 'Credential gaps detected', tip: 'Passwords and access control' },
+  { indices: [4, 5, 6], label: 'Recovery path weaknesses', tip: 'Account recovery and 2FA' },
+  { indices: [7, 8, 9], label: 'Monitoring blind spots', tip: 'Breach awareness and alerts' },
+  { indices: [10, 11, 12], label: 'Social & public exposure', tip: 'Privacy and footprint' },
+  { indices: [13, 14, 15], label: 'No recovery plan documented', tip: 'What to do when things go wrong' },
+  { indices: [16, 17], label: 'No review cadence set', tip: 'Regular maintenance' },
+];
+
 export default function ExposureCheckPage() {
   const { user, loading: authLoading } = useAuth();
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
@@ -60,7 +69,6 @@ export default function ExposureCheckPage() {
     const answers_json = QUESTIONS.map((q, i) => ({ q, a: answers[i] }));
     await supabase.from('exposure_checks').insert({ score, band, answers_json });
 
-    // Locked scoring adjustment for high "not sure" counts
     const notSureCount = Object.values(answers).filter(a => a === 'unsure').length;
     let adjustedBand = band;
     if (notSureCount > 3) {
@@ -78,48 +86,42 @@ export default function ExposureCheckPage() {
       low: 'Looking solid',
     } as const;
 
-    const hasGap = (range: number[]) =>
-      range.some(i => answers[i] === 'no' || answers[i] === 'unsure');
-
-    const problems: string[] = [];
-    if (hasGap([0, 1, 2, 3])) problems.push('Credential control gaps detected');
-    if (hasGap([4, 5, 6])) problems.push('Recovery path weaknesses found');
-    if (hasGap([7, 8, 9])) problems.push('Monitoring blind spots present');
-    if (hasGap([10, 11, 12])) problems.push('Social & public exposure risk');
-    if (hasGap([13, 14, 15])) problems.push('No recovery plan documented');
-    if (hasGap([16, 17])) problems.push('No review cadence set');
+    const detected = PROBLEM_GROUPS.filter(g =>
+      g.indices.some(i => answers[i] === 'no' || answers[i] === 'unsure')
+    ).slice(0, 3);
 
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <Card className="max-w-lg w-full p-8 space-y-6">
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Tier 0 — Exposure Check</p>
-            <div className="text-5xl font-medium">{submitted.score}/18</div>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">Digital health check</p>
+            <div className="text-4xl font-medium">{submitted.score} / 18</div>
             <h1 className="text-xl font-semibold">{bandLabels[submitted.band]}</h1>
             <p className="text-sm text-muted-foreground">
-              Here's what we found based on your answers.
+              Here's what your answers suggest.
             </p>
           </div>
 
-          {problems.length > 0 && (
+          {detected.length > 0 && (
             <div className="space-y-2">
-              {problems.slice(0, 3).map((p) => (
+              {detected.map(g => (
                 <div
-                  key={p}
-                  className="rounded-md border border-l-4 border-l-amber-500 bg-card px-3 py-2 text-sm"
+                  key={g.label}
+                  className="border-l-4 border-[hsl(var(--severity-medium))] bg-muted/40 rounded-r pl-3 py-2 text-sm"
                 >
-                  {p}
+                  <p className="font-medium">{g.label}</p>
+                  <p className="text-xs text-muted-foreground">{g.tip}</p>
                 </div>
               ))}
             </div>
           )}
 
-          <div className="space-y-2">
+          <div>
             <Button asChild className="w-full">
               <Link to="/login">Build my action plan</Link>
             </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Takes 2 minutes. No credit card.
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Takes 2 minutes. No credit card needed.
             </p>
           </div>
         </Card>
@@ -127,15 +129,14 @@ export default function ExposureCheckPage() {
     );
   }
 
-
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Tier 0 — Exposure Check</p>
-          <h1 className="text-2xl font-bold mt-2">18 questions. No account needed.</h1>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Digital health check</p>
+          <h1 className="text-2xl font-bold mt-2">How safe is your digital life?</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Answer honestly. "Not sure" counts as No. Your answers are not linked to your identity.
+            18 questions. No account needed. Takes about 3 minutes.
           </p>
         </div>
 

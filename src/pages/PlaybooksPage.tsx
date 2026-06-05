@@ -80,10 +80,14 @@ export default function PlaybooksPage() {
     <AppLayout>
       <div className="space-y-4 sm:space-y-6">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold">Containment Playbooks</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">When things go wrong</h1>
           <p className="text-sm text-muted-foreground">
-            Structured response checklists for when an account or identity element may be compromised. No automated actions — just guided steps you control.
+            Step-by-step guides for common situations. Work through these calmly — one step at a time.
           </p>
+        </div>
+
+        <div className="bg-muted/40 border rounded-lg px-4 py-3 text-sm text-muted-foreground">
+          These guides are for when something has gone wrong or you think it might have. Pick the situation that matches.
         </div>
 
         <Accordion type="single" collapsible className="space-y-3">
