@@ -47,8 +47,11 @@ const CONSENT_ITEMS = [
   }
 ];
 
+type AccountType = 'personal' | 'creator' | 'business';
+
 export default function OnboardingConsentPage() {
   const [accepted, setAccepted] = useState(false);
+  const [selectedAccountType, setSelectedAccountType] = useState<AccountType>('personal');
   const [loading, setLoading] = useState(false);
   const { user, refreshProfile } = useAuth();
   const { logEvent } = useAuditLog();
@@ -65,8 +68,9 @@ export default function OnboardingConsentPage() {
         .upsert({
           user_id: user.id,
           onboarding_completed: true,
-          consent_accepted_at: new Date().toISOString()
-        }, {
+          consent_accepted_at: new Date().toISOString(),
+          account_type: selectedAccountType,
+        } as never, {
           onConflict: 'user_id'
         });
 
