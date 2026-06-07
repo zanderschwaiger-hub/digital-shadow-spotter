@@ -356,7 +356,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p><strong>Version:</strong> 1.0.0</p>
-            <p><strong>Tagline:</strong> "Emotional safety through technical discipline."</p>
+            <p><strong>Tagline:</strong> "Digital safety through technical discipline."</p>
             <p className="pt-2">
               Freedom Engine is a governance-first, human-in-the-loop digital footprint 
               maintenance tool. We never hack, scrape illegally, or access your accounts 
