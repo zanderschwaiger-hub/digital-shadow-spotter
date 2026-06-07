@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -364,6 +365,12 @@ export default function SettingsPage() {
             </p>
           </CardContent>
         </Card>
+
+        <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground pt-2">
+          <Link to="/privacy" className="hover:text-foreground underline-offset-4 hover:underline">Privacy Policy</Link>
+          <span>·</span>
+          <Link to="/terms" className="hover:text-foreground underline-offset-4 hover:underline">Terms of Service</Link>
+        </div>
       </div>
     </AppLayout>
   );

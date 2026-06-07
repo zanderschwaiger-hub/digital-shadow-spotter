@@ -38,6 +38,8 @@ import RiskDetailPage from "./pages/RiskDetailPage";
 import GovernanceAuditPage from "./pages/GovernanceAuditPage";
 import GovernanceCadencePage from "./pages/GovernanceCadencePage";
 import NotFound from "./pages/NotFound";
+import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 
 const queryClient = new QueryClient();
 
@@ -270,6 +272,9 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
