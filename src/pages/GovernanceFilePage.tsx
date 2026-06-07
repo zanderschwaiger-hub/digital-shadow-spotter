@@ -196,7 +196,7 @@ export default function GovernanceFilePage() {
       '═══════════════════════════════════════════════════════════════',
       '',
       'This file is an audit record of your governance reviews.',
-      '"Emotional safety through technical discipline."',
+      '"Digital safety through technical discipline."',
     );
 
     const blob = new Blob([lines.join('\n')], { type: 'text/plain' });

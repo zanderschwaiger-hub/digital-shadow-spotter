@@ -65,7 +65,7 @@ export default function EmbedPage() {
         {/* Footer */}
         <div className="mt-4 text-center">
           <p className="text-xs text-muted-foreground italic">
-            "Emotional safety through technical discipline."
+            "Digital safety through technical discipline."
           </p>
         </div>
       </div>
