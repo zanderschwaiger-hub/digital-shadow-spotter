@@ -31,7 +31,7 @@ export function TierGate({ mode = 'baseline', children }: TierGateProps) {
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Baseline required</p>
           <h1 className="text-2xl font-bold">Complete your Baseline</h1>
           <p className="text-sm text-muted-foreground">
-            Finish all 12 pillars to unlock this area.
+            Complete your setup to unlock this area.
           </p>
           <Button asChild className="w-full">
             <Link to="/assessment">Go to Baseline</Link>
