@@ -6,24 +6,24 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 const QUESTIONS = [
-  'Do you use a password manager for most of your accounts?',
-  'Is two-factor authentication enabled on your primary email?',
-  'Is two-factor authentication enabled on your bank or financial accounts?',
-  'Do you use unique passwords for every important account?',
-  'Have you reviewed which apps have access to your Google/Apple account in the last year?',
-  'Do you know which email address is the recovery contact for your bank account?',
-  'Do you have a recovery phone number set on your primary email?',
-  'Is your phone protected with a PIN, passcode, or biometric lock?',
-  'Have you checked HaveIBeenPwned (or similar) for your primary email?',
-  'Do you avoid reusing your primary email for low-trust signups?',
-  'Have you removed yourself from any data broker site in the past year?',
-  'Do you know what personal information appears when someone Googles your name?',
-  'Are your social media profiles set to the privacy level you actually want?',
-  'Do you have a written list of which accounts matter most to you?',
-  'Do you know what to do in the first hour if your email is compromised?',
-  'Have you set up account recovery methods you can actually access?',
-  'Do you regularly review login alerts from your important accounts?',
-  'Do you have a backup of your most important documents?',
+  'Do you use a password manager to store your passwords?',
+  'Are your most important accounts — email, banking, social media — on unique passwords you have not reused anywhere else?',
+  'Do you have two-factor authentication turned on for your email?',
+  'Do you have two-factor authentication turned on for your bank or payment accounts?',
+  'Do you know which phone number or backup email is attached to your primary email account?',
+  'If you lost access to your phone right now, could you still get into your most important accounts?',
+  'Have you checked which apps are connected to your Google or Apple account and removed ones you no longer use?',
+  'Have you ever checked if your email address has appeared in a data breach?',
+  'Do you get notified if someone logs into your accounts from a new device?',
+  'Do you use a separate email address for newsletters, signups, and services you do not fully trust?',
+  'Do you know what comes up when someone searches your full name online?',
+  'Have you reviewed the privacy settings on your social media accounts in the last year?',
+  'Do you know if your personal details — address, phone number, age — are listed on any data broker websites?',
+  'Do you have a list — even a rough one — of your most important accounts and where to find them?',
+  'Do you know what to do in the first hour if your email account gets hacked?',
+  'Could someone you trust access your critical accounts or documents if something happened to you?',
+  'Do you have a regular habit — even monthly — of checking your digital accounts and security settings?',
+  'In the last year, have you taken any action to reduce your digital exposure or clean up old accounts?',
 ];
 
 type Answer = 'yes' | 'no' | 'unsure';
@@ -136,7 +136,7 @@ export default function ExposureCheckPage() {
           <p className="text-xs uppercase tracking-wider text-muted-foreground">Digital health check</p>
           <h1 className="text-2xl font-bold mt-2">How safe is your digital life?</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            18 questions. No account needed. Takes about 3 minutes.
+            18 honest questions about your digital life. No account needed. Takes 3 minutes.
           </p>
         </div>
 
