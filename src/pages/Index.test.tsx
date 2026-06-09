@@ -1,20 +1,31 @@
 import { describe, it, expect, vi } from "vitest";
-import { render } from "@testing-library/react";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { render, waitFor } from "@testing-library/react";
+import { MemoryRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Index from "./Index";
 
+const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
   return {
     ...actual,
-    Navigate: vi.fn(() => null),
+    useNavigate: () => mockNavigate,
   };
 });
 
-import { Navigate } from "react-router-dom";
+const mockGetSession = vi.fn();
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: {
+    auth: {
+      getSession: () => mockGetSession(),
+    },
+  },
+}));
 
 describe("Index page", () => {
-  it("redirects to /exposure-check with replace", () => {
+  it("redirects to /dashboard when authenticated", async () => {
+    mockGetSession.mockResolvedValue({ data: { session: { user: { id: "123" } } } });
+    mockNavigate.mockClear();
+
     render(
       <MemoryRouter initialEntries={["/"]}>
         <Routes>
@@ -23,9 +34,25 @@ describe("Index page", () => {
       </MemoryRouter>
     );
 
-    expect(Navigate).toHaveBeenCalled();
-    const props = (Navigate as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0];
-    expect(props.to).toBe("/exposure-check");
-    expect(props.replace).toBe(true);
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/dashboard", { replace: true });
+    });
+  });
+
+  it("redirects to /exposure-check when not authenticated", async () => {
+    mockGetSession.mockResolvedValue({ data: { session: null } });
+    mockNavigate.mockClear();
+
+    render(
+      <MemoryRouter initialEntries={["/"]}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith("/exposure-check", { replace: true });
+    });
   });
 });
