@@ -97,8 +97,8 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
           </Label>
         </div>
 
-        <Button onClick={handleConfirm} disabled={!checked || submitting}>
-          {submitting ? 'Confirming…' : 'Confirm'}
+        <Button onClick={handleConfirm} disabled={!checked || submitting} className="w-full mt-6">
+          {submitting ? 'Confirming…' : 'Continue to Freedom Engine'}
         </Button>
       </DialogContent>
     </Dialog>
