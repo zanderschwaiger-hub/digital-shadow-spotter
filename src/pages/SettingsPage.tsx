@@ -92,6 +92,12 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
+  const handleManageSubscription = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    window.open('https://billing.stripe.com', '_blank');
+  };
+
   const deleteAllData = async () => {
     if (!user) return;
     setDeleting(true);
@@ -171,7 +177,20 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-
+        {/* Billing / Subscription */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Subscription</CardTitle>
+            <CardDescription>
+              Manage your billing and subscription settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" onClick={handleManageSubscription}>
+              Manage subscription
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Notification Settings */}
         <Card>
