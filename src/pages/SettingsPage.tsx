@@ -177,7 +177,20 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-
+        {/* Billing / Subscription */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Subscription</CardTitle>
+            <CardDescription>
+              Manage your billing and subscription settings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" onClick={handleManageSubscription}>
+              Manage subscription
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Notification Settings */}
         <Card>
