@@ -92,6 +92,12 @@ export default function SettingsPage() {
     setSaving(false);
   };
 
+  const handleManageSubscription = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    window.open('https://billing.stripe.com', '_blank');
+  };
+
   const deleteAllData = async () => {
     if (!user) return;
     setDeleting(true);
