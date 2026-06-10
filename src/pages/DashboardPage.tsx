@@ -251,9 +251,15 @@ export default function DashboardPage() {
                 Digital health score
               </p>
               {showScorePlaceholder ? (
-                <p className="text-sm text-muted-foreground py-6">
-                  Complete your action plan to build your score
-                </p>
+                <div className="space-y-3">
+                  <div className="text-5xl font-medium text-muted-foreground">--</div>
+                  <p className="text-sm text-muted-foreground">
+                    Complete your action plan to build your score
+                  </p>
+                  <Button variant="outline" onClick={() => navigate('/tasks')}>
+                    Start my first task →
+                  </Button>
+                </div>
               ) : (
                 <>
                   <div className="text-5xl font-medium">{healthScore}</div>
