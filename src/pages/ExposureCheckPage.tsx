@@ -45,6 +45,7 @@ const PROBLEM_GROUPS: Array<{ indices: number[]; label: string; tip: string }> =
 
 export default function ExposureCheckPage() {
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [submitted, setSubmitted] = useState<{ score: number; band: 'high' | 'medium' | 'low' } | null>(null);
   const [submitting, setSubmitting] = useState(false);
