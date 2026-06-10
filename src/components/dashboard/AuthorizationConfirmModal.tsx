@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -20,11 +19,12 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
   const [checked, setChecked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  if (!open) return null;
+
   const handleConfirm = async () => {
     if (!user || !checked || submitting) return;
     setSubmitting(true);
 
-    // Step 1: Update profile
     const { error: profileError } = await supabase
       .from('profiles')
       .update({
@@ -35,16 +35,11 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
       .eq('user_id', user.id);
 
     if (profileError) {
-      toast({
-        title: 'Confirmation failed',
-        description: profileError.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Confirmation failed', description: profileError.message, variant: 'destructive' });
       setSubmitting(false);
       return;
     }
 
-    // Step 2: Write audit log — must succeed
     const { error: auditError } = await supabase
       .from('authorization_audit_logs')
       .insert({
@@ -55,52 +50,44 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
       });
 
     if (auditError) {
-      toast({
-        title: 'Audit log failed — confirmation not saved',
-        description: auditError.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'Audit log failed', description: auditError.message, variant: 'destructive' });
       setSubmitting(false);
       return;
     }
 
-    // Step 3: Sync profile context, then unlock
     await refreshProfile();
     setSubmitting(false);
     onConfirmed();
   };
 
   return (
-    <Dialog open={open}>
-      <DialogContent
-        className="[&>button]:hidden overflow-y-auto max-h-[90vh]"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
-      >
-        <DialogHeader>
-          <DialogTitle>Before you begin</DialogTitle>
-          <DialogDescription>
-            Before accessing your dashboard, confirm you are authorized to manage the accounts and information in scope.
-          </DialogDescription>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="relative w-full max-w-md overflow-y-auto max-h-[90vh] rounded-lg border bg-background p-6 shadow-lg">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold">Before you begin</h2>
+            <p className="text-sm text-muted-foreground">
+              Before accessing your dashboard, confirm you are authorized to manage the accounts and information in scope.
+            </p>
+          </div>
 
-        <div className="flex items-start gap-3 py-2">
-          <Checkbox
-            id="authorization-confirm"
-            checked={checked}
-            onCheckedChange={(v) => setChecked(v === true)}
-            disabled={submitting}
-          />
-          <Label htmlFor="authorization-confirm" className="leading-snug cursor-pointer">
-            Freedom Engine only works properly when you are authorized to manage the accounts and information being scanned. I confirm I have that authorization.
-          </Label>
+          <div className="flex items-start gap-3 py-2">
+            <Checkbox
+              id="authorization-confirm"
+              checked={checked}
+              onCheckedChange={(v) => setChecked(v === true)}
+              disabled={submitting}
+            />
+            <Label htmlFor="authorization-confirm" className="leading-snug cursor-pointer">
+              Freedom Engine only works properly when you are authorized to manage the accounts and information being scanned. I confirm I have that authorization.
+            </Label>
+          </div>
+
+          <Button onClick={handleConfirm} disabled={!checked || submitting} className="w-full mt-6">
+            {submitting ? 'Confirming…' : 'Continue to Freedom Engine'}
+          </Button>
         </div>
-
-        <Button onClick={handleConfirm} disabled={!checked || submitting} className="w-full mt-6">
-          {submitting ? 'Confirming…' : 'Continue to Freedom Engine'}
-        </Button>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
