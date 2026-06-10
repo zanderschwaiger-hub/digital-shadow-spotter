@@ -73,7 +73,7 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
   return (
     <Dialog open={open}>
       <DialogContent
-        className="[&>button]:hidden"
+        className="[&>button]:hidden overflow-y-auto max-h-[90vh]"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
