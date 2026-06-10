@@ -141,6 +141,22 @@ export default function ExposureCheckPage() {
           </p>
         </div>
 
+        {user !== null && (
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '13px',
+              color: 'var(--muted-foreground, #888)',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Skip — go to my dashboard
+          </button>
+        )}
+
         <div className="space-y-4">
           {QUESTIONS.map((q, i) => (
             <Card key={i} className="p-4">
