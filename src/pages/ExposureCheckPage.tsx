@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,7 @@ const PROBLEM_GROUPS: Array<{ indices: number[]; label: string; tip: string }> =
 
 export default function ExposureCheckPage() {
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [submitted, setSubmitted] = useState<{ score: number; band: 'high' | 'medium' | 'low' } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -139,6 +140,22 @@ export default function ExposureCheckPage() {
             18 honest questions about your digital life. No account needed. Takes 3 minutes.
           </p>
         </div>
+
+        {user !== null && (
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '13px',
+              color: 'var(--muted-foreground, #888)',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            Skip — go to my dashboard
+          </button>
+        )}
 
         <div className="space-y-4">
           {QUESTIONS.map((q, i) => (
