@@ -355,6 +355,17 @@ export default function DashboardPage() {
                     Start my first task →
                   </Button>
                 </div>
+              ) : healthScore === 0 ? (
+                <>
+                  <div className="text-5xl font-medium text-muted-foreground">--</div>
+                  <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full transition-all ${scoreBarClass(healthScore)}`}
+                      style={{ width: `${healthScore}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Add your accounts to build your score</p>
+                </>
               ) : (
                 <>
                   <div className="text-5xl font-medium">{healthScore}</div>

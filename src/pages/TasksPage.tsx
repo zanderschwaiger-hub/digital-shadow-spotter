@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { TaskBriefPanel } from '@/components/tasks/TaskBriefPanel';
 import { ReadinessChecklist } from '@/components/tasks/ReadinessChecklist';
@@ -23,6 +23,7 @@ import {
 import {
   CheckCircle2, Clock, Loader2, ListTodo, CheckCheck,
   Lock, PlayCircle, Zap, Timer, ShieldAlert, Info, ChevronDown, ChevronRight, FileText,
+  Mail,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Task, TaskCatalogItem, IdentifierCoverage, buildIdentifierCoverage } from '@/lib/types';
@@ -90,6 +91,7 @@ export default function TasksPage() {
   const { logEvent } = useAuditLog();
   const { proposeAction, confirmAction, rejectAction, getNextRecommendation } = useAgentEngine();
   const { overallScore } = useAssessment();
+  const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get('highlight');
@@ -102,6 +104,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(tabParam || 'open');
+  const [emailCount, setEmailCount] = useState(0);
 
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [coverage, setCoverage] = useState<IdentifierCoverage>({
@@ -143,6 +146,7 @@ export default function TasksPage() {
     if (tasksRes.data) setTasks(tasksRes.data as Task[]);
     if (catalogRes.data) setCatalog(catalogRes.data as TaskCatalogItem[]);
     const emails = emailsRes.data || [];
+    setEmailCount(emails.length);
     const covRow = covInputsRes.data;
     setCoverage(buildIdentifierCoverage({
       emails: emails.map(e => ({ is_primary: e.is_primary })),
@@ -332,6 +336,31 @@ export default function TasksPage() {
       <AppLayout>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (emailCount === 0) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold">Action plan</h1>
+            <p className="text-muted-foreground">Work through these to clean up your digital life.</p>
+          </div>
+          <Card className="border-dashed">
+            <CardContent className="py-16 text-center space-y-4">
+              <Mail className="h-12 w-12 mx-auto text-muted-foreground" />
+              <p className="text-lg font-medium">Add an email to get started</p>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Your action plan is built around the accounts you add.
+              </p>
+              <Button onClick={() => navigate('/dashboard')} size="lg">
+                Add my accounts →
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </AppLayout>
     );
