@@ -57,6 +57,25 @@ const PILLAR_ORDER = [
   'inbox-cloud-hygiene', 'personal-content', 'public-footprint', 'governance-cadence',
 ];
 
+const ACTION_LINKS: Record<string, string> = {
+  'Enable 2FA on your primary email': 'https://myaccount.google.com/signinoptions/two-step-verification',
+  'Secure your primary email password': 'https://myaccount.google.com/security',
+  'Audit your email recovery options': 'https://myaccount.google.com/recovery',
+  'Remove unused app access to email': 'https://myaccount.google.com/permissions',
+  'Check your emails on haveibeenpwned.com': 'https://haveibeenpwned.com',
+  'Sign up for breach alerts': 'https://haveibeenpwned.com/NotifyMe',
+  'Review apps connected to your Google account': 'https://myaccount.google.com/permissions',
+  'Review apps connected to your Apple ID': 'https://appleid.apple.com',
+  'Review Facebook app permissions': 'https://www.facebook.com/settings?tab=applications',
+  'Check your email for forwarding rules': 'https://mail.google.com/mail/u/0/#settings/fwdandpop',
+  'Review active sessions on your primary email': 'https://myaccount.google.com/device-activity',
+  'Enable remote wipe on your phone': 'https://myaccount.google.com/find-your-phone',
+  'Check Whitepages for your listing': 'https://www.whitepages.com/suppression-center',
+  'Check Spokeo for your listing': 'https://www.spokeo.com/optout',
+  'Install a password manager': 'https://bitwarden.com/download/',
+  'Install an authenticator app': 'https://play.google.com/store/apps/details?id=com.authy.authy',
+};
+
 
 interface PendingAction {
   actionId: string;
@@ -594,6 +613,16 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                       {expanded ? <ChevronDown className="h-3 w-3 ml-1" /> : <ChevronRight className="h-3 w-3 ml-1" />}
                     </Button>
                   </CollapsibleTrigger>
+                )}
+                {ACTION_LINKS[task.title] && (
+                  <a
+                    href={ACTION_LINKS[task.title]}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-primary underline shrink-0"
+                  >
+                    Go there →
+                  </a>
                 )}
                 {!locked && (
                   <>
