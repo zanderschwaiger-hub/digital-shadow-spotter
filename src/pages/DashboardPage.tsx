@@ -84,10 +84,16 @@ export default function DashboardPage() {
     recoveryMethod: false,
   });
   const [primaryEmail, setPrimaryEmail] = useState<string | null>(null);
+  const [emailCount, setEmailCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showCadence, setShowCadence] = useState(false);
   const [daysSinceVisit, setDaysSinceVisit] = useState(0);
+  const [entryEmail1, setEntryEmail1] = useState('');
+  const [entryEmail2, setEntryEmail2] = useState('');
+  const [entryPhone, setEntryPhone] = useState('');
+  const [entrySubmitting, setEntrySubmitting] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
