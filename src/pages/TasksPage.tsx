@@ -146,6 +146,7 @@ export default function TasksPage() {
     if (tasksRes.data) setTasks(tasksRes.data as Task[]);
     if (catalogRes.data) setCatalog(catalogRes.data as TaskCatalogItem[]);
     const emails = emailsRes.data || [];
+    setEmailCount(emails.length);
     const covRow = covInputsRes.data;
     setCoverage(buildIdentifierCoverage({
       emails: emails.map(e => ({ is_primary: e.is_primary })),
