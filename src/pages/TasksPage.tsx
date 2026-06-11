@@ -23,6 +23,7 @@ import {
 import {
   CheckCircle2, Clock, Loader2, ListTodo, CheckCheck,
   Lock, PlayCircle, Zap, Timer, ShieldAlert, Info, ChevronDown, ChevronRight, FileText,
+  Mail,
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Task, TaskCatalogItem, IdentifierCoverage, buildIdentifierCoverage } from '@/lib/types';
