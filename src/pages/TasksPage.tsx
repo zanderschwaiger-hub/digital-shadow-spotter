@@ -91,6 +91,7 @@ export default function TasksPage() {
   const { logEvent } = useAuditLog();
   const { proposeAction, confirmAction, rejectAction, getNextRecommendation } = useAgentEngine();
   const { overallScore } = useAssessment();
+  const navigate = useNavigate();
 
   const [searchParams] = useSearchParams();
   const highlightId = searchParams.get('highlight');
