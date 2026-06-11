@@ -341,6 +341,31 @@ export default function TasksPage() {
     );
   }
 
+  if (emailCount === 0) {
+    return (
+      <AppLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold">Action plan</h1>
+            <p className="text-muted-foreground">Work through these to clean up your digital life.</p>
+          </div>
+          <Card className="border-dashed">
+            <CardContent className="py-16 text-center space-y-4">
+              <Mail className="h-12 w-12 mx-auto text-muted-foreground" />
+              <p className="text-lg font-medium">Add an email to get started</p>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Your action plan is built around the accounts you add.
+              </p>
+              <Button onClick={() => navigate('/dashboard')} size="lg">
+                Add my accounts →
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
+
   if (courseTasks.length === 0) {
     return (
       <AppLayout>
