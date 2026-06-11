@@ -103,6 +103,7 @@ export default function TasksPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(tabParam || 'open');
+  const [emailCount, setEmailCount] = useState(0);
 
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [coverage, setCoverage] = useState<IdentifierCoverage>({
