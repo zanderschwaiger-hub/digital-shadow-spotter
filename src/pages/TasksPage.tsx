@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { TaskBriefPanel } from '@/components/tasks/TaskBriefPanel';
 import { ReadinessChecklist } from '@/components/tasks/ReadinessChecklist';
