@@ -169,6 +169,7 @@ export default function DashboardPage() {
       if (alertsRes.data) setAlerts(alertsRes.data as Alert[]);
 
       const emails = emailsRes.data || [];
+      setEmailCount(emails.length);
       const primary = emails.find(e => e.is_primary);
       if (primary) setPrimaryEmail(primary.email);
 
