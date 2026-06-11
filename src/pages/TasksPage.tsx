@@ -614,6 +614,16 @@ function CourseTaskItem({ task, catItem, locked, highlighted, onStatusChange, on
                     </Button>
                   </CollapsibleTrigger>
                 )}
+                {ACTION_LINKS[task.title] && (
+                  <a
+                    href={ACTION_LINKS[task.title]}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-primary underline shrink-0"
+                  >
+                    Go there →
+                  </a>
+                )}
                 {!locked && (
                   <>
                     {status === 'open' && (
