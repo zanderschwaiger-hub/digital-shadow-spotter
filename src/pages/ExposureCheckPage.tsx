@@ -57,9 +57,6 @@ export default function ExposureCheckPage() {
       </div>
     );
   }
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   const allAnswered = QUESTIONS.every((_, i) => answers[i]);
 
@@ -141,7 +138,7 @@ export default function ExposureCheckPage() {
           </p>
         </div>
 
-        {user !== null && (
+        {Object.keys(answers).length >= 3 && (
           <button
             onClick={() => navigate('/dashboard')}
             style={{
