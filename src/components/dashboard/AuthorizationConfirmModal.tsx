@@ -61,8 +61,8 @@ export function AuthorizationConfirmModal({ open, onConfirmed }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-md overflow-y-auto max-h-[90vh] rounded-lg border bg-background p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 bg-black/50 p-4 overflow-y-auto">
+      <div className="relative w-full max-w-md mx-auto my-auto rounded-lg border bg-background p-6 shadow-lg" style={{ minHeight: 'fit-content' }}>
         <div className="space-y-4">
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">Before you begin</h2>
