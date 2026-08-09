@@ -108,7 +108,14 @@ export default function BusinessPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={status === 'submitting'}>
-                {status === 'submitting' ? 'Sending…' : 'Send enquiry'}
+                {status === 'submitting' ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending…
+                  </>
+                ) : (
+                  'Send enquiry'
+                )}
               </Button>
             </form>
           )}
