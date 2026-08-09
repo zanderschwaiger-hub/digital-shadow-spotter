@@ -40,6 +40,7 @@ import GovernanceCadencePage from "./pages/GovernanceCadencePage";
 import NotFound from "./pages/NotFound";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
+import BusinessPage from "./pages/BusinessPage";
 
 const queryClient = new QueryClient();
 
@@ -275,6 +276,7 @@ const App = () => (
 
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/terms" element={<TermsPage />} />
+              <Route path="/business" element={<BusinessPage />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
