@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from 'lucide-react';
 
 const LEADS_URL = 'https://gyyktrqkkqcasiykxuvt.supabase.co/rest/v1/b2b_leads';
 const LEADS_KEY = 'sb_publishable__U5B2zB3HrkvAEIVdKA8Lw_zEa67dI-';
@@ -107,7 +108,14 @@ export default function BusinessPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={status === 'submitting'}>
-                {status === 'submitting' ? 'Sending…' : 'Send enquiry'}
+                {status === 'submitting' ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending…
+                  </>
+                ) : (
+                  'Send enquiry'
+                )}
               </Button>
             </form>
           )}
