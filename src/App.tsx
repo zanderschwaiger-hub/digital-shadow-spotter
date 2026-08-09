@@ -40,6 +40,7 @@ import GovernanceCadencePage from "./pages/GovernanceCadencePage";
 import NotFound from "./pages/NotFound";
 import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
+import BusinessPage from "./pages/BusinessPage";
 
 const queryClient = new QueryClient();
 
