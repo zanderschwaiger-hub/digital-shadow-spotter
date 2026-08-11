@@ -125,17 +125,22 @@ export default function InventoryPage() {
   });
   const { level: coverageLevel, total: coverageTotal } = calculateIdentifierCoverage(identifierCoverage);
 
+  const emailsFull = emails.length >= MAX_EMAILS;
+  const phonesFull = phones.length >= MAX_PHONES;
+
   const addEmail = async () => {
     if (!user || !newEmail) return;
     setAddingItem(true);
-    
+
     const { error } = await supabase.from('inventory_emails').insert([{
       user_id: user.id,
       email: newEmail,
       is_primary: newEmailPrimary
     }]);
 
-    if (!error) {
+    if (error) {
+      toast({ title: "Couldn't add email", description: error.message, variant: 'destructive' });
+    } else {
       await logEvent('inventory_email_added', { email: newEmail });
       toast({ title: 'Email added', description: 'Email has been added to your inventory.' });
       setNewEmail('');
@@ -206,13 +211,15 @@ export default function InventoryPage() {
   const addPhone = async () => {
     if (!user || !newPhone) return;
     setAddingItem(true);
-    
+
     const { error } = await supabase.from('inventory_phones').insert([{
       user_id: user.id,
       phone: newPhone
     }]);
 
-    if (!error) {
+    if (error) {
+      toast({ title: "Couldn't add phone number", description: error.message, variant: 'destructive' });
+    } else {
       await logEvent('inventory_phone_added', { phone: newPhone });
       toast({ title: 'Phone added' });
       setNewPhone('');
