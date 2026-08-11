@@ -124,12 +124,22 @@ export default function ExposureCheckPage() {
           )}
 
           <div>
-            <Button asChild className="w-full">
-              <Link to="/login">Build my action plan</Link>
-            </Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Takes 2 minutes. No credit card needed.
-            </p>
+            {user ? (
+              <Button asChild className="w-full">
+                <Link to="/dashboard">Go to my action plan</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild className="w-full">
+                  <Link to="/login?mode=signup">
+                    Create your account to save this and get your action plan
+                  </Link>
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Takes 2 minutes. No credit card needed.
+                </p>
+              </>
+            )}
           </div>
         </Card>
       </div>
