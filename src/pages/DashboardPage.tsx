@@ -5,6 +5,7 @@ import { AlertsCard } from '@/components/dashboard/AlertsCard';
 import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
 import { IdentifierCoverageCard } from '@/components/dashboard/IdentifierCoverageCard';
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
+import { IdentifierEntry } from '@/components/dashboard/IdentifierEntry';
 import { AuthorizationConfirmModal, CURRENT_AUTHORIZATION_VERSION } from '@/components/dashboard/AuthorizationConfirmModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
