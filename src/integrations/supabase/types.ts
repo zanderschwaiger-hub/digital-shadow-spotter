@@ -210,6 +210,7 @@ export type Database = {
           created_at: string
           id: string
           score: number
+          user_id: string | null
         }
         Insert: {
           answers_json?: Json
@@ -217,6 +218,7 @@ export type Database = {
           created_at?: string
           id?: string
           score: number
+          user_id?: string | null
         }
         Update: {
           answers_json?: Json
@@ -224,6 +226,7 @@ export type Database = {
           created_at?: string
           id?: string
           score?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -788,12 +791,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      claim_exposure_check: { Args: { _id: string }; Returns: boolean }
       complete_baseline: { Args: never; Returns: undefined }
       complete_tier2: { Args: never; Returns: undefined }
       generate_course_tasks: { Args: never; Returns: undefined }
       profile_tier_unchanged: {
         Args: { _tier: string; _tier_level: number; _user_id: string }
         Returns: boolean
+      }
+      submit_exposure_check: {
+        Args: { _answers: Json; _band: string; _score: number }
+        Returns: string
       }
     }
     Enums: {
