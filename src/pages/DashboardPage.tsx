@@ -5,6 +5,7 @@ import { AlertsCard } from '@/components/dashboard/AlertsCard';
 import { MasterKeyCard } from '@/components/dashboard/MasterKeyCard';
 import { IdentifierCoverageCard } from '@/components/dashboard/IdentifierCoverageCard';
 import { WelcomeModal } from '@/components/dashboard/WelcomeModal';
+import { IdentifierEntry } from '@/components/dashboard/IdentifierEntry';
 import { AuthorizationConfirmModal, CURRENT_AUTHORIZATION_VERSION } from '@/components/dashboard/AuthorizationConfirmModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -89,10 +90,6 @@ export default function DashboardPage() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showCadence, setShowCadence] = useState(false);
   const [daysSinceVisit, setDaysSinceVisit] = useState(0);
-  const [entryEmail1, setEntryEmail1] = useState('');
-  const [entryEmail2, setEntryEmail2] = useState('');
-  const [entryPhone, setEntryPhone] = useState('');
-  const [entrySubmitting, setEntrySubmitting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -220,87 +217,11 @@ export default function DashboardPage() {
 
   const playbookPreview = CONTAINMENT_PLAYBOOKS.slice(0, 3);
 
-  const handleExposureEntrySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    const e1 = entryEmail1.trim();
-    const e2 = entryEmail2.trim();
-    const ph = entryPhone.trim();
-    if (!e1) {
-      toast({ title: 'Primary email is required', variant: 'destructive' });
-      return;
-    }
-    setEntrySubmitting(true);
-    try {
-      const emailRows = [
-        { user_id: user.id, email: e1, is_primary: true },
-        ...(e2 ? [{ user_id: user.id, email: e2, is_primary: false }] : []),
-      ];
-      const { error: emailErr } = await supabase.from('inventory_emails').insert(emailRows);
-      if (emailErr) throw emailErr;
-      if (ph) {
-        const { error: phoneErr } = await supabase
-          .from('inventory_phones')
-          .insert({ user_id: user.id, phone: ph });
-        if (phoneErr) throw phoneErr;
-      }
-      navigate('/tasks');
-    } catch (err) {
-      console.error(err);
-      toast({
-        title: "Couldn't save your details",
-        description: err instanceof Error ? err.message : 'Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setEntrySubmitting(false);
-    }
-  };
-
-  if (!needsAuthorization && emailCount === 0) {
+  if (!needsAuthorization && emailCount === 0 && user) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center min-h-[60vh] px-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-xl">Let's find your exposure</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Enter the email addresses and phone number you use most. We'll check what's out there.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleExposureEntrySubmit} className="space-y-3">
-                <Input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={entryEmail1}
-                  onChange={(e) => setEntryEmail1(e.target.value)}
-                  disabled={entrySubmitting}
-                  required
-                />
-                <Input
-                  type="email"
-                  placeholder="another@email.com — optional"
-                  value={entryEmail2}
-                  onChange={(e) => setEntryEmail2(e.target.value)}
-                  disabled={entrySubmitting}
-                />
-                <Input
-                  type="tel"
-                  placeholder="+1 555 000 0000 — optional"
-                  value={entryPhone}
-                  onChange={(e) => setEntryPhone(e.target.value)}
-                  disabled={entrySubmitting}
-                />
-                <Button type="submit" className="w-full" disabled={entrySubmitting}>
-                  {entrySubmitting ? 'Saving…' : 'Check my exposure'}
-                </Button>
-                <p className="text-xs text-muted-foreground text-center">
-                  We don't store passwords or access your accounts. Your data stays private.
-                </p>
-              </form>
-            </CardContent>
-          </Card>
+          <IdentifierEntry userId={user.id} onDone={() => navigate('/tasks')} />
         </div>
       </AppLayout>
     );

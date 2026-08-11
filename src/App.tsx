@@ -13,6 +13,9 @@ import { RootRedirect } from "@/components/layout/RootRedirect";
 import ExposureCheckPage from "./pages/ExposureCheckPage";
 import LoginPage from "./pages/LoginPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
+import MfaSetupPage from "./pages/MfaSetupPage";
+import MfaChallengePage from "./pages/MfaChallengePage";
+import WelcomePage from "./pages/WelcomePage";
 import OnboardingConsentPage from "./pages/OnboardingConsentPage";
 import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
@@ -58,6 +61,11 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/embed" element={<EmbedPage />} />
+              <Route path="/mfa-setup" element={<MfaSetupPage />} />
+              <Route path="/mfa-challenge" element={<MfaChallengePage />} />
+              <Route path="/welcome" element={<WelcomePage />} />
+
+
 
               <Route
                 path="/onboarding-consent"

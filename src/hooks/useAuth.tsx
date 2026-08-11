@@ -3,12 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Profile } from '@/lib/types';
 import type { Session, User } from '@supabase/supabase-js';
 
+export const PENDING_EXPOSURE_CHECK_KEY = 'pending_exposure_check_id';
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
   sendMagicLink: (email: string) => Promise<{ error: Error | null }>;
+  signUpWithPassword: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signInWithPassword: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -38,11 +42,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return nextProfile;
   };
 
+  const claimPendingExposureCheck = async () => {
+    const pendingId = localStorage.getItem(PENDING_EXPOSURE_CHECK_KEY);
+    if (!pendingId) return;
+
+    const { error } = await (supabase as any).rpc('claim_exposure_check', { _id: pendingId });
+    if (!error) {
+      localStorage.removeItem(PENDING_EXPOSURE_CHECK_KEY);
+    }
+  };
+
   const syncAuthState = async (nextSession: Session | null) => {
     setSession(nextSession);
     setUser(nextSession?.user ?? null);
 
     if (nextSession?.user) {
+      await claimPendingExposureCheck();
       await fetchProfile(nextSession.user.id);
     } else {
       setProfile(null);
@@ -93,6 +108,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   };
 
+  const signUpWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ email, password });
+    return { error: error as Error | null };
+  };
+
+  const signInWithPassword = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error: error as Error | null };
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -113,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile,
         loading,
         sendMagicLink,
+        signUpWithPassword,
+        signInWithPassword,
         signOut,
         refreshProfile,
       }}

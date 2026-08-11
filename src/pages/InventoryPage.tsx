@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useToast } from '@/hooks/use-toast';
+import { MAX_EMAILS, MAX_PHONES } from '@/components/dashboard/IdentifierEntry';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,17 +126,22 @@ export default function InventoryPage() {
   });
   const { level: coverageLevel, total: coverageTotal } = calculateIdentifierCoverage(identifierCoverage);
 
+  const emailsFull = emails.length >= MAX_EMAILS;
+  const phonesFull = phones.length >= MAX_PHONES;
+
   const addEmail = async () => {
     if (!user || !newEmail) return;
     setAddingItem(true);
-    
+
     const { error } = await supabase.from('inventory_emails').insert([{
       user_id: user.id,
       email: newEmail,
       is_primary: newEmailPrimary
     }]);
 
-    if (!error) {
+    if (error) {
+      toast({ title: "Couldn't add email", description: error.message, variant: 'destructive' });
+    } else {
       await logEvent('inventory_email_added', { email: newEmail });
       toast({ title: 'Email added', description: 'Email has been added to your inventory.' });
       setNewEmail('');
@@ -206,13 +212,15 @@ export default function InventoryPage() {
   const addPhone = async () => {
     if (!user || !newPhone) return;
     setAddingItem(true);
-    
+
     const { error } = await supabase.from('inventory_phones').insert([{
       user_id: user.id,
       phone: newPhone
     }]);
 
-    if (!error) {
+    if (error) {
+      toast({ title: "Couldn't add phone number", description: error.message, variant: 'destructive' });
+    } else {
       await logEvent('inventory_phone_added', { phone: newPhone });
       toast({ title: 'Phone added' });
       setNewPhone('');
@@ -369,11 +377,15 @@ export default function InventoryPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Email Addresses</CardTitle>
-                    <CardDescription>Add all email addresses you use or have used</CardDescription>
+                    <CardDescription>
+                      {emailsFull
+                        ? "You've added the maximum for your account."
+                        : `${emails.length} of ${MAX_EMAILS} emails added`}
+                    </CardDescription>
                   </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button><Plus className="mr-2 h-4 w-4" />Add Email</Button>
+                      <Button disabled={emailsFull}><Plus className="mr-2 h-4 w-4" />Add Email</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
@@ -669,11 +681,15 @@ export default function InventoryPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Phone Numbers</CardTitle>
-                    <CardDescription>Optional: for comprehensive review coverage</CardDescription>
+                    <CardDescription>
+                      {phonesFull
+                        ? "You've added the maximum for your account."
+                        : `${phones.length} of ${MAX_PHONES} phone numbers added`}
+                    </CardDescription>
                   </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button><Plus className="mr-2 h-4 w-4" />Add Phone</Button>
+                      <Button disabled={phonesFull}><Plus className="mr-2 h-4 w-4" />Add Phone</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>

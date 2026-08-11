@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, PENDING_EXPOSURE_CHECK_KEY } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -49,8 +49,39 @@ export default function ExposureCheckPage() {
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [submitted, setSubmitted] = useState<{ score: number; band: 'high' | 'medium' | 'low' } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [savedLoading, setSavedLoading] = useState(false);
 
-  if (authLoading) {
+  // A signed-in user with a saved result never has to retake the check.
+  useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+    setSavedLoading(true);
+
+    supabase
+      .from('exposure_checks')
+      .select('score, band, answers_json')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!mounted) return;
+        if (data) {
+          setSubmitted({ score: data.score, band: data.band as 'high' | 'medium' | 'low' });
+          const saved = data.answers_json as Array<{ a: Answer }> | null;
+          if (Array.isArray(saved)) {
+            setAnswers(Object.fromEntries(saved.map((r, i) => [i, r.a])));
+          }
+        }
+        setSavedLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  if (authLoading || savedLoading) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -65,7 +96,16 @@ export default function ExposureCheckPage() {
     const score = QUESTIONS.reduce((acc, _, i) => acc + (answers[i] === 'yes' ? 1 : 0), 0);
     const band = bandFor(score);
     const answers_json = QUESTIONS.map((q, i) => ({ q, a: answers[i] }));
-    await supabase.from('exposure_checks').insert({ score, band, answers_json });
+
+    const { data: checkId } = await (supabase as any).rpc('submit_exposure_check', {
+      _score: score,
+      _band: band,
+      _answers: answers_json,
+    });
+
+    if (typeof checkId === 'string') {
+      localStorage.setItem(PENDING_EXPOSURE_CHECK_KEY, checkId);
+    }
 
     const notSureCount = Object.values(answers).filter(a => a === 'unsure').length;
     let adjustedBand = band;
@@ -115,12 +155,22 @@ export default function ExposureCheckPage() {
           )}
 
           <div>
-            <Button asChild className="w-full">
-              <Link to="/login">Build my action plan</Link>
-            </Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">
-              Takes 2 minutes. No credit card needed.
-            </p>
+            {user ? (
+              <Button asChild className="w-full">
+                <Link to="/dashboard">Go to my action plan</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild className="w-full">
+                  <Link to="/login?mode=signup">
+                    Create your account to save this and get your action plan
+                  </Link>
+                </Button>
+                <p className="text-xs text-muted-foreground text-center mt-2">
+                  Takes 2 minutes. No credit card needed.
+                </p>
+              </>
+            )}
           </div>
         </Card>
       </div>

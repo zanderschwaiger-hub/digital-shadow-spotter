@@ -1,32 +1,31 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2 } from 'lucide-react';
 import { FELogo } from '@/components/FELogo';
-import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
-const emailSchema = z.string().email('Please enter a valid email address');
+const schema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Use at least 8 characters'),
+});
 
 export default function LoginPage() {
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<'signup' | 'signin'>(
+    searchParams.get('mode') === 'signin' ? 'signin' : 'signup',
+  );
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { sendMagicLink, user, loading } = useAuth();
+  const { signUpWithPassword, signInWithPassword, user, loading } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!loading && user) {
@@ -36,103 +35,60 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
 
-    const result = emailSchema.safeParse(email.trim());
-    if (!result.success) {
-      toast({
-        title: 'Validation Error',
-        description: result.error.errors[0].message,
-        variant: 'destructive',
-      });
+    const parsed = schema.safeParse({ email: email.trim(), password });
+    if (!parsed.success) {
+      setError(parsed.error.errors[0].message);
       return;
     }
 
     setSubmitting(true);
 
-    try {
-      const { error } = await sendMagicLink(result.data);
+    const { error: authError } =
+      mode === 'signup'
+        ? await signUpWithPassword(parsed.data.email, parsed.data.password)
+        : await signInWithPassword(parsed.data.email, parsed.data.password);
 
-      if (error) {
-        toast({
-          title: 'Sign-in link failed',
-          description: error.message,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      setSent(true);
-
-      toast({
-        title: 'Check your email',
-        description: 'Your sign-in link has been sent.',
-      });
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Something went wrong sending the sign-in link.';
-
-      toast({
-        title: 'Error',
-        description: message,
-        variant: 'destructive',
-      });
-    } finally {
+    if (authError) {
+      setError(authError.message);
       setSubmitting(false);
+      return;
     }
+
+    // The session is created immediately; routing is handled by the protected routes.
+    navigate('/dashboard', { replace: true });
   };
 
   if (loading) {
     return (
-      <div className="flex min-h-[100dvh] items-center justify-center bg-background p-4">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading session...</p>
-        </div>
+      <div className="flex min-h-[100dvh] items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-[100dvh] overflow-y-auto bg-background p-4">
+      <div className="mx-auto w-full max-w-md py-10 space-y-6">
         <div className="text-center">
           <FELogo size="lg" className="mx-auto mb-4" />
           <h1 className="text-2xl font-bold">Freedom Engine</h1>
         </div>
 
-        {sent ? (
-          <Card>
-            <CardContent className="space-y-4 py-12 text-center">
-              <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
+        <Card>
+          <form onSubmit={handleSubmit}>
+            <CardHeader>
+              <CardTitle>{mode === 'signup' ? 'Create your account' : 'Sign in'}</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {mode === 'signup'
+                  ? 'Save your result and get your action plan.'
+                  : 'Welcome back.'}
+              </p>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                <p className="font-medium">Check your email</p>
-                <p className="text-sm text-muted-foreground">
-                  We sent a secure sign-in link to <span className="font-medium">{email}</span>
-                </p>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setSent(false);
-                  setEmail('');
-                }}
-              >
-                Use a different email
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card>
-            <form onSubmit={handleSubmit}>
-              <CardHeader>
-                <CardTitle>Sign in</CardTitle>
-                <CardDescription>No password required</CardDescription>
-              </CardHeader>
-
-              <CardContent className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -143,23 +99,43 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={submitting}
                 />
-              </CardContent>
+              </div>
 
-              <CardFooter>
-                <Button type="submit" className="w-full" disabled={submitting}>
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending sign-in link...
-                    </>
-                  ) : (
-                    'Send Sign-in Link'
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        )}
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                  placeholder="At least 8 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={submitting}
+                />
+              </div>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
+
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {mode === 'signup' ? 'Create account' : 'Sign in'}
+              </Button>
+
+              <button
+                type="button"
+                className="w-full text-sm text-muted-foreground underline"
+                onClick={() => {
+                  setMode(mode === 'signup' ? 'signin' : 'signup');
+                  setError(null);
+                }}
+              >
+                {mode === 'signup'
+                  ? 'Already have an account? Sign in'
+                  : 'Need an account? Create one'}
+              </button>
+            </CardContent>
+          </form>
+        </Card>
       </div>
     </div>
   );
