@@ -377,11 +377,15 @@ export default function InventoryPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Email Addresses</CardTitle>
-                    <CardDescription>Add all email addresses you use or have used</CardDescription>
+                    <CardDescription>
+                      {emailsFull
+                        ? "You've added the maximum for your account."
+                        : `${emails.length} of ${MAX_EMAILS} emails added`}
+                    </CardDescription>
                   </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button><Plus className="mr-2 h-4 w-4" />Add Email</Button>
+                      <Button disabled={emailsFull}><Plus className="mr-2 h-4 w-4" />Add Email</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
