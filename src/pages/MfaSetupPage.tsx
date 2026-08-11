@@ -46,7 +46,7 @@ export default function MfaSetupPage() {
       }
 
       // Clear any abandoned, unverified enrollments so enroll() succeeds.
-      for (const f of factors?.totp?.filter((x) => x.status === 'unverified') ?? []) {
+      for (const f of totpFactors.filter((x) => x.status !== 'verified')) {
         await supabase.auth.mfa.unenroll({ factorId: f.id });
       }
 
