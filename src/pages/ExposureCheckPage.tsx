@@ -49,8 +49,39 @@ export default function ExposureCheckPage() {
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [submitted, setSubmitted] = useState<{ score: number; band: 'high' | 'medium' | 'low' } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [savedLoading, setSavedLoading] = useState(false);
 
-  if (authLoading) {
+  // A signed-in user with a saved result never has to retake the check.
+  useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+    setSavedLoading(true);
+
+    supabase
+      .from('exposure_checks')
+      .select('score, band, answers_json')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!mounted) return;
+        if (data) {
+          setSubmitted({ score: data.score, band: data.band as 'high' | 'medium' | 'low' });
+          const saved = data.answers_json as Array<{ a: Answer }> | null;
+          if (Array.isArray(saved)) {
+            setAnswers(Object.fromEntries(saved.map((r, i) => [i, r.a])));
+          }
+        }
+        setSavedLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  if (authLoading || savedLoading) {
     return (
       <div className="flex min-h-[100dvh] items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
