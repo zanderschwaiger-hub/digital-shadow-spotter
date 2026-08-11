@@ -42,11 +42,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return nextProfile;
   };
 
+  const claimPendingExposureCheck = async () => {
+    const pendingId = localStorage.getItem(PENDING_EXPOSURE_CHECK_KEY);
+    if (!pendingId) return;
+
+    const { error } = await (supabase as any).rpc('claim_exposure_check', { _id: pendingId });
+    if (!error) {
+      localStorage.removeItem(PENDING_EXPOSURE_CHECK_KEY);
+    }
+  };
+
   const syncAuthState = async (nextSession: Session | null) => {
     setSession(nextSession);
     setUser(nextSession?.user ?? null);
 
     if (nextSession?.user) {
+      await claimPendingExposureCheck();
       await fetchProfile(nextSession.user.id);
     } else {
       setProfile(null);
