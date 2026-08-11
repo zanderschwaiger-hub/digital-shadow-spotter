@@ -61,6 +61,11 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/embed" element={<EmbedPage />} />
+              <Route path="/mfa-setup" element={<MfaSetupPage />} />
+              <Route path="/mfa-challenge" element={<MfaChallengePage />} />
+              <Route path="/welcome" element={<WelcomePage />} />
+
+
 
               <Route
                 path="/onboarding-consent"

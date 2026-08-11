@@ -65,7 +65,16 @@ export default function ExposureCheckPage() {
     const score = QUESTIONS.reduce((acc, _, i) => acc + (answers[i] === 'yes' ? 1 : 0), 0);
     const band = bandFor(score);
     const answers_json = QUESTIONS.map((q, i) => ({ q, a: answers[i] }));
-    await supabase.from('exposure_checks').insert({ score, band, answers_json });
+
+    const { data: checkId } = await (supabase as any).rpc('submit_exposure_check', {
+      _score: score,
+      _band: band,
+      _answers: answers_json,
+    });
+
+    if (typeof checkId === 'string') {
+      localStorage.setItem(PENDING_EXPOSURE_CHECK_KEY, checkId);
+    }
 
     const notSureCount = Object.values(answers).filter(a => a === 'unsure').length;
     let adjustedBand = band;
