@@ -681,11 +681,15 @@ export default function InventoryPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Phone Numbers</CardTitle>
-                    <CardDescription>Optional: for comprehensive review coverage</CardDescription>
+                    <CardDescription>
+                      {phonesFull
+                        ? "You've added the maximum for your account."
+                        : `${phones.length} of ${MAX_PHONES} phone numbers added`}
+                    </CardDescription>
                   </div>
                   <Dialog>
                     <DialogTrigger asChild>
-                      <Button><Plus className="mr-2 h-4 w-4" />Add Phone</Button>
+                      <Button disabled={phonesFull}><Plus className="mr-2 h-4 w-4" />Add Phone</Button>
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
