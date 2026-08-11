@@ -38,7 +38,8 @@ export default function MfaSetupPage() {
 
       // If a verified factor already exists, this step is done.
       const { data: factors } = await supabase.auth.mfa.listFactors();
-      const verifiedFactor = factors?.totp?.find((f) => f.status === 'verified');
+      const totpFactors = (factors?.totp ?? []) as Array<{ id: string; status: string }>;
+      const verifiedFactor = totpFactors.find((f) => f.status === 'verified');
       if (verifiedFactor) {
         if (mounted) navigate('/welcome', { replace: true });
         return;
