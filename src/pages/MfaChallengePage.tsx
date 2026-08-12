@@ -30,7 +30,7 @@ export default function MfaChallengePage() {
     const prepare = async () => {
       const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal?.currentLevel === 'aal2') {
-        if (mounted) navigate('/dashboard', { replace: true });
+        if (mounted) navigate('/', { replace: true });
         return;
       }
 
@@ -80,7 +80,8 @@ export default function MfaChallengePage() {
       return;
     }
 
-    navigate('/dashboard', { replace: true });
+    // Root decides where a returning user lands (saved exposure result or check).
+    navigate('/', { replace: true });
   };
 
   if (loading || preparing) {
