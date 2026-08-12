@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, PENDING_EXPOSURE_CHECK_KEY } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,8 @@ const PROBLEM_GROUPS: Array<{ indices: number[]; label: string; tip: string }> =
 export default function ExposureCheckPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isRerun = searchParams.get('rerun') === '1';
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
   const [submitted, setSubmitted] = useState<{ score: number; band: 'high' | 'medium' | 'low' } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -53,7 +55,7 @@ export default function ExposureCheckPage() {
 
   // A signed-in user with a saved result never has to retake the check.
   useEffect(() => {
-    if (!user) return;
+    if (!user || isRerun) return;
     let mounted = true;
     setSavedLoading(true);
 
@@ -79,7 +81,7 @@ export default function ExposureCheckPage() {
     return () => {
       mounted = false;
     };
-  }, [user]);
+  }, [user, isRerun]);
 
   if (authLoading || savedLoading) {
     return (
