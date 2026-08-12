@@ -40,6 +40,28 @@ export default function ReportsPage() {
   const loadReportData = async () => {
     if (!user) return;
     setLoading(true);
+    setLoadError(false);
+
+    const results = await Promise.all([
+      supabase.from('inventory_emails').select('id').eq('user_id', user.id),
+      supabase.from('inventory_usernames').select('id').eq('user_id', user.id),
+      supabase.from('inventory_accounts').select('id').eq('user_id', user.id),
+      supabase.from('inventory_domains').select('id').eq('user_id', user.id),
+      supabase.from('inventory_phones').select('id').eq('user_id', user.id),
+      supabase.from('alerts').select('severity, resolved_at').eq('user_id', user.id),
+      supabase.from('tasks').select('status').eq('user_id', user.id),
+      supabase.from('broker_sites').select('status').eq('user_id', user.id),
+      supabase.from('signals_settings').select('enabled').eq('user_id', user.id),
+    ]);
+
+    const firstError = results.find((r) => r.error)?.error;
+    if (firstError) {
+      console.error('Failed to load report data', firstError);
+      setLoadError(true);
+      setReportData(null);
+      setLoading(false);
+      return;
+    }
 
     const [
       emailsRes,
@@ -50,22 +72,13 @@ export default function ReportsPage() {
       alertsRes,
       tasksRes,
       brokersRes,
-      signalsRes
-    ] = await Promise.all([
-      supabase.from('inventory_emails').select('id').eq('user_id', user.id),
-      supabase.from('inventory_usernames').select('id').eq('user_id', user.id),
-      supabase.from('inventory_accounts').select('id').eq('user_id', user.id),
-      supabase.from('inventory_domains').select('id').eq('user_id', user.id),
-      supabase.from('inventory_phones').select('id').eq('user_id', user.id),
-      supabase.from('alerts').select('severity, resolved_at').eq('user_id', user.id),
-      supabase.from('tasks').select('status').eq('user_id', user.id),
-      supabase.from('broker_sites').select('status').eq('user_id', user.id),
-      supabase.from('signals_settings').select('enabled').eq('user_id', user.id).eq('enabled', true)
-    ]);
+      signalsRes,
+    ] = results;
 
-    const alerts = alertsRes.data || [];
-    const tasks = tasksRes.data || [];
-    const brokers = brokersRes.data || [];
+    const alerts = (alertsRes.data || []) as { severity: string; resolved_at: string | null }[];
+    const tasks = (tasksRes.data || []) as { status: string }[];
+    const brokers = (brokersRes.data || []) as { status: string }[];
+    const signals = (signalsRes.data || []) as { enabled: boolean }[];
 
     setReportData({
       inventoryCounts: {
@@ -78,10 +91,10 @@ export default function ReportsPage() {
       alertsCount: alerts.filter(a => !a.resolved_at).length,
       highSeverityCount: alerts.filter(a => a.severity === 'high' && !a.resolved_at).length,
       tasksCompleted: tasks.filter(t => t.status === 'completed').length,
-      tasksPending: tasks.filter(t => t.status === 'pending').length,
+      tasksOpen: tasks.filter(t => t.status === 'open').length,
       brokersTracked: brokers.length,
       brokersConfirmed: brokers.filter(b => b.status === 'confirmed').length,
-      signalsEnabled: signalsRes.data?.length || 0
+      signalsEnabled: signals.filter(s => s.enabled).length
     });
 
     setLoading(false);
