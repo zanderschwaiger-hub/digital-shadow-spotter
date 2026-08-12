@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
 const BAND_LABEL: Record<string, string> = {
-  high: 'Significant gaps found',
-  medium: 'Some gaps to address',
-  low: 'Looking solid',
+  exposed: 'EXPOSED — You are one failure away from losing access.',
+  fragile: 'FRAGILE — Your system works, until something goes wrong.',
+  structured: 'STRUCTURED — You have a base, but it may not hold under pressure.',
 };
 
 export default function WelcomePage() {
