@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, PENDING_EXPOSURE_CHECK_KEY } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -28,11 +28,19 @@ const QUESTIONS = [
 
 type Answer = 'yes' | 'no' | 'unsure';
 
-function bandFor(score: number): 'high' | 'medium' | 'low' {
-  if (score <= 6) return 'high';
-  if (score <= 13) return 'medium';
-  return 'low';
+type Band = 'exposed' | 'fragile' | 'structured';
+
+function bandFor(score: number): Band {
+  if (score <= 6) return 'exposed';
+  if (score <= 13) return 'fragile';
+  return 'structured';
 }
+
+const BAND_LABELS: Record<Band, string> = {
+  exposed: 'EXPOSED — You are one failure away from losing access.',
+  fragile: 'FRAGILE — Your system works, until something goes wrong.',
+  structured: 'STRUCTURED — You have a base, but it may not hold under pressure.',
+};
 
 const PROBLEM_GROUPS: Array<{ indices: number[]; label: string; tip: string }> = [
   { indices: [0, 1, 2, 3], label: 'Credential gaps detected', tip: 'Passwords and access control' },
@@ -45,13 +53,31 @@ const PROBLEM_GROUPS: Array<{ indices: number[]; label: string; tip: string }> =
 
 export default function ExposureCheckPage() {
   const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isRerun = searchParams.get('rerun') === '1';
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
-  const [submitted, setSubmitted] = useState<{ score: number; band: 'high' | 'medium' | 'low' } | null>(null);
+  const [submitted, setSubmitted] = useState<{ score: number; band: Band } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [savedLoading, setSavedLoading] = useState(false);
+
+  // Attach any pending anonymous check to the account once signed in.
+  useEffect(() => {
+    if (!user) return;
+    const pendingId = localStorage.getItem(PENDING_EXPOSURE_CHECK_KEY);
+    if (!pendingId) return;
+
+    (async () => {
+      const { error } = await (supabase as any).rpc('claim_exposure_check', {
+        _check_id: pendingId,
+      });
+      if (error) {
+        console.error('claim_exposure_check failed', error);
+        return;
+      }
+      localStorage.removeItem(PENDING_EXPOSURE_CHECK_KEY);
+    })();
+  }, [user]);
 
   // A signed-in user with a saved result never has to retake the check.
   useEffect(() => {
@@ -69,7 +95,7 @@ export default function ExposureCheckPage() {
       .then(({ data }) => {
         if (!mounted) return;
         if (data) {
-          setSubmitted({ score: data.score, band: data.band as 'high' | 'medium' | 'low' });
+          setSubmitted({ score: data.score, band: data.band as Band });
           const saved = data.answers_json as Array<{ a: Answer }> | null;
           if (Array.isArray(saved)) {
             setAnswers(Object.fromEntries(saved.map((r, i) => [i, r.a])));
@@ -95,37 +121,41 @@ export default function ExposureCheckPage() {
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setSubmitError(null);
+
     const score = QUESTIONS.reduce((acc, _, i) => acc + (answers[i] === 'yes' ? 1 : 0), 0);
-    const band = bandFor(score);
+    let band = bandFor(score);
+
+    const notSureCount = Object.values(answers).filter(a => a === 'unsure').length;
+    if (notSureCount > 3) {
+      if (band === 'structured') band = 'fragile';
+      else if (band === 'fragile') band = 'exposed';
+    }
+
     const answers_json = QUESTIONS.map((q, i) => ({ q, a: answers[i] }));
 
-    const { data: checkId } = await (supabase as any).rpc('submit_exposure_check', {
+    const { data: checkId, error } = await (supabase as any).rpc('submit_exposure_check', {
       _score: score,
       _band: band,
       _answers: answers_json,
     });
 
+    if (error) {
+      console.error('submit_exposure_check failed', error);
+      setSubmitError('Something went wrong saving your answers. Please try again.');
+      setSubmitting(false);
+      return;
+    }
+
     if (typeof checkId === 'string') {
       localStorage.setItem(PENDING_EXPOSURE_CHECK_KEY, checkId);
     }
 
-    const notSureCount = Object.values(answers).filter(a => a === 'unsure').length;
-    let adjustedBand = band;
-    if (notSureCount > 3) {
-      if (adjustedBand === 'low') adjustedBand = 'medium';
-      else if (adjustedBand === 'medium') adjustedBand = 'high';
-    }
-    setSubmitted({ score, band: adjustedBand });
+    setSubmitted({ score, band });
     setSubmitting(false);
   };
 
   if (submitted) {
-    const bandLabels = {
-      high: 'Significant gaps found',
-      medium: 'Some gaps to address',
-      low: 'Looking solid',
-    } as const;
-
     const detected = PROBLEM_GROUPS.filter(g =>
       g.indices.some(i => answers[i] === 'no' || answers[i] === 'unsure')
     ).slice(0, 3);
@@ -136,7 +166,7 @@ export default function ExposureCheckPage() {
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Digital health check</p>
             <div className="text-4xl font-medium">{submitted.score} / 18</div>
-            <h1 className="text-xl font-semibold">{bandLabels[submitted.band]}</h1>
+            <h1 className="text-xl font-semibold">{BAND_LABELS[submitted.band]}</h1>
             <p className="text-sm text-muted-foreground">
               Here's what your answers suggest.
             </p>
@@ -190,22 +220,6 @@ export default function ExposureCheckPage() {
           </p>
         </div>
 
-        {Object.keys(answers).length >= 3 && (
-          <button
-            onClick={() => navigate('/dashboard')}
-            style={{
-              background: 'none',
-              border: 'none',
-              fontSize: '13px',
-              color: 'var(--muted-foreground, #888)',
-              cursor: 'pointer',
-              textDecoration: 'underline'
-            }}
-          >
-            Skip — go to my dashboard
-          </button>
-        )}
-
         <div className="space-y-4">
           {QUESTIONS.map((q, i) => (
             <Card key={i} className="p-4">
@@ -226,6 +240,10 @@ export default function ExposureCheckPage() {
             </Card>
           ))}
         </div>
+
+        {submitError && (
+          <p className="text-sm text-destructive">{submitError}</p>
+        )}
 
         <Button
           className="w-full"
