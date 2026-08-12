@@ -147,9 +147,9 @@ High Severity Alerts: ${reportData.highSeverityCount}
 TASK COMPLETION
 ─────────────────────────────────────────────────────────────────
 Tasks Completed: ${reportData.tasksCompleted}
-Tasks Pending: ${reportData.tasksPending}
-Completion Rate: ${reportData.tasksCompleted + reportData.tasksPending > 0 
-  ? Math.round((reportData.tasksCompleted / (reportData.tasksCompleted + reportData.tasksPending)) * 100)
+Tasks Open: ${reportData.tasksOpen}
+Completion Rate: ${reportData.tasksCompleted + reportData.tasksOpen > 0 
+  ? Math.round((reportData.tasksCompleted / (reportData.tasksCompleted + reportData.tasksOpen)) * 100)
   : 0}%
 
 ═══════════════════════════════════════════════════════════════
