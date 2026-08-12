@@ -86,6 +86,7 @@ export default function DashboardPage() {
   });
   const [primaryEmail, setPrimaryEmail] = useState<string | null>(null);
   const [emailCount, setEmailCount] = useState<number | null>(null);
+  const [savedCheck, setSavedCheck] = useState<{ score: number; band: string; created_at: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showCadence, setShowCadence] = useState(false);
@@ -152,6 +153,7 @@ export default function DashboardPage() {
         domainsRes,
         phonesRes,
         covInputsRes,
+        exposureRes,
       ] = await Promise.all([
         supabase.from('tasks').select('*').eq('user_id', user.id).order('priority', { ascending: true }),
         supabase.from('alerts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -160,7 +162,16 @@ export default function DashboardPage() {
         supabase.from('inventory_domains').select('id').eq('user_id', user.id),
         supabase.from('inventory_phones').select('id').eq('user_id', user.id),
         supabase.from('governance_coverage_inputs').select('recovery_phone, recovery_method').eq('user_id', user.id).maybeSingle(),
+        supabase
+          .from('exposure_checks')
+          .select('score, band, created_at')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
+
+      setSavedCheck(exposureRes.data ?? null);
 
       if (tasksRes.data) setTasks(tasksRes.data as Task[]);
       if (alertsRes.data) setAlerts(alertsRes.data as Alert[]);
@@ -258,6 +269,29 @@ export default function DashboardPage() {
                 <X className="h-4 w-4" />
               </button>
             </div>
+          )}
+
+          {/* Saved exposure result */}
+          {savedCheck && (
+            <Card>
+              <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+                <CardTitle className="text-base">Your exposure result</CardTitle>
+                <Badge variant="outline" className="capitalize">{savedCheck.band} exposure</Badge>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Score {savedCheck.score} of {18} · saved{' '}
+                  {new Date(savedCheck.created_at).toLocaleDateString()}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/exposure-check?rerun=1')}
+                >
+                  Re-run my exposure check
+                </Button>
+              </CardContent>
+            </Card>
           )}
 
           {/* Health Score Hero */}
