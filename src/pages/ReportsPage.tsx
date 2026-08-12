@@ -21,12 +21,13 @@ export default function ReportsPage() {
 
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [reportData, setReportData] = useState<{
     inventoryCounts: InventoryCounts;
     alertsCount: number;
     highSeverityCount: number;
     tasksCompleted: number;
-    tasksPending: number;
+    tasksOpen: number;
     brokersTracked: number;
     brokersConfirmed: number;
     signalsEnabled: number;
