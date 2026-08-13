@@ -109,19 +109,25 @@ export default function SignalsPage() {
     setLoading(true);
 
     const [signalsRes, alertsRes] = await Promise.all([
-      supabase.from('signals_settings').select('*').eq('user_id', user.id),
+      (supabase.from('signals_settings') as any)
+        .select('breach_alerts_enabled, data_broker_tracking_enabled, social_takeover_enabled')
+        .eq('user_id', user.id)
+        .maybeSingle(),
       supabase.from('alerts').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20)
     ]);
 
-    if (signalsRes.data) {
-      const newSettings = { ...settings };
-      signalsRes.data.forEach((s: SignalSetting) => {
-        if (s.signal_type in newSettings) {
-          newSettings[s.signal_type as SignalType] = s.enabled;
-        }
-      });
-      setSettings(newSettings);
-    }
+    const row = signalsRes.data as {
+      breach_alerts_enabled: boolean | null;
+      data_broker_tracking_enabled: boolean | null;
+      social_takeover_enabled: boolean | null;
+    } | null;
+
+    setSettings(prev => ({
+      ...prev,
+      breach_alerts: !!row?.breach_alerts_enabled,
+      data_broker_tracking: !!row?.data_broker_tracking_enabled,
+      social_takeover: !!row?.social_takeover_enabled
+    }));
 
     if (alertsRes.data) {
       setAlerts(alertsRes.data as AlertType[]);
@@ -135,13 +141,20 @@ export default function SignalsPage() {
     if (UNAVAILABLE_SIGNALS.includes(signalType)) return;
     setUpdating(signalType);
 
-    const { error } = await supabase
-      .from('signals_settings')
-      .upsert([{
-        user_id: user.id,
-        signal_type: signalType,
-        enabled
-      }], { onConflict: 'user_id,signal_type' });
+    const columnMap: Partial<Record<SignalType, string>> = {
+      breach_alerts: 'breach_alerts_enabled',
+      data_broker_tracking: 'data_broker_tracking_enabled',
+      social_takeover: 'social_takeover_enabled'
+    };
+    const column = columnMap[signalType];
+    if (!column) {
+      setUpdating(null);
+      return;
+    }
+
+    const { error } = await (supabase.from('signals_settings') as any)
+      .update({ [column]: enabled })
+      .eq('user_id', user.id);
 
     if (error) {
       console.error('Failed to update signal setting', error);
