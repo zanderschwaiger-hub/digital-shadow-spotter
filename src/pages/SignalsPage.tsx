@@ -76,6 +76,13 @@ const ALL_SIGNALS: SignalType[] = [
   'device_permissions'
 ];
 
+// Signals with no storage and no implementation yet.
+const UNAVAILABLE_SIGNALS: SignalType[] = [
+  'password_exposure',
+  'domain_spoofing',
+  'device_permissions'
+];
+
 export default function SignalsPage() {
   const { user } = useAuth();
   const { logEvent } = useAuditLog();
@@ -125,9 +132,9 @@ export default function SignalsPage() {
 
   const toggleSignal = async (signalType: SignalType, enabled: boolean) => {
     if (!user) return;
+    if (UNAVAILABLE_SIGNALS.includes(signalType)) return;
     setUpdating(signalType);
 
-    // Upsert the signal setting
     const { error } = await supabase
       .from('signals_settings')
       .upsert([{
@@ -136,14 +143,23 @@ export default function SignalsPage() {
         enabled
       }], { onConflict: 'user_id,signal_type' });
 
-    if (!error) {
-      await logEvent('signal_toggled', { signal_type: signalType, enabled });
-      setSettings(prev => ({ ...prev, [signalType]: enabled }));
+    if (error) {
+      console.error('Failed to update signal setting', error);
       toast({
-        title: enabled ? 'Signal enabled' : 'Signal disabled',
-        description: `${SIGNAL_CONFIG[signalType].title} has been ${enabled ? 'enabled' : 'disabled'}.`
+        title: "Couldn't save that change",
+        description: 'Please try again in a moment.',
+        variant: 'destructive'
       });
+      setUpdating(null);
+      return;
     }
+
+    await logEvent('signal_toggled', { signal_type: signalType, enabled });
+    setSettings(prev => ({ ...prev, [signalType]: enabled }));
+    toast({
+      title: enabled ? 'Signal enabled' : 'Signal disabled',
+      description: `${SIGNAL_CONFIG[signalType].title} has been ${enabled ? 'enabled' : 'disabled'}.`
+    });
 
     setUpdating(null);
   };
@@ -181,10 +197,14 @@ export default function SignalsPage() {
           {ALL_SIGNALS.map((signalType) => {
             const config = SIGNAL_CONFIG[signalType];
             const Icon = config.icon;
-            const isEnabled = settings[signalType];
+            const unavailable = UNAVAILABLE_SIGNALS.includes(signalType);
+            const isEnabled = unavailable ? false : settings[signalType];
 
             return (
-              <Card key={signalType} className={isEnabled ? 'border-primary/50' : ''}>
+              <Card
+                key={signalType}
+                className={unavailable ? 'opacity-60' : isEnabled ? 'border-primary/50' : ''}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -192,7 +212,12 @@ export default function SignalsPage() {
                         <Icon className={`h-5 w-5 ${isEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
                       </div>
                       <div>
-                        <CardTitle className="text-base">{config.title}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-base">{config.title}</CardTitle>
+                          {unavailable && (
+                            <Badge variant="outline" className="text-[10px]">Coming soon</Badge>
+                          )}
+                        </div>
                         <CardDescription className="text-sm">
                           {config.description}
                         </CardDescription>
@@ -200,14 +225,17 @@ export default function SignalsPage() {
                     </div>
                     <Switch
                       checked={isEnabled}
-                      onCheckedChange={(checked) => toggleSignal(signalType, checked)}
-                      disabled={updating === signalType}
+                      onCheckedChange={(checked) => {
+                        if (unavailable) return;
+                        toggleSignal(signalType, checked);
+                      }}
+                      disabled={unavailable || updating === signalType}
                     />
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-                    {config.note}
+                    {unavailable ? 'Not available yet.' : config.note}
                   </p>
                 </CardContent>
               </Card>
