@@ -125,9 +125,9 @@ export default function SignalsPage() {
 
   const toggleSignal = async (signalType: SignalType, enabled: boolean) => {
     if (!user) return;
+    if (UNAVAILABLE_SIGNALS.includes(signalType)) return;
     setUpdating(signalType);
 
-    // Upsert the signal setting
     const { error } = await supabase
       .from('signals_settings')
       .upsert([{
@@ -136,14 +136,23 @@ export default function SignalsPage() {
         enabled
       }], { onConflict: 'user_id,signal_type' });
 
-    if (!error) {
-      await logEvent('signal_toggled', { signal_type: signalType, enabled });
-      setSettings(prev => ({ ...prev, [signalType]: enabled }));
+    if (error) {
+      console.error('Failed to update signal setting', error);
       toast({
-        title: enabled ? 'Signal enabled' : 'Signal disabled',
-        description: `${SIGNAL_CONFIG[signalType].title} has been ${enabled ? 'enabled' : 'disabled'}.`
+        title: "Couldn't save that change",
+        description: 'Please try again in a moment.',
+        variant: 'destructive'
       });
+      setUpdating(null);
+      return;
     }
+
+    await logEvent('signal_toggled', { signal_type: signalType, enabled });
+    setSettings(prev => ({ ...prev, [signalType]: enabled }));
+    toast({
+      title: enabled ? 'Signal enabled' : 'Signal disabled',
+      description: `${SIGNAL_CONFIG[signalType].title} has been ${enabled ? 'enabled' : 'disabled'}.`
+    });
 
     setUpdating(null);
   };
