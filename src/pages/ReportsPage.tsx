@@ -51,7 +51,10 @@ export default function ReportsPage() {
       supabase.from('alerts').select('severity, resolved_at').eq('user_id', user.id),
       supabase.from('tasks').select('status').eq('user_id', user.id),
       supabase.from('broker_sites').select('status').eq('user_id', user.id),
-      supabase.from('signals_settings').select('enabled').eq('user_id', user.id),
+      (supabase.from('signals_settings') as any)
+        .select('breach_alerts_enabled, data_broker_tracking_enabled, social_takeover_enabled')
+        .eq('user_id', user.id)
+        .maybeSingle(),
     ]);
 
     const firstError = results.find((r) => r.error)?.error;
@@ -78,7 +81,16 @@ export default function ReportsPage() {
     const alerts = (alertsRes.data || []) as { severity: string; resolved_at: string | null }[];
     const tasks = (tasksRes.data || []) as { status: string }[];
     const brokers = (brokersRes.data || []) as { status: string }[];
-    const signals = (signalsRes.data || []) as { enabled: boolean }[];
+    const signalsRow = signalsRes.data as {
+      breach_alerts_enabled: boolean | null;
+      data_broker_tracking_enabled: boolean | null;
+      social_takeover_enabled: boolean | null;
+    } | null;
+    const signalsEnabledCount = [
+      signalsRow?.breach_alerts_enabled,
+      signalsRow?.data_broker_tracking_enabled,
+      signalsRow?.social_takeover_enabled,
+    ].filter(Boolean).length;
 
     setReportData({
       inventoryCounts: {
@@ -94,7 +106,7 @@ export default function ReportsPage() {
       tasksOpen: tasks.filter(t => t.status === 'open').length,
       brokersTracked: brokers.length,
       brokersConfirmed: brokers.filter(b => b.status === 'confirmed').length,
-      signalsEnabled: signals.filter(s => s.enabled).length
+      signalsEnabled: signalsEnabledCount
     });
 
     setLoading(false);
