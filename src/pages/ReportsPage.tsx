@@ -51,7 +51,10 @@ export default function ReportsPage() {
       supabase.from('alerts').select('severity, resolved_at').eq('user_id', user.id),
       supabase.from('tasks').select('status').eq('user_id', user.id),
       supabase.from('broker_sites').select('status').eq('user_id', user.id),
-      supabase.from('signals_settings').select('enabled').eq('user_id', user.id),
+      (supabase.from('signals_settings') as any)
+        .select('breach_alerts_enabled, data_broker_tracking_enabled, social_takeover_enabled')
+        .eq('user_id', user.id)
+        .maybeSingle(),
     ]);
 
     const firstError = results.find((r) => r.error)?.error;
