@@ -197,10 +197,14 @@ export default function SignalsPage() {
           {ALL_SIGNALS.map((signalType) => {
             const config = SIGNAL_CONFIG[signalType];
             const Icon = config.icon;
-            const isEnabled = settings[signalType];
+            const unavailable = UNAVAILABLE_SIGNALS.includes(signalType);
+            const isEnabled = unavailable ? false : settings[signalType];
 
             return (
-              <Card key={signalType} className={isEnabled ? 'border-primary/50' : ''}>
+              <Card
+                key={signalType}
+                className={unavailable ? 'opacity-60' : isEnabled ? 'border-primary/50' : ''}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -208,7 +212,12 @@ export default function SignalsPage() {
                         <Icon className={`h-5 w-5 ${isEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
                       </div>
                       <div>
-                        <CardTitle className="text-base">{config.title}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-base">{config.title}</CardTitle>
+                          {unavailable && (
+                            <Badge variant="outline" className="text-[10px]">Coming soon</Badge>
+                          )}
+                        </div>
                         <CardDescription className="text-sm">
                           {config.description}
                         </CardDescription>
@@ -216,14 +225,17 @@ export default function SignalsPage() {
                     </div>
                     <Switch
                       checked={isEnabled}
-                      onCheckedChange={(checked) => toggleSignal(signalType, checked)}
-                      disabled={updating === signalType}
+                      onCheckedChange={(checked) => {
+                        if (unavailable) return;
+                        toggleSignal(signalType, checked);
+                      }}
+                      disabled={unavailable || updating === signalType}
                     />
                   </div>
                 </CardHeader>
                 <CardContent>
                   <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-                    {config.note}
+                    {unavailable ? 'Not available yet.' : config.note}
                   </p>
                 </CardContent>
               </Card>
