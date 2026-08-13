@@ -76,6 +76,13 @@ const ALL_SIGNALS: SignalType[] = [
   'device_permissions'
 ];
 
+// Signals with no storage and no implementation yet.
+const UNAVAILABLE_SIGNALS: SignalType[] = [
+  'password_exposure',
+  'domain_spoofing',
+  'device_permissions'
+];
+
 export default function SignalsPage() {
   const { user } = useAuth();
   const { logEvent } = useAuditLog();
