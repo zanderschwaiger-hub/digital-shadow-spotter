@@ -81,7 +81,16 @@ export default function ReportsPage() {
     const alerts = (alertsRes.data || []) as { severity: string; resolved_at: string | null }[];
     const tasks = (tasksRes.data || []) as { status: string }[];
     const brokers = (brokersRes.data || []) as { status: string }[];
-    const signals = (signalsRes.data || []) as { enabled: boolean }[];
+    const signalsRow = signalsRes.data as {
+      breach_alerts_enabled: boolean | null;
+      data_broker_tracking_enabled: boolean | null;
+      social_takeover_enabled: boolean | null;
+    } | null;
+    const signalsEnabledCount = [
+      signalsRow?.breach_alerts_enabled,
+      signalsRow?.data_broker_tracking_enabled,
+      signalsRow?.social_takeover_enabled,
+    ].filter(Boolean).length;
 
     setReportData({
       inventoryCounts: {
