@@ -106,7 +106,7 @@ export default function ReportsPage() {
       tasksOpen: tasks.filter(t => t.status === 'open').length,
       brokersTracked: brokers.length,
       brokersConfirmed: brokers.filter(b => b.status === 'confirmed').length,
-      signalsEnabled: signals.filter(s => s.enabled).length
+      signalsEnabled: signalsEnabledCount
     });
 
     setLoading(false);
