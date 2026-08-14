@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, PENDING_EXPOSURE_CHECK_KEY } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -60,6 +60,8 @@ export default function ExposureCheckPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [savedLoading, setSavedLoading] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
+  const [rerunDone, setRerunDone] = useState(false);
 
   // Attach any pending anonymous check to the account once signed in.
   useEffect(() => {
@@ -87,20 +89,13 @@ export default function ExposureCheckPage() {
 
     supabase
       .from('exposure_checks')
-      .select('score, band, answers_json')
+      .select('id')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
       .then(({ data }) => {
         if (!mounted) return;
-        if (data) {
-          setSubmitted({ score: data.score, band: data.band as Band });
-          const saved = data.answers_json as Array<{ a: Answer }> | null;
-          if (Array.isArray(saved)) {
-            setAnswers(Object.fromEntries(saved.map((r, i) => [i, r.a])));
-          }
-        }
+        if (data) setHasSaved(true);
         setSavedLoading(false);
       });
 
@@ -116,6 +111,15 @@ export default function ExposureCheckPage() {
       </div>
     );
   }
+
+  if (hasSaved && !isRerun) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (rerunDone) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
 
   const allAnswered = QUESTIONS.every((_, i) => answers[i]);
 
@@ -149,6 +153,12 @@ export default function ExposureCheckPage() {
 
     if (typeof checkId === 'string') {
       localStorage.setItem(PENDING_EXPOSURE_CHECK_KEY, checkId);
+    }
+
+    if (user && isRerun) {
+      setSubmitting(false);
+      setRerunDone(true);
+      return;
     }
 
     setSubmitted({ score, band });

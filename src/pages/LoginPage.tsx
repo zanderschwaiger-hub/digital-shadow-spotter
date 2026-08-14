@@ -56,6 +56,8 @@ export default function LoginPage() {
       return;
     }
 
+    localStorage.setItem('fe_has_account', '1');
+
     // The session is created immediately; routing is handled by the protected routes.
     navigate('/dashboard', { replace: true });
   };

@@ -80,7 +80,7 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/login');
+    navigate('/login?mode=signin');
   };
 
   if (isMobile) {

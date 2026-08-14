@@ -41,7 +41,8 @@ export function RootRedirect() {
   if (loading) return <Spinner />;
 
   if (!user) {
-    return <Navigate to="/exposure-check" replace />;
+    const hasAccount = localStorage.getItem('fe_has_account') === '1';
+    return <Navigate to={hasAccount ? '/login?mode=signin' : '/exposure-check'} replace />;
   }
 
   // Routing for returning users is based on a saved exposure result only.
