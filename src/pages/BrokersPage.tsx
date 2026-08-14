@@ -190,7 +190,7 @@ export default function BrokersPage() {
     <AppLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">Data Broker Opt-outs</h1>
+          <h1 className="text-2xl font-bold">Data Brokers — Opt-Out Tracking</h1>
           <p className="text-muted-foreground">
             Track your opt-out requests to data broker and people-search sites
           </p>
@@ -315,7 +315,7 @@ export default function BrokersPage() {
             {brokers.length === 0 ? (
               <div className="text-center py-12">
                 <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-medium">No broker sites tracked</p>
+                <p className="text-lg font-medium">No data broker tracking yet.</p>
                 <p className="text-muted-foreground">
                   Add sites from the quick list above or add custom sites
                 </p>

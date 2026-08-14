@@ -32,8 +32,8 @@ const SIGNAL_CONFIG: Record<SignalType, {
   breach_alerts: {
     icon: ShieldAlert,
     title: 'Breach Alerts',
-    description: 'Check your emails against known data breach databases',
-    note: 'Uses lawful breach notification APIs. Manual check available if API is not configured.'
+    description: 'Guided steps to check your emails against known breach records',
+    note: 'Guided check. We tell you where and how to check your email against known breaches.'
   },
   password_exposure: {
     icon: Key,
@@ -45,7 +45,7 @@ const SIGNAL_CONFIG: Record<SignalType, {
     icon: Building2,
     title: 'Data Broker Tracking',
     description: 'Track your exposure on people-search and data broker sites',
-    note: 'User-driven workflow. We provide opt-out links and track your removal requests.'
+    note: 'User-driven. We provide opt-out links and let you track your own removal requests.'
   },
   domain_spoofing: {
     icon: Globe,
@@ -57,7 +57,7 @@ const SIGNAL_CONFIG: Record<SignalType, {
     icon: Users,
     title: 'Social Takeover Risk',
     description: 'Checklist-based assessment of social account security',
-    note: 'Risk flags only - we never access your social accounts.'
+    note: 'Checklist only. We never access your social accounts.'
   },
   device_permissions: {
     icon: Smartphone,
