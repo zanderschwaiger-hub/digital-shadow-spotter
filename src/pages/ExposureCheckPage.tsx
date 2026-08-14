@@ -87,20 +87,13 @@ export default function ExposureCheckPage() {
 
     supabase
       .from('exposure_checks')
-      .select('score, band, answers_json')
+      .select('id')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle()
       .then(({ data }) => {
         if (!mounted) return;
-        if (data) {
-          setSubmitted({ score: data.score, band: data.band as Band });
-          const saved = data.answers_json as Array<{ a: Answer }> | null;
-          if (Array.isArray(saved)) {
-            setAnswers(Object.fromEntries(saved.map((r, i) => [i, r.a])));
-          }
-        }
+        if (data) setHasSaved(true);
         setSavedLoading(false);
       });
 
@@ -116,6 +109,15 @@ export default function ExposureCheckPage() {
       </div>
     );
   }
+
+  if (hasSaved && !isRerun) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (rerunDone) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
 
   const allAnswered = QUESTIONS.every((_, i) => answers[i]);
 
