@@ -50,6 +50,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalMessage, setPortalMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) loadSettings();
@@ -93,9 +95,28 @@ export default function SettingsPage() {
   };
 
   const handleManageSubscription = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    window.open('https://billing.stripe.com', '_blank');
+    setPortalLoading(true);
+    setPortalMessage(null);
+    const { data, error } = await supabase.functions.invoke('stripe-portal', {
+      body: { return_url: window.location.origin + '/settings' },
+    });
+
+    if (data?.url) {
+      window.location.href = data.url;
+      return;
+    }
+
+    const noCustomer =
+      (data as { error?: string } | null)?.error === 'no_customer' ||
+      (error as { status?: number } | null)?.status === 404;
+
+    if (noCustomer) {
+      setPortalMessage('No billing account yet.');
+    } else {
+      console.error('stripe-portal failed', error, data);
+      setPortalMessage("Couldn't open billing. Please try again.");
+    }
+    setPortalLoading(false);
   };
 
   const deleteAllData = async () => {
@@ -163,20 +184,6 @@ export default function SettingsPage() {
 
         <PaymentReminderBanner />
 
-        <Card>
-          <CardContent className="py-4">
-            <a
-              href="/governance-console"
-              className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-            >
-              Advanced governance →
-            </a>
-            <p className="text-xs text-muted-foreground mt-1">
-              Access the full governance console, decision queue, and audit history.
-            </p>
-          </CardContent>
-        </Card>
-
         {/* Billing / Subscription */}
         <Card>
           <CardHeader>
@@ -186,9 +193,13 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" onClick={handleManageSubscription}>
+            <Button variant="outline" onClick={handleManageSubscription} disabled={portalLoading}>
+              {portalLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Manage subscription
             </Button>
+            {portalMessage && (
+              <p className="text-sm text-muted-foreground mt-2">{portalMessage}</p>
+            )}
           </CardContent>
         </Card>
 

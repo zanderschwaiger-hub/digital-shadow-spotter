@@ -27,8 +27,6 @@ import SettingsPage from "./pages/SettingsPage";
 import GovernancePage from "./pages/GovernancePage";
 import EmbedPage from "./pages/EmbedPage";
 import GovernanceFilePage from "./pages/GovernanceFilePage";
-import AssessmentPage from "./pages/AssessmentPage";
-import PillarAssessmentPage from "./pages/PillarAssessmentPage";
 import ExposuresPage from "./pages/ExposuresPage";
 import DecisionsPage from "./pages/DecisionsPage";
 import AgentLogPage from "./pages/AgentLogPage";
@@ -121,7 +119,7 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <RequiresAuthorization>
-                      <TierGate mode="baseline"><BrokersPage /></TierGate>
+                      <BrokersPage />
                     </RequiresAuthorization>
                   </ProtectedRoute>
                 }
@@ -165,23 +163,10 @@ const App = () => (
                 }
               />
 
-              <Route
-                path="/assessment"
-                element={
-                  <ProtectedRoute>
-                    <AssessmentPage />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/assessment" element={<Navigate to="/exposure-check" replace />} />
+              <Route path="/assessment/pillar/:index" element={<Navigate to="/exposure-check" replace />} />
 
-              <Route
-                path="/assessment/pillar/:index"
-                element={
-                  <ProtectedRoute>
-                    <PillarAssessmentPage />
-                  </ProtectedRoute>
-                }
-              />
+
 
               <Route
                 path="/exposures"

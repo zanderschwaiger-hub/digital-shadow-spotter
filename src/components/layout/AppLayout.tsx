@@ -51,7 +51,7 @@ const NAV_GROUPS = [
       { title: 'Actions', url: '/tasks', icon: CheckSquare },
       { title: 'My accounts', url: '/inventory', icon: User },
       { title: 'Breach alerts', url: '/signals', icon: Radio },
-      { title: 'Data brokers', url: '/brokers', icon: Building2 },
+      { title: 'Data Brokers — Opt-Out Tracking', url: '/brokers', icon: Building2 },
       { title: 'Reports', url: '/reports', icon: FileText },
     ],
   },

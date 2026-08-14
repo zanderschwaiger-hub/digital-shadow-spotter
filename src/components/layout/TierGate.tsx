@@ -28,13 +28,13 @@ export function TierGate({ mode = 'baseline', children }: TierGateProps) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6 bg-background">
         <Card className="max-w-md w-full p-8 space-y-4">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">Baseline required</p>
-          <h1 className="text-2xl font-bold">Complete your Baseline</h1>
+          <p className="text-xs uppercase tracking-wider text-muted-foreground">Setup required</p>
+          <h1 className="text-2xl font-bold">Complete your exposure check</h1>
           <p className="text-sm text-muted-foreground">
             Complete your setup to unlock this area.
           </p>
           <Button asChild className="w-full">
-            <Link to="/assessment">Go to Baseline</Link>
+            <Link to="/exposure-check">Go to exposure check</Link>
           </Button>
         </Card>
       </div>
