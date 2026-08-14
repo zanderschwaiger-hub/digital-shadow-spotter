@@ -155,6 +155,12 @@ export default function ExposureCheckPage() {
       localStorage.setItem(PENDING_EXPOSURE_CHECK_KEY, checkId);
     }
 
+    if (user && isRerun) {
+      setSubmitting(false);
+      setRerunDone(true);
+      return;
+    }
+
     setSubmitted({ score, band });
     setSubmitting(false);
   };
