@@ -163,23 +163,10 @@ const App = () => (
                 }
               />
 
-              <Route
-                path="/assessment"
-                element={
-                  <ProtectedRoute>
-                    <AssessmentPage />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/assessment" element={<Navigate to="/exposure-check" replace />} />
+              <Route path="/assessment/pillar/:index" element={<Navigate to="/exposure-check" replace />} />
 
-              <Route
-                path="/assessment/pillar/:index"
-                element={
-                  <ProtectedRoute>
-                    <PillarAssessmentPage />
-                  </ProtectedRoute>
-                }
-              />
+
 
               <Route
                 path="/exposures"
