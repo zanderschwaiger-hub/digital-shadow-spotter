@@ -60,6 +60,8 @@ export default function ExposureCheckPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [savedLoading, setSavedLoading] = useState(false);
+  const [hasSaved, setHasSaved] = useState(false);
+  const [rerunDone, setRerunDone] = useState(false);
 
   // Attach any pending anonymous check to the account once signed in.
   useEffect(() => {
