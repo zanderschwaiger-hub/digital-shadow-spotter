@@ -50,6 +50,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalMessage, setPortalMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) loadSettings();
