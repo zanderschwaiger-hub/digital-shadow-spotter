@@ -63,24 +63,6 @@ export default function ExposureCheckPage() {
   const [hasSaved, setHasSaved] = useState(false);
   const [rerunDone, setRerunDone] = useState(false);
 
-  // Attach any pending anonymous check to the account once signed in.
-  useEffect(() => {
-    if (!user) return;
-    const pendingId = localStorage.getItem(PENDING_EXPOSURE_CHECK_KEY);
-    if (!pendingId) return;
-
-    (async () => {
-      const { error } = await (supabase as any).rpc('claim_exposure_check', {
-        _check_id: pendingId,
-      });
-      if (error) {
-        console.error('claim_exposure_check failed', error);
-        return;
-      }
-      localStorage.removeItem(PENDING_EXPOSURE_CHECK_KEY);
-    })();
-  }, [user]);
-
   // A signed-in user with a saved result never has to retake the check.
   useEffect(() => {
     if (!user || isRerun) return;
