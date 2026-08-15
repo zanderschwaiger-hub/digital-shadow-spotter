@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  sendMagicLink: (email: string) => Promise<{ error: Error | null }>;
+  
   signUpWithPassword: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithPassword: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
