@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { insertInventoryRow } from '@/lib/inventory-insert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,27 +42,27 @@ export function IdentifierEntry({
     setError(null);
 
     if (kind === 'email') {
-      const { error: insertError } = await supabase.from('inventory_emails').insert({
+      const result = await insertInventoryRow('inventory_emails', {
         user_id: userId,
         email: entry,
         is_primary: emails.length === 0,
       });
 
-      if (insertError) {
-        setError(insertError.message);
+      if (!result.ok) {
+        setError(result.message ?? 'We could not save that email. Please try again.');
         setSaving(false);
         return;
       }
 
       setEmails((prev) => [...prev, entry]);
     } else {
-      const { error: insertError } = await supabase.from('inventory_phones').insert({
+      const result = await insertInventoryRow('inventory_phones', {
         user_id: userId,
         phone: entry,
       });
 
-      if (insertError) {
-        setError(insertError.message);
+      if (!result.ok) {
+        setError(result.message ?? 'We could not save that phone number. Please try again.');
         setSaving(false);
         return;
       }
