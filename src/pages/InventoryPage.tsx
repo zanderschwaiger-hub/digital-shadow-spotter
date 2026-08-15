@@ -133,14 +133,14 @@ export default function InventoryPage() {
     if (!user || !newEmail) return;
     setAddingItem(true);
 
-    const { error } = await supabase.from('inventory_emails').insert([{
+    const result = await insertInventoryRow('inventory_emails', {
       user_id: user.id,
       email: newEmail,
-      is_primary: newEmailPrimary
-    }]);
+      is_primary: newEmailPrimary,
+    });
 
-    if (error) {
-      toast({ title: "Couldn't add email", description: error.message, variant: 'destructive' });
+    if (!result.ok) {
+      toast({ title: "Couldn't add email", description: result.message, variant: 'destructive' });
     } else {
       await logEvent('inventory_email_added', { email: newEmail });
       toast({ title: 'Email added', description: 'Email has been added to your inventory.' });
@@ -154,14 +154,16 @@ export default function InventoryPage() {
   const addUsername = async () => {
     if (!user || !newUsername) return;
     setAddingItem(true);
-    
-    const { error } = await supabase.from('inventory_usernames').insert([{
+
+    const result = await insertInventoryRow('inventory_usernames', {
       user_id: user.id,
       username: newUsername,
-      platform: newUsernamePlatform || null
-    }]);
+      platform: newUsernamePlatform || null,
+    });
 
-    if (!error) {
+    if (!result.ok) {
+      toast({ title: "Couldn't add username", description: result.message, variant: 'destructive' });
+    } else {
       await logEvent('inventory_username_added', { username: newUsername });
       toast({ title: 'Username added' });
       setNewUsername('');
@@ -174,14 +176,16 @@ export default function InventoryPage() {
   const addAccount = async () => {
     if (!user || !newAccount) return;
     setAddingItem(true);
-    
-    const { error } = await supabase.from('inventory_accounts').insert([{
+
+    const result = await insertInventoryRow('inventory_accounts', {
       user_id: user.id,
       account_name: newAccount,
-      category: newAccountCategory
-    }]);
+      category: newAccountCategory,
+    });
 
-    if (!error) {
+    if (!result.ok) {
+      toast({ title: "Couldn't add account", description: result.message, variant: 'destructive' });
+    } else {
       await logEvent('inventory_account_added', { account: newAccount });
       toast({ title: 'Account added' });
       setNewAccount('');
@@ -194,13 +198,15 @@ export default function InventoryPage() {
   const addDomain = async () => {
     if (!user || !newDomain) return;
     setAddingItem(true);
-    
-    const { error } = await supabase.from('inventory_domains').insert([{
-      user_id: user.id,
-      domain: newDomain
-    }]);
 
-    if (!error) {
+    const result = await insertInventoryRow('inventory_domains', {
+      user_id: user.id,
+      domain: newDomain,
+    });
+
+    if (!result.ok) {
+      toast({ title: "Couldn't add domain", description: result.message, variant: 'destructive' });
+    } else {
       await logEvent('inventory_domain_added', { domain: newDomain });
       toast({ title: 'Domain added' });
       setNewDomain('');
@@ -213,13 +219,13 @@ export default function InventoryPage() {
     if (!user || !newPhone) return;
     setAddingItem(true);
 
-    const { error } = await supabase.from('inventory_phones').insert([{
+    const result = await insertInventoryRow('inventory_phones', {
       user_id: user.id,
-      phone: newPhone
-    }]);
+      phone: newPhone,
+    });
 
-    if (error) {
-      toast({ title: "Couldn't add phone number", description: error.message, variant: 'destructive' });
+    if (!result.ok) {
+      toast({ title: "Couldn't add phone number", description: result.message, variant: 'destructive' });
     } else {
       await logEvent('inventory_phone_added', { phone: newPhone });
       toast({ title: 'Phone added' });
@@ -230,12 +236,22 @@ export default function InventoryPage() {
   };
 
   const deleteItem = async (table: 'inventory_emails' | 'inventory_usernames' | 'inventory_accounts' | 'inventory_domains' | 'inventory_phones', id: string, itemType: string) => {
-    const { error } = await supabase.from(table).delete().eq('id', id);
-    if (!error) {
-      await logEvent(`inventory_${itemType}_deleted`, { id });
-      toast({ title: 'Item deleted' });
-      loadInventory();
+    const { data, error } = await supabase.from(table).delete().eq('id', id).select('id');
+    if (error) {
+      toast({ title: "Couldn't delete item", description: error.message, variant: 'destructive' });
+      return;
     }
+    if (!data || data.length === 0) {
+      toast({
+        title: "Couldn't delete item",
+        description: 'That item could not be removed from your account. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    await logEvent(`inventory_${itemType}_deleted`, { id });
+    toast({ title: 'Item deleted' });
+    loadInventory();
   };
 
   const saveGovernanceCoverage = async () => {
