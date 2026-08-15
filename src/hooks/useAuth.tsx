@@ -137,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         loading,
-        sendMagicLink,
+        
         signUpWithPassword,
         signInWithPassword,
         signOut,
