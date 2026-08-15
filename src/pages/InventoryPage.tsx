@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAuditLog } from '@/hooks/useAuditLog';
 import { useToast } from '@/hooks/use-toast';
 import { MAX_EMAILS, MAX_PHONES } from '@/components/dashboard/IdentifierEntry';
+import { insertInventoryRow } from '@/lib/inventory-insert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
